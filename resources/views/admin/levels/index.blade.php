@@ -17,17 +17,17 @@
     {{-- Level Table --}}
     <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left datatable" id="levels-table">
                 <thead>
                     <tr class="border-b" :style="'border-color: var(--border-color)'">
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">No. Urut</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Jenjang</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Induk Unit</th>
-                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right">Aksi</th>
+                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right" data-dt-order="disable">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y" :style="'divide-color: var(--border-color)'">
-                    @forelse($levels as $level)
+                    @foreach($levels as $level)
                     <tr class="hover:bg-primary/5 transition-colors group">
                         <td class="px-8 py-5">
                             <span class="text-xs font-bold themed-text-muted">#{{ $level->sort_order }}</span>
@@ -86,11 +86,7 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-8 py-10 text-center themed-text-muted italic text-xs">Belum ada data jenjang.</td>
-                    </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>

@@ -16,8 +16,9 @@ class StudentManagementController extends Controller
 
         if (!$user->isSuperAdmin()) {
             $unit = $user->getUnit();
-            $query->whereHas('user', function($q) use ($unit) {
-                $q->where('tujuan_masuk', $unit);
+            $levelId = \App\Models\EducationalLevel::where('name', $unit)->value('id');
+            $query->whereHas('user', function($q) use ($levelId) {
+                $q->where('educational_level_id', $levelId);
             });
         }
 
@@ -84,11 +85,11 @@ class StudentManagementController extends Controller
         }
 
         $request->validate([
-            'unit' => 'required|in:SMP,SMA,SMK'
+            'unit' => 'required|exists:educational_levels,id'
         ]);
 
         $registration->user->update([
-            'tujuan_masuk' => $request->unit
+            'educational_level_id' => $request->unit
         ]);
 
         return redirect()->route('admin.students.index')->with('status', 'Siswa berhasil dipindahkan ke jenjang ' . $request->unit);
@@ -101,8 +102,9 @@ class StudentManagementController extends Controller
 
         if (!$user->isSuperAdmin()) {
             $unit = $user->getUnit();
-            $query->whereHas('user', function($q) use ($unit) {
-                $q->where('tujuan_masuk', $unit);
+            $levelId = \App\Models\EducationalLevel::where('name', $unit)->value('id');
+            $query->whereHas('user', function($q) use ($levelId) {
+                $q->where('educational_level_id', $levelId);
             });
         }
 
@@ -137,7 +139,7 @@ class StudentManagementController extends Controller
     {
         $user = auth()->user();
         if (!$user->isSuperAdmin()) {
-            if ($registration->user->tujuan_masuk !== $user->getUnit()) {
+            if ($registration->user->educational_level_id !== \App\Models\EducationalLevel::where('name', $user->getUnit())->value('id')) {
                 abort(403, 'Anda tidak memiliki akses ke data siswa unit lain.');
             }
         }

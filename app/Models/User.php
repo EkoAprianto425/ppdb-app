@@ -19,7 +19,7 @@ class User extends Authenticatable
         'whatsapp_number',
         'password',
         'asal_sekolah',
-        'tujuan_masuk',
+        'educational_level_id',
         'alasan_memilih',
         'sumber_informasi',
         'role',
@@ -62,7 +62,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the unit name based on admin role or student choice
+     * Relationship to the educational level (jenjang pendidikan).
+     */
+    public function educationalLevel()
+    {
+        return $this->belongsTo(EducationalLevel::class);
+    }
+
+    /**
+     * Get the unit name based on admin role or student choice.
+     * Returns the level name from the joined educational_levels table.
      */
     public function getUnit(): ?string
     {
@@ -70,7 +79,7 @@ class User extends Authenticatable
         if ($this->role === self::ROLE_ADMIN_SMA) return 'SMA';
         if (in_array($this->role, [self::ROLE_ADMIN_SMK])) return 'SMK';
         
-        return $this->tujuan_masuk;
+        return $this->educationalLevel?->name;
     }
 
     public function registration()

@@ -28,7 +28,7 @@ class RegisteredUserController extends Controller
             'whatsapp_number'  => $request->whatsapp_number,
             'password'         => Hash::make($request->password),
             'asal_sekolah'     => $request->asal_sekolah,
-            'tujuan_masuk'     => $request->tujuan_masuk,
+            'educational_level_id' => $request->educational_level_id,
             'alasan_memilih'   => $request->alasan_memilih,
             'sumber_informasi' => $request->sumber_informasi,
             'role'             => 'siswa',

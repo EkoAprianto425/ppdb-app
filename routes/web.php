@@ -51,6 +51,13 @@ Route::middleware('auth')->group(function () {
             Route::resource('users', \App\Http\Controllers\Admin\AdminManagementController::class);
             Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
             Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+            
+            // Backup & Restore
+            Route::get('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup.index');
+            Route::get('/backup/db', [\App\Http\Controllers\Admin\BackupController::class, 'downloadDatabase'])->name('backup.download-db');
+            Route::get('/backup/proofs', [\App\Http\Controllers\Admin\BackupController::class, 'downloadProofs'])->name('backup.download-proofs');
+            Route::post('/backup/restore-db', [\App\Http\Controllers\Admin\BackupController::class, 'restoreDatabase'])->name('backup.restore-db');
+            Route::post('/backup/restore-proofs', [\App\Http\Controllers\Admin\BackupController::class, 'restoreProofs'])->name('backup.restore-proofs');
         });
 
         // Unit Admin & Super Admin Management

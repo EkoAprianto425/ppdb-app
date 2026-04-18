@@ -20,7 +20,7 @@
                     <h2 class="text-3xl font-black themed-text tracking-tight mb-2">{{ $registration->user->full_name }}</h2>
                     <div class="flex flex-wrap justify-center md:justify-start gap-3">
                         <span class="px-3 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest border border-primary/20">
-                            {{ $registration->user->tujuan_masuk }}
+                            {{ $registration->user->educationalLevel?->name }}
                         </span>
                         <span class="px-3 py-1 rounded-lg bg-card-bg text-themed-text-muted text-[10px] font-bold uppercase tracking-widest border" :style="'border-color: var(--border-color)'">
                             Gelombang: {{ $registration->registrationWave->name ?? 'Belum Diatur' }}
@@ -42,7 +42,7 @@
                     @php
                         $initData = [
                             'Asal Sekolah' => $registration->user->asal_sekolah,
-                            'Tujuan Masuk' => $registration->user->tujuan_masuk,
+                            'Tujuan Masuk' => $registration->user->educationalLevel?->name,
                             'Alasan Memilih' => $registration->user->alasan_memilih,
                             'Sumber Informasi' => $registration->user->sumber_informasi,
                             'No. WhatsApp' => $registration->user->whatsapp_number,
@@ -147,7 +147,7 @@
             </h3>
 
             @php
-                $level = \App\Models\EducationalLevel::where('name', $registration->user->tujuan_masuk)->first();
+                $level = $registration->user->educationalLevel;
                 $allFees = $level ? $level->fees()->orderBy('sort_order')->get() : collect();
                 $fee1 = $allFees->where('sort_order', 1)->first();
                 $fee2 = $allFees->where('sort_order', 2)->first();
@@ -232,7 +232,7 @@
                 <label class="block text-xs font-bold themed-text-muted uppercase tracking-widest mb-2">Pilih Jenjang Tujuan</label>
                 <select name="unit" required class="w-full themed-input rounded-xl px-4 py-3 text-sm transition-all appearance-none">
                     @foreach(\App\Models\EducationalLevel::where('name', '!=', 'SMP')->get() as $level)
-                        <option value="{{ $level->name }}" {{ $registration->user->tujuan_masuk === $level->name ? 'selected' : '' }}>Unit {{ $level->name }}</option>
+                        <option value="{{ $level->id }}" {{ $registration->user->educational_level_id === $level->id ? 'selected' : '' }}>Unit {{ $level->name }}</option>
                     @endforeach
                 </select>
             </div>

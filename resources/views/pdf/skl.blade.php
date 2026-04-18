@@ -214,14 +214,14 @@
                 <tr>
                     <td class="label">Unit Tujuan</td>
                     <td class="separator">:</td>
-                    <td class="value">{{ $user->tujuan_masuk }}</td>
+                    <td class="value">{{ $user->educationalLevel?->name }}</td>
                 </tr>
             </table>
 
             {{-- Outcome Declaration --}}
             <div class="declaration">
                 Dinyatakan <span class="highlight">LULUS</span>
-                sebagai Peserta Didik Baru Unit <strong>{{ $user->tujuan_masuk }}</strong> Tahun Ajaran {{ $registration->academicYear->name }}.<br><br>
+                sebagai Peserta Didik Baru Unit <strong>{{ $user->educationalLevel?->name }}</strong> Tahun Ajaran {{ $registration->academicYear->name }}.<br><br>
                 Selanjutnya, peserta didik wajib melakukan proses <strong>Daftar Ulang</strong> sesuai dengan batas waktu yang telah ditetapkan. Kelalaian dalam melakukan daftar ulang dapat berakibat pada pembatalan status kelulusan.
             </div>
 

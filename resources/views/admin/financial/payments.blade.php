@@ -18,18 +18,18 @@
 
     <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left datatable" id="payments-table">
                 <thead>
                     <tr class="border-b" :style="'border-color: var(--border-color)'">
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Siswa</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tipe</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jumlah</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Waktu Upload</th>
-                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right">Aksi</th>
+                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right" data-dt-order="disable">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y" :style="'divide-color: var(--border-color)'">
-                    @forelse($payments as $payment)
+                <tbody>
+                    @foreach($payments as $payment)
                     <tr class="hover:bg-primary/5 transition-colors group">
                         <td class="px-8 py-5">
                             <div class="flex items-center gap-4">
@@ -47,25 +47,19 @@
                                 {{ $payment->fee_type }}
                             </span>
                         </td>
-                        <td class="px-8 py-5 text-center font-bold themed-text text-sm">
+                        <td class="px-8 py-5 text-center font-bold themed-text text-sm" data-order="{{ $payment->amount }}">
                             Rp {{ number_format($payment->amount, 0, ',', '.') }}
                         </td>
-                        <td class="px-8 py-5 text-center text-[10px] themed-text-muted">
+                        <td class="px-8 py-5 text-center text-[10px] themed-text-muted" data-order="{{ $payment->created_at->format('Y-m-d H:i:s') }}">
                             {{ $payment->created_at->format('d M Y, H:i') }}
                         </td>
                         <td class="px-8 py-5 text-right">
                             <button @click="$dispatch('open-modal', 'verify-{{ $payment->id }}')" class="px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary text-[10px] font-bold uppercase tracking-widest hover:text-white transition-all">
                                 Verifikasi
                             </button>
-
-                        </td>
                         </td>
                     </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="px-8 py-10 text-center themed-text-muted italic text-xs">Tidak ada pembayaran dalam antrean ini.</td>
-                    </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>

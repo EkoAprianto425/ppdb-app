@@ -42,7 +42,7 @@
                 @php
                     $accFields = [
                         'Asal Sekolah' => auth()->user()->asal_sekolah,
-                        'Tujuan Masuk' => auth()->user()->tujuan_masuk,
+                        'Tujuan Masuk' => auth()->user()->educationalLevel?->name,
                         'Sumber Info' => auth()->user()->sumber_informasi,
                     ];
                 @endphp

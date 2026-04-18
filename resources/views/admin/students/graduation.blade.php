@@ -6,25 +6,18 @@
 
 @section('content')
 <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
-    <div class="p-8 border-b flex items-center justify-between" :style="'border-color: var(--border-color)'">
-        <h3 class="text-lg font-bold themed-text">Pengumuman Kelulusan</h3>
-        <div class="flex gap-2 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-lg">
-            Total Valid: {{ $registrations->where('payment_status', 'success')->count() }} Siswa
-        </div>
-    </div>
-
     <div class="overflow-x-auto">
-        <table class="w-full text-left">
+        <table class="w-full text-left datatable" id="graduation-table">
             <thead>
                 <tr class="border-b bg-black/10" :style="'border-color: var(--border-color)'">
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Siswa</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jadwal Ujian</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status Saat Ini</th>
-                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Tindakan Kelulusan</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest" data-dt-order="disable">Tindakan Kelulusan</th>
                 </tr>
             </thead>
-            <tbody class="divide-y" :style="'divide-color: var(--border-color)'">
-                @forelse($registrations->where('payment_status', 'success') as $reg)
+            <tbody>
+                @foreach($registrations->where('payment_status', 'success') as $reg)
                 <tr class="hover:bg-primary/5 transition-colors group">
                     <td class="px-8 py-5">
                         <div class="flex items-center gap-4">
@@ -90,11 +83,7 @@
                         </div>
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="4" class="px-8 py-10 text-center themed-text-muted italic text-xs">Belum ada pendaftar yang pembayarannya terverifikasi (success).</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>

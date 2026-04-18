@@ -57,7 +57,7 @@
                 <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mb-4 tracking-tight">SELAMAT!</h2>
                 
                 <p class="text-lg md:text-xl themed-text max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-                    Ananda <span class="font-bold">{{ $registration->user->full_name }}</span> dinyatakan <span class="font-bold text-emerald-400">LULUS</span> seleksi Penerimaan Peserta Didik Baru (PPDB) untuk unit <span class="font-bold">{{ $registration->user->tujuan_masuk }}</span> Tahun Ajaran {{ $registration->academicYear->name }}.
+                    Ananda <span class="font-bold">{{ $registration->user->full_name }}</span> dinyatakan <span class="font-bold text-emerald-400">LULUS</span> seleksi Penerimaan Peserta Didik Baru (PPDB) untuk unit <span class="font-bold">{{ $registration->user->educationalLevel?->name }}</span> Tahun Ajaran {{ $registration->academicYear->name }}.
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-10 text-left">

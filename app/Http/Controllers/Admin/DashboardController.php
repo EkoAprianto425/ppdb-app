@@ -14,8 +14,9 @@ class DashboardController extends Controller
 
         if (!$user->isSuperAdmin()) {
             $unit = $user->getUnit();
-            $query->whereHas('user', function($q) use ($unit) {
-                $q->where('tujuan_masuk', $unit);
+            $levelId = \App\Models\EducationalLevel::where('name', $unit)->value('id');
+            $query->whereHas('user', function($q) use ($levelId) {
+                $q->where('educational_level_id', $levelId);
             });
         }
 

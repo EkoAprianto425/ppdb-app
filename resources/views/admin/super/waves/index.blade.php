@@ -45,17 +45,17 @@
         @endif
 
         <div class="card-glass rounded-3xl overflow-hidden">
-            <table class="w-full text-left">
+            <table class="w-full text-left datatable" id="waves-table">
                 <thead>
                     <tr class="border-b" :style="'border-color: var(--border-color)'">
                         <th class="px-6 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Gelombang</th>
                         <th class="px-6 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Periode</th>
                         <th class="px-6 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status</th>
-                        <th class="px-6 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right">Aksi</th>
+                        <th class="px-6 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right" data-dt-order="disable">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y" :style="'divide-color: var(--border-color)'">
-                    @forelse($waves as $wave)
+                    @foreach($waves as $wave)
                     <tr class="hover:bg-primary/5 transition-colors group">
                         <td class="px-6 py-4">
                             <span class="text-sm font-bold themed-text">{{ $wave->name }}</span>
@@ -95,11 +95,7 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-6 py-8 text-center themed-text-muted text-xs italic">Belum ada data gelombang untuk tahun ini.</td>
-                    </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>

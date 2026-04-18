@@ -6,26 +6,20 @@
 
 @section('content')
 <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
-    <div class="p-8 border-b flex items-center justify-between" :style="'border-color: var(--border-color)'">
-        <h3 class="text-lg font-bold themed-text">Daftar Pendaftar</h3>
-        <div class="flex gap-2 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-lg">
-            Total: {{ $registrations->count() }} Siswa
-        </div>
-    </div>
-
     <div class="overflow-x-auto">
-        <table class="w-full text-left">
+        <table class="w-full text-left datatable" id="students-table">
             <thead>
                 <tr class="border-b" :style="'border-color: var(--border-color)'">
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Lengkap / Email</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tujuan</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Wave</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status Bayar</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jadwal Ujian</th>
-                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right">Aksi</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right" data-dt-order="disable">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y" :style="'divide-color: var(--border-color)'">
-                @forelse($registrations as $reg)
+            <tbody>
+                @foreach($registrations as $reg)
                 <tr class="hover:bg-primary/5 transition-colors group">
                     <td class="px-8 py-5">
                         <div class="flex items-center gap-4">
@@ -37,6 +31,11 @@
                                 <p class="text-[10px] themed-text-muted">{{ $reg->user->email }}</p>
                             </div>
                         </div>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
+                            {{ $reg->user->educationalLevel?->name ?? '-' }}
+                        </span>
                     </td>
                     <td class="px-8 py-5 text-center">
                         <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
@@ -79,11 +78,7 @@
                         </div>
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="px-8 py-10 text-center themed-text-muted italic text-xs">Belum ada pendaftar di unit ini.</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>

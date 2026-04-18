@@ -6,6 +6,11 @@
     <meta name="description" content="{{ \App\Models\Setting::get('meta_description', 'PPDB Online - Pendaftaran Peserta Didik Baru') }}">
     <title>@yield('title', \App\Models\Setting::get('app_name', 'PPDB Online')) - {{ \App\Models\Setting::get('app_name', 'PPDB Online') }}</title>
 
+    <!-- jQuery + DataTables -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+
     <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -158,6 +163,63 @@
         
         .flatpickr-weekday { color: var(--text-muted) !important; font-weight: 800 !important; font-size: 10px !important; text-transform: uppercase; }
         span.flatpickr-weekday { color: var(--text-muted) !important; }
+
+        /* ── DataTables Dark Theme ── */
+        table.dataTable { border-collapse: collapse !important; width: 100% !important; }
+        .dt-container { padding: 0 !important; }
+        .dt-container .dt-search { padding: 1rem 2rem 0 !important; }
+        .dt-container .dt-search label { font-size: 0; }
+        .dt-container .dt-search input {
+            background: var(--input-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 1rem !important;
+            font-size: 0.8rem !important;
+            font-weight: 500 !important;
+            width: 260px !important;
+            outline: none !important;
+            transition: border-color 0.2s;
+        }
+        .dt-container .dt-search input::placeholder { color: var(--text-muted) !important; opacity: 0.6; }
+        .dt-container .dt-search input:focus { border-color: var(--primary-color) !important; box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1) !important; }
+        .dt-container .dt-length { padding: 1rem 2rem 0 !important; }
+        .dt-container .dt-length label { color: var(--text-muted) !important; font-size: 0.7rem !important; font-weight: 600 !important; text-transform: uppercase; letter-spacing: 0.1em; }
+        .dt-container .dt-length select {
+            background: var(--input-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            border-radius: 0.5rem !important;
+            padding: 0.35rem 0.5rem !important;
+            font-size: 0.75rem !important;
+            margin: 0 0.3rem !important;
+        }
+        .dt-container .dt-info { padding: 1rem 2rem !important; color: var(--text-muted) !important; font-size: 0.65rem !important; font-weight: 600 !important; text-transform: uppercase; letter-spacing: 0.05em; }
+        .dt-container .dt-paging { padding: 0.75rem 2rem 1.5rem !important; }
+        .dt-container .dt-paging .dt-paging-button {
+            background: transparent !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-muted) !important;
+            border-radius: 0.5rem !important;
+            padding: 0.35rem 0.7rem !important;
+            font-size: 0.7rem !important;
+            font-weight: 600 !important;
+            margin: 0 2px !important;
+            transition: all 0.2s !important;
+        }
+        .dt-container .dt-paging .dt-paging-button:hover { background: rgba(var(--primary-rgb), 0.1) !important; color: var(--primary-color) !important; border-color: rgba(var(--primary-rgb), 0.3) !important; }
+        .dt-container .dt-paging .dt-paging-button.current { background: var(--primary-color) !important; color: #fff !important; border-color: var(--primary-color) !important; }
+        .dt-container .dt-paging .dt-paging-button.disabled { opacity: 0.3 !important; cursor: default !important; }
+        table.dataTable thead th { border-bottom: 1px solid var(--border-color) !important; background: transparent !important; cursor: pointer; position: relative; }
+        table.dataTable thead th:after, table.dataTable thead th:before { opacity: 0.3 !important; }
+        table.dataTable thead th.dt-ordering-asc:after, table.dataTable thead th.dt-ordering-desc:before { opacity: 1 !important; color: var(--primary-color) !important; }
+        table.dataTable tbody tr { border-bottom: 1px solid var(--border-color) !important; transition: background 0.15s; }
+        table.dataTable tbody tr:hover { background: rgba(var(--primary-rgb), 0.04) !important; }
+        table.dataTable tbody tr:last-child { border-bottom: none !important; }
+        table.dataTable tbody td { border: none !important; vertical-align: middle !important; }
+        .dt-container .dt-layout-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        table.dataTable.no-footer { border-bottom: none !important; }
+        table.dataTable thead .dt-column-order { display: none !important; }
     </style>
 </head>
 <body class="h-full" 
@@ -365,7 +427,7 @@
                     <div class="hidden sm:flex items-center gap-2 h-10 px-4 rounded-xl border font-bold transition-all duration-700"
                          :style="'background: var(--card-bg); border-color: ' + themes[currentTheme].color + '33; color: ' + themes[currentTheme].color">
                         <span class="w-2 h-2 rounded-full animate-pulse" :style="'background:' + themes[currentTheme].color"></span>
-                        <span class="text-xs uppercase tracking-widest">{{ auth()->user()->tujuan_masuk ?? 'CALON' }}</span>
+                        <span class="text-xs uppercase tracking-widest">{{ auth()->user()->educationalLevel?->name ?? 'CALON' }}</span>
                     </div>
                 </div>
             </header>
@@ -405,7 +467,29 @@
             monthSelectorType: "dropdown",
             yearSelectorType: "dropdown"
         });
+
+        // Auto-init DataTables on all tables with class 'datatable'
+        $('.datatable').each(function() {
+            if (!$.fn.DataTable.isDataTable(this)) {
+                $(this).DataTable({
+                    pageLength: 25,
+                    ordering: true,
+                    language: {
+                        search: '',
+                        searchPlaceholder: '🔍  Cari data...',
+                        lengthMenu: 'Tampilkan _MENU_ data',
+                        info: 'Menampilkan _START_ - _END_ dari _TOTAL_ data',
+                        infoEmpty: 'Tidak ada data',
+                        infoFiltered: '(dari _MAX_ total data)',
+                        zeroRecords: 'Data tidak ditemukan',
+                        emptyTable: 'Belum ada data',
+                        paginate: { first: '«', previous: '‹', next: '›', last: '»' }
+                    }
+                });
+            }
+        });
     });
 </script>
+@yield('scripts')
 </body>
 </html>

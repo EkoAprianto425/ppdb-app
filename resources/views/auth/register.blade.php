@@ -118,11 +118,11 @@
 
                     {{-- Tujuan Masuk --}}
                     <div>
-                        <label for="tujuan_masuk" class="block text-xs font-medium text-slate-400 mb-1.5">Pilihan Tujuan Masuk <span class="text-red-400">*</span></label>
+                        <label for="educational_level_id" class="block text-xs font-medium text-slate-400 mb-1.5">Pilihan Tujuan Masuk <span class="text-red-400">*</span></label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             @foreach($levels as $level)
                             <label class="tujuan-option cursor-pointer">
-                                <input type="radio" name="tujuan_masuk" value="{{ $level->name }}" class="hidden peer" {{ old('tujuan_masuk') === $level->name ? 'checked' : '' }}>
+                                <input type="radio" name="educational_level_id" value="{{ $level->id }}" class="hidden peer" {{ old('educational_level_id') == $level->id ? 'checked' : '' }}>
                                 <div class="peer-checked:bg-indigo-500/20 peer-checked:border-indigo-400 peer-checked:text-indigo-300 border border-slate-700 rounded-xl px-4 py-3 text-center text-sm text-slate-400 hover:border-slate-600 hover:bg-slate-800 transition-all flex items-center justify-between">
                                     <p class="font-bold">{{ $level->name }}</p>
                                     <span class="text-[9px] themed-text-muted opacity-50">{{ $level->parent_unit }}</span>
@@ -130,7 +130,7 @@
                             </label>
                             @endforeach
                         </div>
-                        @error('tujuan_masuk') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                        @error('educational_level_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 

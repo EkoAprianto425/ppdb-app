@@ -31,8 +31,8 @@ class RegistrationController extends Controller
             return redirect()->route('pendaftaran.create');
         }
 
-        // Ambil Jenjang
-        $level = EducationalLevel::where('name', $user->tujuan_masuk)->first();
+        // Ambil Jenjang via relationship
+        $level = $user->educationalLevel;
         $fees = $level ? $level->fees()->orderBy('sort_order')->get() : collect();
 
         // Mapping status pembayaran untuk setiap biaya
@@ -210,7 +210,7 @@ class RegistrationController extends Controller
 
         $schedules = [];
         if (!$registration->exam_schedule_id) {
-            $schedules = \App\Models\ExamSchedule::where('unit', Auth::user()->tujuan_masuk)->get();
+            $schedules = \App\Models\ExamSchedule::where('unit', Auth::user()->educationalLevel?->name)->get();
         }
 
         return view('pendaftaran.exam', compact('registration', 'schedules'));
