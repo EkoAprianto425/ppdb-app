@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13"></a>
-  <a href="#"><img src="https://img.shields.io/badge/PHP-8.3+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.3+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/PHP-8.4+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.4+"></a>
   <a href="#"><img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
   <a href="#"><img src="https://img.shields.io/badge/Alpine.js-3-8BC0D0?style=for-the-badge&logo=alpine.js&logoColor=white" alt="Alpine.js"></a>
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"></a>
@@ -32,7 +32,8 @@
 | 📱 | **Responsive** | Tampilan optimal di desktop, tablet, dan smartphone |
 | 📄 | **PDF Generator** | Kartu ujian & Surat Keterangan Lulus otomatis dalam format PDF |
 | 💬 | **Integrasi WhatsApp** | Tombol bantuan langsung terhubung ke panitia setiap unit |
-| 🔐 | **Role-Based Access** | 6 role berbeda dengan hak akses yang terkontrol ketat |
+| 📊 | **DataTables** | Tabel interaktif dengan fitur search, ordering, dan paging untuk manajemen peserta |
+| 🔐 | **Role-Based Access** | 6 role berbeda dengan isolasi data unit yang ketat (SMA, SMK, SMP) |
 
 ---
 
@@ -65,14 +66,17 @@
 ### 🛡️ Modul Admin Unit (SMP/SMA/SMK)
 
 - **Dashboard Statistik** — Data realtime pendaftar per gelombang & status
-- **Manajemen Pendaftar** — Lihat detail, edit data, dan kelola status siswa
-- **Jadwal Ujian** — Buat & atur sesi ujian (tanggal, waktu, kuota)
+- **Manajemen Pendaftar** — Lihat detail, edit data, dan kelola status siswa (Terisolasi per unit)
+- **Jadwal Ujian** — Buat sesi ujian dengan relasi jenjang yang spesifik (e.g. SMK TKJ)
+- **Daftar Peserta** — Monitoring peserta ujian per sesi dengan fitur search & paging (DataTables)
+- **Pindah Jenjang** — Fitur transfer siswa antar unit (e.g. SMA ke SMK) dengan satu klik
 - **Manajemen Kelulusan** — Update status kelulusan massal (bulk action) dengan deadline daftar ulang
 
 ### 💰 Modul Admin Keuangan
 
 - **Master Biaya** — Atur jenis & nominal biaya per jenjang pendidikan (sortable)
-- **Verifikasi Pembayaran** — Approve/reject bukti bayar dengan catatan admin
+- **Verifikasi Global** — Akses verifikasi pembayaran untuk seluruh unit (SMP, SMA, SMK)
+- **Dashboard Keuangan** — Statistik pembayaran realtime di seluruh jenjang
 
 ### 👑 Modul Super Admin
 
@@ -80,6 +84,7 @@
 - **Manajemen Jenjang** — CRUD unit pendidikan + kontak WhatsApp per unit
 - **Gelombang Pendaftaran** — Atur gelombang dengan rentang tanggal & status
 - **Manajemen Admin** — CRUD akun admin semua role
+- **Backup & Restore** — Ekspor/Impor database (SQL) dan arsip bukti pembayaran (ZIP)
 - **Pengaturan Global** — Ubah nama aplikasi, logo, deskripsi meta & footer
 
 ---
@@ -87,7 +92,7 @@
 ## 🧱 Tech Stack
 
 ```
-Backend       → Laravel 13 (PHP 8.3+)
+Backend       → Laravel 13 (PHP 8.4+)
 Frontend      → Blade + Tailwind CSS + Alpine.js
 Database      → MySQL / MariaDB
 PDF Engine    → Barryvdh DomPDF
@@ -102,7 +107,7 @@ Testing       → Pest PHP
 
 ### Prasyarat
 
-- PHP ≥ 8.3
+- PHP ≥ 8.4 (Optimized for MySQL 8.4)
 - Composer ≥ 2.x
 - Node.js ≥ 18.x & npm
 - MySQL / MariaDB
@@ -203,7 +208,7 @@ graph TD
 | Admin SMP | `admin_smp` | Data pendaftar, jadwal & kelulusan unit SMP |
 | Admin SMA | `admin_sma` | Data pendaftar, jadwal & kelulusan unit SMA |
 | Admin SMK | `admin_smk` | Data pendaftar, jadwal & kelulusan unit SMK |
-| Admin Keuangan | `admin_administrasi` | Master biaya & verifikasi pembayaran |
+| Admin Keuangan | `admin_administrasi` | Global access untuk master biaya & verifikasi pembayaran |
 | Siswa | `siswa` | Dashboard, formulir, pembayaran, kartu ujian |
 
 ---
