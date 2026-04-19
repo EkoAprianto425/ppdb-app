@@ -13,10 +13,9 @@ class DashboardController extends Controller
         $query = \App\Models\Registration::query();
 
         if (!$user->isSuperAdmin()) {
-            $unit = $user->getUnit();
-            $levelId = \App\Models\EducationalLevel::where('name', $unit)->value('id');
-            $query->whereHas('user', function($q) use ($levelId) {
-                $q->where('educational_level_id', $levelId);
+            $levelIds = $user->getManagedLevelIds();
+            $query->whereHas('user', function($q) use ($levelIds) {
+                $q->whereIn('educational_level_id', $levelIds);
             });
         }
 

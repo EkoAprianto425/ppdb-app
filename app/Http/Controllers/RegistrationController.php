@@ -210,7 +210,7 @@ class RegistrationController extends Controller
 
         $schedules = [];
         if (!$registration->exam_schedule_id) {
-            $schedules = \App\Models\ExamSchedule::where('unit', Auth::user()->educationalLevel?->name)->get();
+            $schedules = \App\Models\ExamSchedule::where('educational_level_id', Auth::user()->educational_level_id)->get();
         }
 
         return view('pendaftaran.exam', compact('registration', 'schedules'));

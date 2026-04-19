@@ -15,13 +15,29 @@ class ExamScheduleController extends Controller
         $query = ExamSchedule::with('academicYear')->withCount('registrations');
 
         if (!$user->isSuperAdmin()) {
-            $query->where('unit', $user->getUnit());
+            $levelIds = $user->getManagedLevelIds();
+            $query->whereIn('educational_level_id', $levelIds);
         }
 
         $schedules = $query->latest()->get();
         $activeYear = AcademicYear::where('is_active', true)->first();
+        
+        $levelIds = $user->getManagedLevelIds();
+        $levels = \App\Models\EducationalLevel::whereIn('id', $levelIds)->orderBy('sort_order')->get();
 
-        return view('admin.schedules.index', compact('schedules', 'activeYear'));
+        // Fetch participants
+        $participantsQuery = \App\Models\Registration::with('user', 'examSchedule', 'user.educationalLevel')
+            ->whereNotNull('exam_schedule_id');
+
+        if (!$user->isSuperAdmin()) {
+            $participantsQuery->whereHas('user', function($q) use ($levelIds) {
+                $q->whereIn('educational_level_id', $levelIds);
+            });
+        }
+
+        $participants = $participantsQuery->latest()->get();
+
+        return view('admin.schedules.index', compact('schedules', 'activeYear', 'levels', 'participants'));
     }
 
     public function store(Request $request)
@@ -42,7 +58,8 @@ class ExamScheduleController extends Controller
 
         ExamSchedule::create([
             'academic_year_id' => $activeYear->id,
-            'unit' => $user->isSuperAdmin() ? $request->unit : $user->getUnit(),
+            'educational_level_id' => $request->educational_level_id,
+            'unit' => \App\Models\EducationalLevel::find($request->educational_level_id)?->name ?? 'Unknown',
             'name' => $request->name,
             'date' => $request->date,
             'time_start' => $request->time_start,

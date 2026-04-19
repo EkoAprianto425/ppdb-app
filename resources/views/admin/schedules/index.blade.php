@@ -36,16 +36,15 @@
                 </div>
             </div>
 
-            @if(auth()->user()->isSuperAdmin())
             <div>
-                <label class="block text-xs font-bold themed-text-muted uppercase tracking-widest mb-2">Unit</label>
-                <select name="unit" class="w-full themed-input rounded-xl px-4 py-3 text-sm transition-all appearance-none">
-                    <option value="SMP">SMP</option>
-                    <option value="SMA">SMA</option>
-                    <option value="SMK">SMK</option>
+                <label class="block text-xs font-bold themed-text-muted uppercase tracking-widest mb-2">Unit / Jenjang</label>
+                <select name="educational_level_id" class="w-full themed-input rounded-xl px-4 py-3 text-sm transition-all appearance-none" required>
+                    <option value="" disabled selected>Pilih Jenjang</option>
+                    @foreach($levels as $level)
+                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                    @endforeach
                 </select>
             </div>
-            @endif
 
             <button type="submit" class="w-full py-3 rounded-xl btn-soft-primary font-bold uppercase tracking-widest text-xs">Buat Slot Ujian</button>
         </form>
@@ -92,6 +91,79 @@
             <p class="text-xs themed-text-muted">Buat slot ujian pertama untuk unit ini menggunakan form di samping.</p>
         </div>
         @endforelse
+    </div>
+</div>
+
+{{-- Daftar Peserta Ujian --}}
+<div class="mt-12">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h3 class="text-xl font-bold themed-text">Peserta Ujian</h3>
+            <p class="text-xs themed-text-muted uppercase tracking-widest mt-1">Daftar siswa yang telah memilih jadwal ujian</p>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold">
+            Total: {{ $participants->count() }} Siswa
+        </div>
+    </div>
+
+    <div class="card-glass rounded-3xl overflow-hidden border border-white/5">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse datatable">
+                <thead>
+                    <tr class="bg-white/5 border-b border-white/10">
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest themed-text-muted">Siswa</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest themed-text-muted">Unit / Jenjang</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest themed-text-muted">Jadwal Terpilih</th>
+                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest themed-text-muted text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @forelse($participants as $participant)
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                                    {{ substr($participant->user->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold themed-text">{{ $participant->user->full_name ?? $participant->user->name }}</p>
+                                    <p class="text-[10px] themed-text-muted uppercase tracking-tighter">{{ $participant->user->email }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase">
+                                {{ $participant->user->educationalLevel->name }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                <div>
+                                    <p class="text-xs font-bold themed-text">{{ $participant->examSchedule->name }}</p>
+                                    <p class="text-[10px] themed-text-muted uppercase tracking-tighter">{{ date('d M Y', strtotime($participant->examSchedule->date)) }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{{ route('admin.students.show', $participant) }}" class="inline-flex items-center justify-center p-2 rounded-lg bg-white/5 text-primary hover:bg-primary hover:text-white transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center">
+                            <p class="text-xs themed-text-muted uppercase tracking-widest font-bold">Belum ada siswa yang memilih jadwal</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endsection

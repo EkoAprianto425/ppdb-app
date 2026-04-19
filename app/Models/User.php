@@ -82,6 +82,22 @@ class User extends Authenticatable
         return $this->educationalLevel?->name;
     }
 
+    /**
+     * Get the list of educational level IDs managed by this user.
+     */
+    public function getManagedLevelIds(): array
+    {
+        if ($this->isSuperAdmin() || $this->role === self::ROLE_ADMIN_ADM) {
+            return EducationalLevel::pluck('id')->toArray();
+        }
+
+        $unit = $this->getUnit();
+        return EducationalLevel::where('parent_unit', $unit)
+            ->orWhere('name', $unit)
+            ->pluck('id')
+            ->toArray();
+    }
+
     public function registration()
     {
         return $this->hasOne(Registration::class);

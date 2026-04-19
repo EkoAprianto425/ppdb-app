@@ -13,6 +13,7 @@ class ExamSchedule extends Model
 
     protected $fillable = [
         'academic_year_id',
+        'educational_level_id',
         'unit',
         'name',
         'date',
@@ -24,6 +25,11 @@ class ExamSchedule extends Model
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function educationalLevel(): BelongsTo
+    {
+        return $this->belongsTo(EducationalLevel::class);
     }
 
     public function registrations(): HasMany

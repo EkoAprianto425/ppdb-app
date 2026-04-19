@@ -15,10 +15,9 @@ class StudentManagementController extends Controller
         $query = Registration::with('user', 'academicYear', 'registrationWave');
 
         if (!$user->isSuperAdmin()) {
-            $unit = $user->getUnit();
-            $levelId = \App\Models\EducationalLevel::where('name', $unit)->value('id');
-            $query->whereHas('user', function($q) use ($levelId) {
-                $q->where('educational_level_id', $levelId);
+            $levelIds = $user->getManagedLevelIds();
+            $query->whereHas('user', function($q) use ($levelIds) {
+                $q->whereIn('educational_level_id', $levelIds);
             });
         }
 
@@ -101,10 +100,9 @@ class StudentManagementController extends Controller
         $query = Registration::with('user', 'academicYear', 'registrationWave');
 
         if (!$user->isSuperAdmin()) {
-            $unit = $user->getUnit();
-            $levelId = \App\Models\EducationalLevel::where('name', $unit)->value('id');
-            $query->whereHas('user', function($q) use ($levelId) {
-                $q->where('educational_level_id', $levelId);
+            $levelIds = $user->getManagedLevelIds();
+            $query->whereHas('user', function($q) use ($levelIds) {
+                $q->whereIn('educational_level_id', $levelIds);
             });
         }
 
@@ -139,7 +137,8 @@ class StudentManagementController extends Controller
     {
         $user = auth()->user();
         if (!$user->isSuperAdmin()) {
-            if ($registration->user->educational_level_id !== \App\Models\EducationalLevel::where('name', $user->getUnit())->value('id')) {
+            $levelIds = $user->getManagedLevelIds();
+            if (!in_array($registration->user->educational_level_id, $levelIds)) {
                 abort(403, 'Anda tidak memiliki akses ke data siswa unit lain.');
             }
         }
