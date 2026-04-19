@@ -54,10 +54,17 @@ class FinancialController extends Controller
     public function indexPayments(Request $request)
     {
         $status = $request->get('status', 'pending');
-        $payments = \App\Models\Payment::with('registration.user')
-                    ->where('status', $status)
-                    ->latest()
-                    ->get();
+        $query = \App\Models\Payment::with('registration.user')->where('status', $status);
+
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            $levelIds = $user->getManagedLevelIds();
+            $query->whereHas('registration.user', function($q) use ($levelIds) {
+                $q->whereIn('educational_level_id', $levelIds);
+            });
+        }
+
+        $payments = $query->latest()->get();
 
         return view('admin.financial.payments', compact('payments', 'status'));
     }
