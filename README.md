@@ -2,290 +2,131 @@
   <img src="public/images/banner.png" alt="PPDB Online Banner" width="100%">
 </p>
 
-<h1 align="center">PPDB Online</h1>
+<h1 align="center">PPDB Online — BTN VA Integrated</h1>
 
 <p align="center">
-  <strong>Sistem Penerimaan Peserta Didik Baru — Modern, Cepat & Fleksibel</strong>
+  <strong>Sistem Penerimaan Peserta Didik Baru — Modern, Cepat & Terintegrasi Bank BTN</strong>
 </p>
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 13"></a>
-  <a href="#"><img src="https://img.shields.io/badge/PHP-8.4+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.4+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2+"></a>
   <a href="#"><img src="https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
   <a href="#"><img src="https://img.shields.io/badge/Alpine.js-3-8BC0D0?style=for-the-badge&logo=alpine.js&logoColor=white" alt="Alpine.js"></a>
-  <a href="#"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"></a>
+  <a href="#"><img src="https://img.shields.io/badge/BTN_VA-Integrated-00529C?style=for-the-badge" alt="BTN VA"></a>
 </p>
 
 <p align="center">
-  Platform manajemen penerimaan siswa baru yang dirancang khusus untuk yayasan pendidikan multi-jenjang (SMP, SMA, SMK). Dibangun dengan teknologi terkini, tampilan premium, dan arsitektur yang scalable.
+  Platform manajemen pendaftaran siswa baru multi-jenjang (SMP, SMA, SMK) dengan integrasi <strong>Virtual Account Bank BTN</strong>. Mendukung otomatisasi verifikasi pembayaran melalui sistem <em>Inquiry</em> dan <em>Callback (Webhook)</em>.
 </p>
 
 ---
 
-## ✨ Mengapa PPDB Online?
+## ✨ Fitur Unggulan Terkini
 
 | | Fitur | Keterangan |
 |---|---|---|
-| 🏫 | **Multi-Unit** | Satu instalasi untuk mengelola pendaftaran SMP, SMA, dan SMK secara bersamaan |
-| 🎨 | **Tema Dinamis** | 5 warna aksen & 4 background tema yang bisa dipilih setiap pengguna |
-| ⚙️ | **Konfigurasi Penuh** | Nama aplikasi, logo, footer, meta SEO — semua bisa diubah dari dashboard |
-| 📱 | **Responsive** | Tampilan optimal di desktop, tablet, dan smartphone |
-| 📄 | **PDF Generator** | Kartu ujian & Surat Keterangan Lulus otomatis dalam format PDF |
-| 💬 | **Integrasi WhatsApp** | Tombol bantuan langsung terhubung ke panitia setiap unit |
-| 📊 | **DataTables** | Tabel interaktif dengan fitur search, ordering, dan paging untuk manajemen peserta |
-| 🔐 | **Role-Based Access** | 6 role berbeda dengan isolasi data unit yang ketat (SMA, SMK, SMP) |
+| 💳 | **Integrasi VA BTN** | Pembuatan Virtual Account otomatis (17 digit) untuk biaya pendaftaran & daftar ulang |
+| 🔄 | **Auto-Verify** | Verifikasi pembayaran realtime melalui tombol "Cek Status" (Inquiry API) |
+| 🌐 | **Webhook Callback** | Pembaruan status pembayaran otomatis dari bank ke sistem tanpa campur tangan admin |
+| 📊 | **1000+ Dummy Data** | Seeder pintar untuk simulasi data pendaftar dalam jumlah besar yang saling terintegrasi |
+| 🏫 | **Multi-Unit Scope** | Isolasi data ketat antara unit SMP, SMA, dan SMK dalam satu dashboard |
+| 🎨 | **Premium UI** | Antarmuka berbasis Glassmorphism dengan tema dinamis & micro-animations |
 
 ---
 
-## 🖥️ Demo & Preview
+## 🖥️ Demo & Akun Testing
 
-### 🔑 Akun Demo (Setelah Seeding)
+Setelah melakukan instalasi dan seeding, gunakan akun berikut:
 
 | Role | Email | Password |
 |---|---|---|
-| Super Admin | `admin@ppdb.com` | `password` |
-| Admin SMP | `admin.smp@ppdb.com` | `password` |
-| Admin SMA | `admin.sma@ppdb.com` | `password` |
-| Admin SMK | `admin.smk@ppdb.com` | `password` |
-| Admin Keuangan | `admin.adm@ppdb.com` | `password` |
-| Siswa | *(Daftar melalui form registrasi)* | — |
+| **Super Admin** | `admin@ppdb.com` | `password` |
+| **Admin Unit (SMP)** | `admin.smp@ppdb.com` | `password` |
+| **Admin Keuangan** | `admin.adm@ppdb.com` | `password` |
+| **Siswa (Dummy)** | *(Cek tabel `users`)* | `password123` |
 
 ---
 
-## 🏗️ Arsitektur & Fitur Lengkap
+## 🏗️ Modul Utama
 
-### 📋 Modul Siswa (Student Portal)
+### 📋 Portal Siswa (Student Portal)
+- **Registrasi & Login** — Alur pembuatan akun yang simpel.
+- **Formulir Pendaftaran** — Validasi biodata, data orang tua, dan asal sekolah.
+- **Finansial VA** — Generate VA BTN untuk biaya formulir & biaya masuk. Siswa bisa cek status lunas secara mandiri.
+- **Download Center** — Cetak Kartu Ujian dan SKL (Surat Keterangan Lulus) dalam format PDF premium.
 
-- **Dashboard Interaktif** — Ringkasan status pendaftaran dengan progress timeline
-- **Formulir Pendaftaran** — Form multi-step dengan validasi real-time
-- **Administrasi Keuangan** — Upload bukti pembayaran & tracking status verifikasi
-- **Kartu Ujian Digital** — Download kartu ujian dalam format PDF setelah terverifikasi
-- **Pengumuman Kelulusan** — Cek status kelulusan & download SKL (Surat Keterangan Lulus)
-- **Pusat Bantuan** — WhatsApp shortcut langsung ke panitia unit terkait
+### 💰 Modul Keuangan & VA BTN
+- **Inquiry Status** — Admin Keuangan dapat memverifikasi pembayaran VA secara massal atau per individu langsung ke API BTN.
+- **Master Biaya** — Pengaturan nominal biaya pendaftaran dan daftar ulang per jenjang (SMP/SMA/SMK).
+- **Callback Listener** — Endpoint API `/api/btn/callback` yang siap menerima notifikasi pelunasan dari Bank.
 
-### 🛡️ Modul Admin Unit (SMP/SMA/SMK)
-
-- **Dashboard Statistik** — Data realtime pendaftar per gelombang & status
-- **Manajemen Pendaftar** — Lihat detail, edit data, dan kelola status siswa (Terisolasi per unit)
-- **Jadwal Ujian** — Buat sesi ujian dengan relasi jenjang yang spesifik (e.g. SMK TKJ)
-- **Daftar Peserta** — Monitoring peserta ujian per sesi dengan fitur search & paging (DataTables)
-- **Pindah Jenjang** — Fitur transfer siswa antar unit (e.g. SMA ke SMK) dengan satu klik
-- **Manajemen Kelulusan** — Update status kelulusan massal (bulk action) dengan deadline daftar ulang
-
-### 💰 Modul Admin Keuangan
-
-- **Master Biaya** — Atur jenis & nominal biaya per jenjang pendidikan (sortable)
-- **Verifikasi Global** — Akses verifikasi pembayaran untuk seluruh unit (SMP, SMA, SMK)
-- **Dashboard Keuangan** — Statistik pembayaran realtime di seluruh jenjang
-
-### 👑 Modul Super Admin
-
-- **Tahun Ajaran** — Kelola periode akademik dengan toggle aktif/non-aktif
-- **Manajemen Jenjang** — CRUD unit pendidikan + kontak WhatsApp per unit
-- **Gelombang Pendaftaran** — Atur gelombang dengan rentang tanggal & status
-- **Manajemen Admin** — CRUD akun admin semua role
-- **Backup & Restore** — Ekspor/Impor database (SQL) dan arsip bukti pembayaran (ZIP)
-- **Pengaturan Global** — Ubah nama aplikasi, logo, deskripsi meta & footer
+### 🛡️ Modul Admin Unit & Super Admin
+- **Verifikasi Peserta** — Manajemen status kelulusan dan seleksi berkas.
+- **Jadwal Ujian** — Pengaturan sesi ujian yang terintegrasi dengan kartu peserta.
+- **Konfigurasi Sistem** — Ubah Logo, Nama Aplikasi, Kontak WA, dan Background Tema tanpa sentuh kode.
 
 ---
 
-## 🧱 Tech Stack
+## 🚀 Instalasi & Setup
 
-```
-Backend       → Laravel 13 (PHP 8.4+)
-Frontend      → Blade + Tailwind CSS + Alpine.js
-Database      → MySQL / MariaDB
-PDF Engine    → Barryvdh DomPDF
-Auth          → Laravel Breeze
-Build Tool    → Vite
-Testing       → Pest PHP
-```
-
----
-
-## 🚀 Instalasi
-
-### Prasyarat
-
-- PHP ≥ 8.4 (Optimized for MySQL 8.4)
-- Composer ≥ 2.x
-- Node.js ≥ 18.x & npm
+### 1. Persyaratan Sistem
+- PHP ≥ 8.2
 - MySQL / MariaDB
-- Git
+- Node.js & NPM
+- Composer
 
-### Langkah Instalasi
+### 2. Langkah Cepat (Fresh Install)
 
 ```bash
-# 1. Clone repository
-git clone https://gitlab.com/ekozawa72/ppdb-app.git
+# Clone & Install
+git clone https://github.com/your-repo/ppdb-app.git
 cd ppdb-app
+composer install && npm install
 
-# 2. Install dependencies
-composer install
-npm install
-
-# 3. Setup environment
+# Setup Env
 cp .env.example .env
 php artisan key:generate
 
-# 4. Konfigurasi database di file .env
-# DB_DATABASE=ppdb_app
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-# 5. Jalankan migrasi & seeder
+# Database & Seeding
+# Pastikan DB_DATABASE sudah dibuat di MySQL
 php artisan migrate
-php artisan db:seed --class=SuperAdminSeeder
-
-# 6. Buat symbolic link untuk storage
-php artisan storage:link
-
-# 7. Build assets & jalankan server
-npm run build
-php artisan serve
+php artisan db:seed --class=DatabaseSeeder      # Data Master (Role, Jenjang, Biaya)
+php artisan db:seed --class=DummyDataSeeder    # Opsional: 1000 data siswa dummy
 ```
 
-Buka browser di `http://localhost:8000` dan login dengan akun Super Admin.
-
-### ⚡ Mode Development (Concurrent)
-
-```bash
-composer dev
-```
-
-Perintah ini menjalankan **4 proses sekaligus**: Laravel server, Queue listener, Log viewer (Pail), dan Vite dev server.
-
----
-
-## 📁 Struktur Proyek
-
-```
-ppdb-app/
-├── app/
-│   ├── Http/Controllers/
-│   │   ├── Admin/                    # Controller admin (Student, Financial, Setting, dll)
-│   │   ├── Auth/                     # Authentication controllers (Breeze)
-│   │   └── RegistrationController    # Controller utama siswa
-│   ├── Models/                       # Eloquent models (User, Registration, Payment, dll)
-│   ├── Scopes/                       # Global Scope (ActiveAcademicYearScope)
-│   └── Traits/                       # Reusable traits (HasActiveAcademicYear)
-├── database/
-│   ├── migrations/                   # Schema migrasi database
-│   └── seeders/                      # Data seeder (SuperAdminSeeder)
-├── resources/views/
-│   ├── admin/                        # Views admin (dashboard, students, financial, dll)
-│   ├── auth/                         # Views autentikasi (login, register)
-│   ├── layouts/                      # Layout utama + partials navigasi
-│   │   └── partials/                 # nav-siswa, nav-admin, nav-super-admin
-│   ├── pdf/                          # Template PDF (kartu ujian, SKL)
-│   └── pendaftaran/                  # Views modul pendaftaran siswa
-├── routes/
-│   ├── web.php                       # Route utama aplikasi
-│   └── auth.php                      # Route autentikasi
-└── public/
-    └── storage/                      # Symlink ke storage (logo, bukti bayar)
+### 3. Konfigurasi BTN ( .env )
+Tambahkan kredensial BTN Anda untuk mengaktifkan fitur Virtual Account:
+```env
+BTN_ID=your_id
+BTN_KEY=your_key
+BTN_SECRET=your_secret
+BTN_BASE_URL=https://dev.btn.co.id/api
+BTN_KODE_INSTITUSI=4842
 ```
 
 ---
 
-## 🔐 Sistem Role & Hak Akses
+## 📝 Alur Pembayaran Virtual Account
 
-```mermaid
-graph TD
-    A[Super Admin] -->|Full Access| B[Semua Modul]
-    C[Admin SMP/SMA/SMK] -->|Unit Scope| D[Data Pendaftar Unit]
-    C -->|Unit Scope| E[Jadwal Ujian Unit]
-    C -->|Unit Scope| F[Kelulusan Unit]
-    G[Admin Keuangan] -->|Cross Unit| H[Master Biaya]
-    G -->|Cross Unit| I[Verifikasi Pembayaran]
-    J[Siswa] -->|Self Only| K[Dashboard & Formulir]
-    J -->|Self Only| L[Pembayaran & Ujian]
-```
-
-| Role | Kode | Akses |
-|---|---|---|
-| Super Admin | `super_admin` | Semua modul + konfigurasi sistem |
-| Admin SMP | `admin_smp` | Data pendaftar, jadwal & kelulusan unit SMP |
-| Admin SMA | `admin_sma` | Data pendaftar, jadwal & kelulusan unit SMA |
-| Admin SMK | `admin_smk` | Data pendaftar, jadwal & kelulusan unit SMK |
-| Admin Keuangan | `admin_administrasi` | Global access untuk master biaya & verifikasi pembayaran |
-| Siswa | `siswa` | Dashboard, formulir, pembayaran, kartu ujian |
+1.  **Generate**: Siswa menekan tombol "Bayar via VA BTN". Sistem mengirim request ke API BTN dan menyimpan nomor VA 17-digit.
+2.  **Payment**: Siswa melakukan pembayaran melalui ATM/Mobile Banking BTN atau Bank lain.
+3.  **Verification**: 
+    *   **Manual**: Siswa/Admin menekan tombol "Cek Status" (Inquiry).
+    *   **Otomatis**: Bank BTN mengirimkan data pelunasan ke endpoint Callback aplikasi.
+4.  **Update**: Status pendaftaran siswa otomatis berubah menjadi "Success" dan fitur download Kartu Ujian terbuka.
 
 ---
 
-## ⚙️ Konfigurasi Dinamis
-
-Semua konfigurasi berikut dapat diubah langsung dari **Dashboard Super Admin** tanpa perlu mengubah kode:
-
-| Setting | Key | Default |
-|---|---|---|
-| Nama Aplikasi | `app_name` | PPDB Online |
-| Logo Aplikasi | `app_logo` | SVG Icon |
-| Deskripsi Meta | `meta_description` | Sistem PPDB Online... |
-| Teks Footer | `footer_copyright` | © 2026 Yayasan... |
-| Kontak WhatsApp | `contact_whatsapp`* | *(per unit)* |
-
-> \* Kontak WhatsApp diatur per jenjang di menu **Manajemen Jenjang**, bukan di pengaturan global.
-
----
-
-## 📝 Alur Pendaftaran Siswa
-
-```mermaid
-flowchart LR
-    A[Buat Akun] --> B[Isi Formulir]
-    B --> C[Bayar Formulir]
-    C --> D[Verifikasi Admin]
-    D --> E[Pilih Jadwal Ujian]
-    E --> F[Ujian]
-    F --> G[Pengumuman]
-    G -->|Lulus| H[Bayar Uang Masuk]
-    G -->|Tidak Lulus| I[Selesai]
-    H --> J[Daftar Ulang ✅]
-```
-
-1. **Registrasi** — Siswa membuat akun dan memilih unit tujuan (SMP/SMA/SMK)
-2. **Formulir** — Mengisi data diri lengkap (biodata, orang tua, asal sekolah, dll)
-3. **Pembayaran** — Upload bukti transfer biaya formulir, menunggu verifikasi admin
-4. **Jadwal Ujian** — Memilih sesi ujian yang tersedia setelah pembayaran diverifikasi
-5. **Kartu Ujian** — Download kartu ujian dalam format PDF
-6. **Pengumuman** — Cek status kelulusan & download SKL jika lulus
-7. **Daftar Ulang** — Bayar uang masuk sebelum deadline yang ditentukan
-
----
-
-## 🤝 Kontribusi
-
-Kontribusi sangat diterima! Silakan fork repository ini dan buat Pull Request.
-
-```bash
-# Fork & clone
-git clone https://gitlab.com/your-username/ppdb-app.git
-
-# Buat branch fitur
-git checkout -b feature/fitur-baru
-
-# Commit & push
-git commit -m "feat: tambah fitur baru"
-git push origin feature/fitur-baru
-
-# Buat Merge Request di GitLab
-```
-
-### Pedoman Kontribusi
-
-- Gunakan **conventional commits** (`feat:`, `fix:`, `docs:`, dll)
-- Pastikan kode lolos `php artisan test` sebelum submit
-- Ikuti style guide **Laravel Pint** (`./vendor/bin/pint`)
-
----
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan di bawah [MIT License](LICENSE) — bebas digunakan untuk keperluan pribadi maupun komersial.
+## 🧱 Tech Stack & Library
+- **Framework**: Laravel 13
+- **UI**: Tailwind CSS 4, Alpine.js
+- **Integrasi Bank**: BTN Legacy API (Signature SHA-256)
+- **PDF**: Barryvdh DomPDF
+- **Icons**: Lucide Icons & FontAwesome
 
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk kemajuan pendidikan Indonesia
+  Dibuat dengan ❤️ oleh <strong>Tim IT Yayasan</strong>
 </p>
