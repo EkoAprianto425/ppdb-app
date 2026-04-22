@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+        
+        $middleware->validateCsrfTokens(except: [
+            'api/btn/callback'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

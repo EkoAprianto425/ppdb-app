@@ -274,16 +274,17 @@ class RegistrationController extends Controller
                 // This logic depends on the specific BTN API response structure for inqVA
                 // Assuming $result['data']['status_pembayaran'] or similar
                 $rspData = $result['data'];
-                if (isset($rspData['status_bayar']) && $rspData['status_bayar'] == '1') {
+                if (isset($rspData['terbayar']) && $rspData['terbayar'] > 0) {
                     $payment->update([
                         'status' => Payment::STATUS_SUCCESS,
+                        'amount' => $rspData['terbayar'],
                         'verified_at' => now()
                     ]);
                     // Update registration if all fees paid, or just this one
                     if ($fee && $fee->sort_order == 1) {
                          $payment->registration->update(['payment_status' => 'success']);
                     }
-                    return back()->with('status', 'Pembayaran VA telah berhasil dilunasi!');
+                    return back()->with('status', 'Pembayaran VA sebesar Rp ' . number_format($rspData['terbayar'], 0, ',', '.') . ' telah berhasil dilunasi!');
                 }
                 
                 return back()->with('status', 'Status VA masih belum dibayar.');

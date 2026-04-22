@@ -124,9 +124,10 @@ class FinancialController extends Controller
             
             if ($result['status']) {
                 $rspData = $result['data'];
-                if (isset($rspData['status_bayar']) && $rspData['status_bayar'] == '1') {
+                if (isset($rspData['terbayar']) && $rspData['terbayar'] > 0) {
                     $payment->update([
                         'status' => \App\Models\Payment::STATUS_SUCCESS,
+                        'amount' => $rspData['terbayar'],
                         'verified_by' => auth()->id(),
                         'verified_at' => now(),
                         'admin_note' => 'Auto-verified by BTN VA Inquiry'
@@ -134,7 +135,7 @@ class FinancialController extends Controller
                     if ($fee && $fee->sort_order == 1) {
                          $payment->registration->update(['payment_status' => 'success']);
                     }
-                    return back()->with('status', 'Status VA: Sudah Dibayar. Sistem telah mengupdate status otomatis.');
+                    return back()->with('status', 'Status VA: Sudah Dibayar (Rp ' . number_format($rspData['terbayar'], 0, ',', '.') . '). Sistem telah mengupdate status otomatis.');
                 }
                 
                 return back()->with('status', 'Inquiry VA berhasil. Status: Belum Dibayar. (Respon API: ' . json_encode($rspData) . ')');
