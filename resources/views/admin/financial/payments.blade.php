@@ -54,9 +54,18 @@
                             {{ $payment->created_at->format('d M Y, H:i') }}
                         </td>
                         <td class="px-8 py-5 text-right">
-                            <button @click="$dispatch('open-modal', 'verify-{{ $payment->id }}')" class="px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary text-[10px] font-bold uppercase tracking-widest hover:text-white transition-all">
-                                Verifikasi
-                            </button>
+                            @if($payment->payment_method === 'va')
+                                <form action="{{ route('admin.financial.check-va', $payment) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-all">
+                                        Cek Status VA
+                                    </button>
+                                </form>
+                            @else
+                                <button @click="$dispatch('open-modal', 'verify-{{ $payment->id }}')" class="px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary text-[10px] font-bold uppercase tracking-widest hover:text-white transition-all">
+                                    Verifikasi Bukti
+                                </button>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -67,6 +76,7 @@
 
     {{-- Move Modals outside table for correct stacking context --}}
     @foreach($payments as $payment)
+        @if($payment->payment_method !== 'va')
         {{-- Modal Verify --}}
         <div x-data="{ open: false }" @open-modal.window="if($event.detail === 'verify-{{ $payment->id }}') open = true" x-show="open" x-cloak class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl text-left">
             <div @click.away="open = false" 
@@ -159,6 +169,7 @@
                 </div>
             </div>
         </div>
+        @endif
     @endforeach
 </div>
 @endsection

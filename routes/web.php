@@ -26,7 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/administrasi', [RegistrationController::class, 'financialIndex'])->name('pendaftaran.financial');
     
     // Student Payment & Exam
-    Route::post('/payment/upload', [RegistrationController::class, 'uploadPayment'])->name('pendaftaran.payment.upload');
+    Route::post('/payment/create-va', [RegistrationController::class, 'createVaPayment'])->name('pendaftaran.payment.create-va');
+    Route::post('/payment/check-va', [RegistrationController::class, 'checkVaStatus'])->name('pendaftaran.payment.check-va');
     Route::get('/exam', [RegistrationController::class, 'examIndex'])->name('pendaftaran.exam');
     Route::post('/exam/select', [RegistrationController::class, 'selectExam'])->name('pendaftaran.exam.select');
     Route::get('/exam/card', [RegistrationController::class, 'downloadExamCard'])->name('pendaftaran.exam-card');
@@ -86,6 +87,7 @@ Route::middleware('auth')->group(function () {
             // Payment Verification
             Route::get('/payments', [\App\Http\Controllers\Admin\FinancialController::class, 'indexPayments'])->name('financial.payments');
             Route::post('/payments/{payment}/verify', [\App\Http\Controllers\Admin\FinancialController::class, 'verifyPayment'])->name('financial.verify');
+            Route::post('/payments/{payment}/check-va', [\App\Http\Controllers\Admin\FinancialController::class, 'checkVaStatus'])->name('financial.check-va');
         });
     });
 });

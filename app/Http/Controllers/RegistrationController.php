@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Registration;
 use App\Models\EducationalLevel;
 use App\Models\AdministrativeFee;
+use App\Models\Payment;
+use App\Services\BtnService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -152,51 +154,144 @@ class RegistrationController extends Controller
         return redirect()->route('pendaftaran.index')->with('status', 'Pembaruan formulir berhasil disimpan!');
     }
 
-    public function uploadPayment(Request $request)
+    public function createVaPayment(Request $request, BtnService $btnService)
     {
+        $request->validate([
+            'fee_id' => 'required|exists:administrative_fees,id',
+        ]);
+
+        $registration = Auth::user()->registration;
+        $fee = AdministrativeFee::findOrFail($request->fee_id);
+
+        // Cek jika sudah ada VA pending untuk fee ini
+        $existingPayment = $registration->payments()
+            ->where('fee_type', $fee->name)
+            ->where('status', Payment::STATUS_PENDING)
+            ->first();
+
+        if ($existingPayment) {
+            return back()->with('status', 'Anda sudah memiliki VA yang belum dibayar untuk ' . $fee->name);
+        }
+
+        // Generate VA Data
+        $ref = str_pad($registration->id . date('ymd'), 10, '0', STR_PAD_LEFT);
+        
+        $va_prefix = "9" . config('btn.kode_institusi', '4842');
+        $tgl = date('ymd');
+        $va_daftar = str_pad($registration->id, 4, '0', STR_PAD_LEFT);
+        
+        $mao_bayar = $fee->sort_order;
+        if ($mao_bayar == 1) {
+            $kode_adm = "01";
+            $flag = "F";
+        } else {
+            $kode_adm = str_pad($fee->sort_order, 2, '0', STR_PAD_LEFT);
+            $flag = "P";
+        }
+
+        $no_va = $va_prefix . $tgl . $va_daftar . $kode_adm;
+
+        $educational_level_id = Auth::user()->educational_level_id;
+        $noid_base = $educational_level_id . Auth::id();
+        $no_id = str_pad($noid_base, 7, '0', STR_PAD_LEFT) . $kode_adm;
+
+        $data = [
+            'id_calsis'     => Auth::id(),
+            'ref'           => $ref,
+            'va'            => $no_va,
+            'nama_siswa'    => Auth::user()->full_name ?? Auth::user()->name,
+            'jenis_bayar'   => $fee->name,
+            'no_urut'       => $fee->sort_order,
+            'no_id'         => $no_id,
+            'tagihan'       => (string) (int) $fee->amount,
+            'flag'          => $flag
+        ];
+
         try {
-            // Validasi input selain file dulu
-            $request->validate([
-                'fee_type'      => 'required|string',
-                'amount'        => 'required|numeric',
-            ]);
-
-            $registration = Auth::user()->registration;
-
-            if (!isset($_FILES['payment_proof']) || $_FILES['payment_proof']['error'] !== UPLOAD_ERR_OK) {
-                return back()->with('error', 'Gagal mengunggah file. Kode Error: ' . ($_FILES['payment_proof']['error'] ?? 'No File'));
-            }
-
-            $tmpPath = $_FILES['payment_proof']['tmp_name'];
-            $originalName = $_FILES['payment_proof']['name'];
-            $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+            $result = $btnService->createVA($data);
             
-            // Tentukan lokasi penyimpanan absolut
-            $storageDir = storage_path('app/public/payments');
-            if (!file_exists($storageDir)) {
-                mkdir($storageDir, 0755, true);
-            }
-
-            $filename = time() . '_' . uniqid() . '.' . $extension;
-            $destination = $storageDir . DIRECTORY_SEPARATOR . $filename;
-            $dbPath = 'payments/' . $filename;
-
-            // Pindahkan file secara manual (Native PHP)
-            if (move_uploaded_file($tmpPath, $destination)) {
+            if ($result['status']) {
                 $registration->payments()->create([
-                    'fee_type' => $request->fee_type,
-                    'amount'   => $request->amount,
-                    'payment_proof' => $dbPath,
-                    'status'   => 'pending',
+                    'fee_type' => $fee->name,
+                    'amount'   => $fee->amount,
+                    'va_number' => $no_va,
+                    'va_ref' => $ref,
+                    'payment_method' => Payment::METHOD_VA,
+                    'status'   => Payment::STATUS_PENDING,
                 ]);
-
-                return back()->with('status', 'Bukti pembayaran berhasil diunggah secara langsung.');
+                return back()->with('status', 'Virtual Account berhasil dibuat. Silakan lakukan pembayaran.');
             } else {
-                return back()->with('error', 'Gagal memindahkan file ke direktori tujuan: ' . $storageDir);
+                return back()->with('error', 'Gagal membuat VA BTN: ' . ($result['messages'] ?? 'Unknown Error'));
             }
-
         } catch (\Throwable $e) {
-            return back()->with('error', 'Diagnosa: ' . $e->getMessage() . ' di ' . $e->getFile() . ':' . $e->getLine());
+            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
+    }
+
+    public function checkVaStatus(Request $request, BtnService $btnService)
+    {
+        $request->validate([
+            'payment_id' => 'required|exists:payments,id',
+        ]);
+
+        $payment = Payment::findOrFail($request->payment_id);
+        
+        if ($payment->registration->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($payment->status === Payment::STATUS_SUCCESS) {
+            return back()->with('status', 'Pembayaran sudah lunas.');
+        }
+
+        $fee = AdministrativeFee::where('name', $payment->fee_type)
+            ->where('educational_level_id', Auth::user()->educational_level_id)
+            ->first();
+            
+        $kode_adm = str_pad($fee->sort_order ?? 1, 2, '0', STR_PAD_LEFT);
+        $flag = ($fee && $fee->sort_order == 1) ? "F" : "P";
+
+        $noid_base = Auth::user()->educational_level_id . Auth::id();
+        $no_id = str_pad($noid_base, 7, '0', STR_PAD_LEFT) . $kode_adm;
+
+        $data = [
+            'id_calsis'     => Auth::id(),
+            'ref'           => $payment->va_ref,
+            'va'            => $payment->va_number,
+            'nama_siswa'    => Auth::user()->full_name ?? Auth::user()->name,
+            'jenis_bayar'   => $payment->fee_type,
+            'no_urut'       => $fee->sort_order ?? 1,
+            'no_id'         => $no_id,
+            'tagihan'       => (string) (int) $payment->amount,
+            'flag'          => $flag
+        ];
+
+        try {
+            $result = $btnService->inquiryVA($data);
+            
+            if ($result['status']) {
+                // Update status if API indicates payment is completed
+                // This logic depends on the specific BTN API response structure for inqVA
+                // Assuming $result['data']['status_pembayaran'] or similar
+                $rspData = $result['data'];
+                if (isset($rspData['status_bayar']) && $rspData['status_bayar'] == '1') {
+                    $payment->update([
+                        'status' => Payment::STATUS_SUCCESS,
+                        'verified_at' => now()
+                    ]);
+                    // Update registration if all fees paid, or just this one
+                    if ($fee && $fee->sort_order == 1) {
+                         $payment->registration->update(['payment_status' => 'success']);
+                    }
+                    return back()->with('status', 'Pembayaran VA telah berhasil dilunasi!');
+                }
+                
+                return back()->with('status', 'Status VA masih belum dibayar.');
+            } else {
+                return back()->with('error', 'Inquiry gagal: ' . ($result['messages'] ?? 'Unknown Error'));
+            }
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
     }
 

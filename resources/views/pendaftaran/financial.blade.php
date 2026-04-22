@@ -129,10 +129,13 @@
                                                     Batas: {{ \Carbon\Carbon::parse($registration->reregistration_deadline)->translatedFormat('d M Y') }}
                                                 </span>
                                             @endif
-                                            <button @click="$dispatch('open-modal', 'modal-pay-{{ $fee->id }}')" 
-                                                    class="px-4 py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                                                Bayar Sekarang
-                                            </button>
+                                            <form action="{{ route('pendaftaran.payment.create-va') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="fee_id" value="{{ $fee->id }}">
+                                                <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                                                    Bayar via VA BTN
+                                                </button>
+                                            </form>
                                         </div>
                                     @else
                                         <span class="text-[9px] themed-text-muted italic opacity-50">Menunggu Kelulusan</span>
@@ -142,7 +145,16 @@
                                     <span class="text-[10px] themed-text-muted italic opacity-50">Menunggu Tahap Sebelumnya</span>
                                 @endif
                             @elseif($fee->status === 'pending')
-                                <span class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">Diverifikasi Admin</span>
+                                <div class="flex flex-col items-end gap-1.5">
+                                    <span class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">VA: {{ $fee->payment->va_number }}</span>
+                                    <form action="{{ route('pendaftaran.payment.check-va') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="payment_id" value="{{ $fee->payment->id }}">
+                                        <button type="submit" class="px-3 py-1.5 rounded-lg btn-soft-secondary text-[9px] font-bold uppercase tracking-widest">
+                                            Cek Status
+                                        </button>
+                                    </form>
+                                </div>
                                 @php $canPayNext = false; @endphp
                             @else
                                 <div class="flex justify-end">
@@ -159,44 +171,6 @@
     </div>
 </div>
 
-{{-- Local Modals for Specific Fees --}}
-@foreach($feeData as $fee)
-    @if($fee->status === 'none' || $fee->status === 'failed')
-    <div x-data="{ open: false }" @open-modal.window="if($event.detail === 'modal-pay-{{ $fee->id }}') open = true" x-show="open" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-        <div @click.away="open = false" class="card-glass rounded-3xl p-8 w-full max-w-lg shadow-2xl scale-in-center">
-            <h3 class="text-xl font-bold themed-text mb-2">Unggah Bukti: {{ $fee->name }}</h3>
-            <p class="text-xs themed-text-muted mb-6">Nominal yang harus dibayarkan: <span class="text-white font-black">Rp {{ number_format($fee->amount, 0, ',', '.') }}</span></p>
-            
-            <form action="{{ route('pendaftaran.payment.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                @csrf
-                <input type="hidden" name="fee_type" value="{{ $fee->name }}">
-                <input type="hidden" name="amount" value="{{ $fee->amount }}">
-
-                <div class="relative group">
-                    <input type="file" name="payment_proof" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                    <div class="p-8 border-2 border-dashed border-white/10 rounded-2xl group-hover:border-primary/50 group-hover:bg-primary/5 transition-all flex flex-col items-center justify-center text-center">
-                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        </div>
-                        <p class="text-sm themed-text font-medium">Klik atau tarik foto ke sini</p>
-                        <p class="text-[10px] themed-text-muted mt-1 uppercase">Format: PNG, JPG (Maks. 2MB)</p>
-                    </div>
-                </div>
-
-                <div class="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                    <p class="text-[10px] text-orange-400 leading-relaxed font-bold uppercase tracking-wide">
-                        Transfer ke Rekening BCA: 123-456-7890 (A/N YAYASAN PPDB)
-                    </p>
-                </div>
-
-                <div class="flex gap-4">
-                    <button type="button" @click="open = false" class="flex-1 py-3 rounded-xl btn-soft-secondary font-bold text-xs uppercase tracking-widest">Batal</button>
-                    <button type="submit" class="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 shadow-primary/20 active:scale-95 transition-all">Kirim Bukti</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @endif
-@endforeach
+{{-- No Modals needed anymore as payment is direct via VA generation --}}
 
 @endsection

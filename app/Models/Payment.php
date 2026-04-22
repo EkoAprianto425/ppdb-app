@@ -11,6 +11,9 @@ class Payment extends Model
         'registration_id',
         'fee_type',
         'amount',
+        'va_number',
+        'va_ref',
+        'payment_method',
         'payment_proof',
         'status',
         'admin_note',
@@ -21,6 +24,9 @@ class Payment extends Model
     const STATUS_PENDING = 'pending';
     const STATUS_SUCCESS = 'success';
     const STATUS_FAILED = 'failed';
+
+    const METHOD_VA = 'va';
+    const METHOD_MANUAL = 'manual';
 
     public function registration(): BelongsTo
     {
