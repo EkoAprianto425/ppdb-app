@@ -15,6 +15,7 @@ class StudentManagementController extends Controller
         
         // Base Query: Start from User to include "Tamu" (registered only)
         $query = User::where('role', User::ROLE_SISWA)
+            ->whereHas('registration')
             ->with(['registration.payments', 'registration.examSchedule', 'educationalLevel', 'registration.registrationWave']);
 
         // Filter Jenjang (Tujuan) - Terutama untuk Super Admin
@@ -52,6 +53,7 @@ class StudentManagementController extends Controller
     {
         $user = auth()->user();
         $query = User::where('role', User::ROLE_SISWA)
+            ->whereHas('registration')
             ->with(['registration.payments', 'registration.examSchedule', 'educationalLevel', 'registration.registrationWave']);
 
         if ($request->filled('level_id')) {
@@ -252,7 +254,20 @@ class StudentManagementController extends Controller
     public function graduationIndex(Request $request)
     {
         $user = auth()->user();
-        $query = Registration::with('user', 'academicYear', 'registrationWave');
+        $query = Registration::with('user', 'academicYear', 'registrationWave', 'user.educationalLevel')
+            ->where('payment_status', 'success');
+
+        // Filter Status Kelulusan (proses, lulus, tidak_lulus)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter Jenjang (Super Admin)
+        if ($request->filled('level_id')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('educational_level_id', $request->level_id);
+            });
+        }
 
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
@@ -262,8 +277,9 @@ class StudentManagementController extends Controller
         }
 
         $registrations = $query->latest()->get();
+        $levels = \App\Models\EducationalLevel::orderBy('sort_order')->get();
 
-        return view('admin.students.graduation', compact('registrations'));
+        return view('admin.students.graduation', compact('registrations', 'levels'));
     }
 
     public function updateStatus(Request $request, Registration $registration)

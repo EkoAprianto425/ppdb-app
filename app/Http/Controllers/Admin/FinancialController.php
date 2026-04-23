@@ -54,7 +54,9 @@ class FinancialController extends Controller
     public function indexPayments(Request $request)
     {
         $status = $request->get('status', 'pending');
-        $query = \App\Models\Payment::with('registration.user')->where('status', $status);
+        $query = \App\Models\Payment::with('registration.user')
+            ->whereHas('registration')
+            ->where('status', $status);
 
         $user = auth()->user();
         if (!$user->isSuperAdmin()) {

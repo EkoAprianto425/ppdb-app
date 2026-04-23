@@ -5,19 +5,56 @@
 @section('page-subtitle', 'Tentukan status kelulusan peserta didik dan batas waktu pelunasan daftar ulang')
 
 @section('content')
+{{-- Filter Section --}}
+<div class="mb-6 card-glass p-6 rounded-2xl shadow-xl">
+    <form action="{{ route('admin.graduation.index') }}" method="GET" class="flex flex-wrap gap-6 items-end">
+        @if(auth()->user()->isSuperAdmin())
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-[10px] font-bold themed-text-muted uppercase tracking-widest mb-2">Jenjang Tujuan</label>
+            <select name="level_id" class="w-full themed-input rounded-xl px-4 py-2.5 text-xs themed-text focus:ring-primary appearance-none">
+                <option value="" class="text-slate-900">Semua Jenjang</option>
+                @foreach($levels as $lvl)
+                    <option value="{{ $lvl->id }}" {{ request('level_id') == $lvl->id ? 'selected' : '' }} class="text-slate-900">{{ $lvl->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-[10px] font-bold themed-text-muted uppercase tracking-widest mb-2">Status Kelulusan</label>
+            <select name="status" class="w-full themed-input rounded-xl px-4 py-2.5 text-xs themed-text focus:ring-primary appearance-none">
+                <option value="" class="text-slate-900">Semua Status</option>
+                <option value="proses" {{ request('status') == 'proses' ? 'selected' : '' }} class="text-slate-900">Proses</option>
+                <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }} class="text-slate-900">Lulus</option>
+                <option value="tidak_lulus" {{ request('status') == 'tidak_lulus' ? 'selected' : '' }} class="text-slate-900">Gagal (Tidak Lulus)</option>
+            </select>
+        </div>
+        
+        <div class="flex gap-3">
+            <button type="submit" class="px-8 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20">
+                Filter Data
+            </button>
+            <a href="{{ route('admin.graduation.index') }}" class="px-8 py-2.5 btn-soft-secondary rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
 <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
     <div class="overflow-x-auto">
         <table class="w-full text-left datatable" id="graduation-table">
             <thead>
                 <tr class="border-b bg-black/10" :style="'border-color: var(--border-color)'">
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Siswa</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tujuan</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jadwal Ujian</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status Saat Ini</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest" data-dt-order="disable">Tindakan Kelulusan</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($registrations->where('payment_status', 'success') as $reg)
+                @foreach($registrations as $reg)
                 <tr class="hover:bg-primary/5 transition-colors group">
                     <td class="px-8 py-5">
                         <div class="flex items-center gap-4">
@@ -29,6 +66,11 @@
                                 <p class="text-[10px] themed-text-muted">Gel. {{ $reg->registrationWave->name ?? 'Belum Dipilih' }} | ID: #{{ str_pad($reg->id, 4, '0', STR_PAD_LEFT) }}</p>
                             </div>
                         </div>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
+                            {{ $reg->user->educationalLevel->name ?? '-' }}
+                        </span>
                     </td>
                     <td class="px-8 py-5 text-center">
                         @if($reg->examSchedule)
@@ -50,7 +92,7 @@
                     <td class="px-8 py-5">
                         {{-- Form Aksi --}}
                         <div x-data="{ 
-                            showDeadline: false
+                            showDeadline: {{ $reg->status === 'lulus' ? 'true' : 'false' }}
                         }">
                             <form action="{{ route('admin.students.update-status', $reg) }}" method="POST" class="flex flex-col gap-2">
                                 @csrf
@@ -58,11 +100,11 @@
                                     <div class="flex bg-black/20 rounded-lg p-1">
                                         <button type="button" 
                                             @click="showDeadline = true"
-                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-emerald-500 hover:bg-emerald-500/10">Lulus</button>
+                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-emerald-500 hover:bg-emerald-500/10 {{ $reg->status === 'lulus' ? 'bg-emerald-500/20' : '' }}">Lulus</button>
                                         <button type="submit" name="status" value="tidak_lulus"
-                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-rose-500 hover:bg-rose-500/10">Gagal</button>
+                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-rose-500 hover:bg-rose-500/10 {{ $reg->status === 'tidak_lulus' ? 'bg-rose-500/20' : '' }}">Gagal</button>
                                         <button type="submit" name="status" value="proses"
-                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-amber-500 hover:bg-amber-500/10">Reset</button>
+                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-amber-500 hover:bg-amber-500/10 {{ $reg->status === 'proses' ? 'bg-amber-500/20' : '' }}">Reset</button>
                                     </div>
                                 </div>
                                 

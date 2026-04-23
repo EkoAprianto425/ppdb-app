@@ -11,6 +11,7 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $query = \App\Models\User::where('role', \App\Models\User::ROLE_SISWA)
+            ->whereHas('registration')
             ->with(['registration.payments', 'educationalLevel']);
 
         if (!$user->isSuperAdmin()) {
