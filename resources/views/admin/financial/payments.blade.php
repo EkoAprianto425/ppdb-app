@@ -34,11 +34,11 @@
                         <td class="px-8 py-5">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                    {{ strtoupper(substr($payment->registration->user->name, 0, 1)) }}
+                                    {{ strtoupper(substr($payment->registration->user->name ?? 'S', 0, 1)) }}
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $payment->registration->user->full_name }}</p>
-                                    <p class="text-[10px] themed-text-muted">{{ $payment->registration->user->getUnit() }}</p>
+                                    <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $payment->registration->user->full_name ?? $payment->registration->user->name ?? 'Siswa Terhapus' }}</p>
+                                    <p class="text-[10px] themed-text-muted">{{ $payment->registration->user->getUnit() ?? '-' }}</p>
                                 </div>
                             </div>
                         </td>
