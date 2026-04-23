@@ -66,9 +66,17 @@ class FinancialController extends Controller
             });
         }
 
-        $payments = $query->latest()->get();
+        // Filter by Unit/Jenjang
+        if ($request->filled('level_id')) {
+            $query->whereHas('registration.user', function($q) use ($request) {
+                $q->where('educational_level_id', $request->level_id);
+            });
+        }
 
-        return view('admin.financial.payments', compact('payments', 'status'));
+        $payments = $query->latest()->get();
+        $levels = EducationalLevel::all();
+
+        return view('admin.financial.payments', compact('payments', 'status', 'levels'));
     }
 
     public function verifyPayment(Request $request, \App\Models\Payment $payment)

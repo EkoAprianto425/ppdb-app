@@ -6,14 +6,38 @@
 
 @section('content')
 <div class="space-y-6">
-    {{-- Filter Tabs --}}
-    <div class="flex gap-4">
-        @foreach(['pending' => 'Menunggu', 'success' => 'Berhasil', 'failed' => 'Ditolak'] as $val => $label)
-            <a href="{{ route('admin.financial.payments', ['status' => $val]) }}" 
-               class="px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all {{ $status == $val ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-card-bg themed-text-muted hover:bg-primary/5 border border-white/5' }}">
-                {{ $label }}
-            </a>
-        @endforeach
+    {{-- Filter Tabs & Unit Filter --}}
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="flex gap-4">
+            @foreach(['pending' => 'Menunggu', 'success' => 'Berhasil', 'failed' => 'Ditolak'] as $val => $label)
+                <a href="{{ route('admin.financial.payments', ['status' => $val, 'level_id' => request('level_id')]) }}" 
+                class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all {{ $status == $val ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-card-bg themed-text-muted hover:bg-primary/5 border border-white/5' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
+        </div>
+
+        <form action="{{ route('admin.financial.payments') }}" method="GET" class="flex items-end gap-3 min-w-[300px]">
+            <input type="hidden" name="status" value="{{ $status }}">
+            <div class="flex-1">
+                <label class="block text-[10px] font-bold themed-text-muted uppercase tracking-widest mb-2 px-1">Filter Unit</label>
+                <select name="level_id" class="w-full themed-input rounded-xl px-4 py-2.5 text-xs themed-text focus:ring-primary appearance-none border border-white/5">
+                    <option value="" class="text-slate-900">Semua Unit</option>
+                    @foreach($levels as $level)
+                        <option value="{{ $level->id }}" {{ request('level_id') == $level->id ? 'selected' : '' }} class="text-slate-900">{{ $level->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                <span>Filter</span>
+            </button>
+            @if(request('level_id'))
+                <a href="{{ route('admin.financial.payments', ['status' => $status]) }}" class="px-4 py-2.5 btn-soft-secondary rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center">
+                    Reset
+                </a>
+            @endif
+        </form>
     </div>
 
     <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
@@ -22,6 +46,7 @@
                 <thead>
                     <tr class="border-b" :style="'border-color: var(--border-color)'">
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Siswa</th>
+                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tujuan</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tipe</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jumlah</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Waktu Upload</th>
@@ -38,9 +63,14 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $payment->registration->user->full_name ?? $payment->registration->user->name ?? 'Siswa Terhapus' }}</p>
-                                    <p class="text-[10px] themed-text-muted">{{ $payment->registration->user->getUnit() ?? '-' }}</p>
+                                    <p class="text-[10px] themed-text-muted">{{ $payment->registration->user->email ?? '-' }}</p>
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-8 py-5 text-center">
+                            <span class="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold themed-text">
+                                {{ $payment->registration->user->educationalLevel->name ?? '-' }}
+                            </span>
                         </td>
                         <td class="px-8 py-5 text-center">
                             <span class="text-[10px] font-black uppercase tracking-widest {{ $payment->fee_type == 'formulir' ? 'text-indigo-400' : 'text-emerald-400' }}">
