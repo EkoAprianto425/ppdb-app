@@ -18,9 +18,14 @@ class DashboardController extends Controller
             $query->whereIn('educational_level_id', $levelIds);
         }
 
-        $students = $query->get();
+        $students = $query->latest()->get();
         $fees = \App\Models\AdministrativeFee::all()->groupBy('educational_level_id');
         $levels = \App\Models\EducationalLevel::all();
+
+        $globalTamu = 0;
+        $globalFormulir = 0;
+        $globalLulus = 0;
+        $globalDaftar = 0;
 
         $statsByLevel = [];
         foreach ($levels as $level) {
@@ -39,13 +44,14 @@ class DashboardController extends Controller
 
             foreach ($levelStudents as $student) {
                 $status = $this->calculateStatus($student, $fees);
-                if ($status === 'tamu') $tamu++;
-                elseif ($status === 'Formulir') $formulir++;
-                elseif ($status === 'Lulus') $lulus++;
-                elseif ($status === 'daftar') $daftar++;
+                if ($status === 'tamu') { $tamu++; $globalTamu++; }
+                elseif ($status === 'Formulir') { $formulir++; $globalFormulir++; }
+                elseif ($status === 'Lulus') { $lulus++; $globalLulus++; }
+                elseif ($status === 'daftar') { $daftar++; $globalDaftar++; }
             }
 
             $statsByLevel[] = [
+                'id' => $level->id,
                 'name' => $level->name,
                 'tamu' => $tamu,
                 'formulir' => $formulir,
@@ -55,9 +61,59 @@ class DashboardController extends Controller
             ];
         }
 
+        // 4. Wave Stats (Detailed)
+        $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
+        $waves = \App\Models\RegistrationWave::where('academic_year_id', $activeYear?->id)->get();
+        $detailedWaveStats = [
+            'Tamu' => [],
+            'Formulir' => [],
+            'Lulus' => [],
+            'Daftar' => []
+        ];
+
+        foreach ($waves as $wave) {
+            foreach ($levels as $level) {
+                if (!$user->isSuperAdmin()) {
+                    $managedIds = $user->getManagedLevelIds();
+                    if (!in_array($level->id, $managedIds)) continue;
+                }
+
+                $studentIdsInWave = \App\Models\Registration::where('registration_wave_id', $wave->id)
+                    ->pluck('user_id')
+                    ->toArray();
+                
+                $levelWaveStudents = $students->where('educational_level_id', $level->id)
+                    ->whereIn('id', $studentIdsInWave);
+
+                $tamu = 0; $formulir = 0; $lulus = 0; $daftar = 0;
+                foreach ($levelWaveStudents as $student) {
+                    $status = $this->calculateStatus($student, $fees);
+                    if ($status === 'tamu') $tamu++;
+                    elseif ($status === 'Formulir') $formulir++;
+                    elseif ($status === 'Lulus') $lulus++;
+                    elseif ($status === 'daftar') $daftar++;
+                }
+
+                $detailedWaveStats['Tamu'][$wave->name][$level->name] = $tamu;
+                $detailedWaveStats['Formulir'][$wave->name][$level->name] = $formulir;
+                $detailedWaveStats['Lulus'][$wave->name][$level->name] = $lulus;
+                $detailedWaveStats['Daftar'][$wave->name][$level->name] = $daftar;
+            }
+        }
+
         $stats = [
+            'summary' => [
+                'tamu' => $globalTamu,
+                'formulir' => $globalFormulir,
+                'lulus' => $globalLulus,
+                'daftar' => $globalDaftar,
+                'total' => $students->count(),
+            ],
             'unit' => $user->isSuperAdmin() ? 'Global' : $user->getUnit(),
-            'levels' => $statsByLevel
+            'levels' => $statsByLevel,
+            'wave_names' => $waves->pluck('name')->toArray(),
+            'detailed_waves' => $detailedWaveStats,
+            'recent_students' => $students->take(5)
         ];
 
         return view('admin.dashboard', compact('stats'));
