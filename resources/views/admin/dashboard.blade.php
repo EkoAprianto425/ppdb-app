@@ -7,54 +7,65 @@
 @section('content')
 <div class="space-y-8">
     {{-- Header Stats --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {{-- Total --}}
-        <div class="card-glass rounded-3xl p-8 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-all duration-500"></div>
-            <p class="text-[10px] font-bold themed-text-muted uppercase tracking-[0.2em] mb-4">Total Pendaftar</p>
-            <div class="flex items-end gap-3">
-                <h3 class="text-5xl font-black themed-text tracking-tighter">{{ $stats['total'] }}</h3>
-                <span class="text-xs themed-text-muted mb-2 font-bold tracking-widest uppercase">Siswa</span>
+    {{-- Header Stats --}}
+    {{-- Stats by Level --}}
+    @foreach($stats['levels'] as $level)
+    <div class="space-y-6">
+        <div class="flex items-center gap-4">
+            <div class="px-4 py-1 rounded-full bg-primary/10 border border-primary/20">
+                <h2 class="text-sm font-black text-primary uppercase tracking-widest">Unit {{ $level['name'] }}</h2>
             </div>
-            <div class="mt-4 flex items-center gap-2">
-                <div class="w-full h-1 bg-primary/10 rounded-full overflow-hidden">
-                    <div class="h-full bg-primary" :style="'width: 100%'"></div>
-                </div>
-            </div>
+            <div class="h-px flex-1 bg-white/5"></div>
+            <span class="text-[10px] themed-text-muted font-bold uppercase tracking-[0.2em]">{{ $level['total'] }} Pendaftar</span>
         </div>
-
-        {{-- Pending Payment --}}
-        <div class="card-glass rounded-3xl p-8 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 group-hover:bg-amber-500/10 transition-all duration-500"></div>
-            <p class="text-[10px] font-bold themed-text-muted uppercase tracking-[0.2em] mb-4">Menunggu Verifikasi</p>
-            <div class="flex items-end gap-3">
-                <h3 class="text-5xl font-black themed-text tracking-tighter text-amber-500">{{ $stats['pending'] }}</h3>
-                <span class="text-xs themed-text-muted mb-2 font-bold tracking-widest uppercase">Siswa</span>
-            </div>
-            <div class="mt-4 flex items-center gap-2">
-                <div class="w-full h-1 bg-amber-500/10 rounded-full overflow-hidden">
-                    @php $pendingPerc = $stats['total'] > 0 ? ($stats['pending'] / $stats['total']) * 100 : 0 @endphp
-                    <div class="h-full bg-amber-500" style="width: {{ $pendingPerc }}%"></div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {{-- Tamu --}}
+            <div class="card-glass rounded-3xl p-6 relative overflow-hidden group border border-white/5 hover:border-white/10 transition-all">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-slate-500/5 rounded-full -mr-12 -mt-12 group-hover:bg-slate-500/10 transition-all"></div>
+                <p class="text-[9px] font-bold themed-text-muted uppercase tracking-widest mb-4">Tamu</p>
+                <div class="flex items-end gap-2">
+                    <h3 class="text-4xl font-black themed-text tracking-tighter">{{ $level['tamu'] }}</h3>
+                    <span class="text-[10px] themed-text-muted mb-1 font-bold uppercase">Siswa</span>
                 </div>
+                <p class="text-[8px] themed-text-muted mt-3 uppercase tracking-widest italic opacity-60">Baru Membuat Akun</p>
             </div>
-        </div>
 
-        {{-- Verified --}}
-        <div class="card-glass rounded-3xl p-8 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-all duration-500"></div>
-            <p class="text-[10px] font-bold themed-text-muted uppercase tracking-[0.2em] mb-4">Terverifikasi</p>
-            <div class="flex items-end gap-3">
-                <h3 class="text-5xl font-black themed-text tracking-tighter text-emerald-500">{{ $stats['success'] }}</h3>
-                <span class="text-xs themed-text-muted mb-2 font-bold tracking-widest uppercase">Siswa</span>
-            </div>
-            <div class="mt-4 flex items-center gap-2">
-                <div class="w-full h-1 bg-emerald-500/10 rounded-full overflow-hidden">
-                    @php $successPerc = $stats['total'] > 0 ? ($stats['success'] / $stats['total']) * 100 : 0 @endphp
-                    <div class="h-full bg-emerald-500" style="width: {{ $successPerc }}%"></div>
+            {{-- Formulir --}}
+            <div class="card-glass rounded-3xl p-6 relative overflow-hidden group border border-white/5 hover:border-white/10 transition-all">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-12 -mt-12 group-hover:bg-indigo-500/10 transition-all"></div>
+                <p class="text-[9px] font-bold themed-text-muted uppercase tracking-widest mb-4">Formulir</p>
+                <div class="flex items-end gap-2">
+                    <h3 class="text-4xl font-black text-indigo-400 tracking-tighter">{{ $level['formulir'] }}</h3>
+                    <span class="text-[10px] themed-text-muted mb-1 font-bold uppercase">Siswa</span>
                 </div>
+                <p class="text-[8px] themed-text-muted mt-3 uppercase tracking-widest italic opacity-60">Bayar Formulir</p>
+            </div>
+
+            {{-- Lulus --}}
+            <div class="card-glass rounded-3xl p-6 relative overflow-hidden group border border-white/5 hover:border-white/10 transition-all">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full -mr-12 -mt-12 group-hover:bg-amber-500/10 transition-all"></div>
+                <p class="text-[9px] font-bold themed-text-muted uppercase tracking-widest mb-4">Lulus</p>
+                <div class="flex items-end gap-2">
+                    <h3 class="text-4xl font-black text-amber-500 tracking-tighter">{{ $level['lulus'] }}</h3>
+                    <span class="text-[10px] themed-text-muted mb-1 font-bold uppercase">Siswa</span>
+                </div>
+                <p class="text-[8px] themed-text-muted mt-3 uppercase tracking-widest italic opacity-60">Dinyatakan Lulus</p>
+            </div>
+
+            {{-- Daftar --}}
+            <div class="card-glass rounded-3xl p-6 relative overflow-hidden group border border-white/5 hover:border-white/10 transition-all">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12 group-hover:bg-emerald-500/10 transition-all"></div>
+                <p class="text-[9px] font-bold themed-text-muted uppercase tracking-widest mb-4">Daftar</p>
+                <div class="flex items-end gap-2">
+                    <h3 class="text-4xl font-black text-emerald-500 tracking-tighter">{{ $level['daftar'] }}</h3>
+                    <span class="text-[10px] themed-text-muted mb-1 font-bold uppercase">Siswa</span>
+                </div>
+                <p class="text-[8px] themed-text-muted mt-3 uppercase tracking-widest italic opacity-60">Selesai Daftar Ulang</p>
             </div>
         </div>
     </div>
+    @endforeach
 
     {{-- Quick Actions & Recently Registered --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
