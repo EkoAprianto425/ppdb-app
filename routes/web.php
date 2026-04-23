@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
 
         // Unit Admin & Super Admin Management
         Route::middleware(['role:admin_smp,admin_sma,admin_smk,super_admin'])->group(function () {
+            Route::get('/students/export', [\App\Http\Controllers\Admin\StudentManagementController::class, 'exportExcel'])->name('students.export');
             Route::get('/students', [\App\Http\Controllers\Admin\StudentManagementController::class, 'index'])->name('students.index');
             Route::get('/students/{registration}', [\App\Http\Controllers\Admin\StudentManagementController::class, 'show'])->name('students.show');
             Route::get('/students/{registration}/edit', [\App\Http\Controllers\Admin\StudentManagementController::class, 'edit'])->name('students.edit');

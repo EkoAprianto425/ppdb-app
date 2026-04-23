@@ -12,18 +12,173 @@ class StudentManagementController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = Registration::with('user', 'academicYear', 'registrationWave');
+        
+        // Base Query: Start from User to include "Tamu" (registered only)
+        $query = User::where('role', User::ROLE_SISWA)
+            ->with(['registration.payments', 'registration.examSchedule', 'educationalLevel', 'registration.registrationWave']);
 
+        // Filter Jenjang (Tujuan) - Terutama untuk Super Admin
+        if ($request->filled('level_id')) {
+            $query->where('educational_level_id', $request->level_id);
+        }
+
+        // Filter Scope Admin Unit
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
-            $query->whereHas('user', function($q) use ($levelIds) {
-                $q->whereIn('educational_level_id', $levelIds);
+            $query->whereIn('educational_level_id', $levelIds);
+        }
+
+        $students = $query->latest()->get();
+        
+        // Ambil data fees untuk menentukan status
+        $fees = \App\Models\AdministrativeFee::all()->groupBy('educational_level_id');
+        $levels = \App\Models\EducationalLevel::all();
+
+        $students->each(function($student) use ($fees) {
+            $student->ppdb_status = $this->calculateStatus($student, $fees);
+        });
+
+        // Filter Status PPDB
+        if ($request->filled('status')) {
+            $students = $students->filter(function($student) use ($request) {
+                return $student->ppdb_status == $request->status;
             });
         }
 
-        $registrations = $query->latest()->get();
+        return view('admin.students.index', compact('students', 'levels'));
+    }
 
-        return view('admin.students.index', compact('registrations'));
+    public function exportExcel(Request $request)
+    {
+        $user = auth()->user();
+        $query = User::where('role', User::ROLE_SISWA)
+            ->with(['registration.payments', 'registration.examSchedule', 'educationalLevel', 'registration.registrationWave']);
+
+        if ($request->filled('level_id')) {
+            $query->where('educational_level_id', $request->level_id);
+        }
+
+        if (!$user->isSuperAdmin()) {
+            $levelIds = $user->getManagedLevelIds();
+            $query->whereIn('educational_level_id', $levelIds);
+        }
+
+        $students = $query->latest()->get();
+        $fees = \App\Models\AdministrativeFee::all()->groupBy('educational_level_id');
+
+        $students->each(function($student) use ($fees) {
+            $student->ppdb_status = $this->calculateStatus($student, $fees);
+        });
+
+        if ($request->filled('status')) {
+            $students = $students->filter(fn($s) => $s->ppdb_status == $request->status);
+        }
+
+        $fileName = 'Data_Pendaftar_PPDB_' . date('Y-m-d_H-i') . '.xls';
+
+        $headers = [
+            "Content-Type"        => "application/vnd.ms-excel",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = [
+            'No', 'Tgl Daftar Akun', 'Nama Lengkap', 'Nama Panggilan', 'Email', 'No. WhatsApp', 
+            'Asal Sekolah', 'Alasan Memilih', 'Sumber Informasi', 'Jenjang Tujuan', 'Tahun Ajaran', 'Gelombang', 
+            'Status PPDB', 'Status Kelulusan', 'Deadline Daftar Ulang', 'Tempat Lahir', 'Tanggal Lahir', 
+            'Jenis Kelamin', 'Agama', 'Alamat', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Kebutuhan Khusus',
+            'Anak Ke', 'Dari Saudara', 'Nama Ayah', 'Pendidikan Ayah', 'Pekerjaan Ayah', 'Penghasilan Ayah', 
+            'Nama Ibu', 'Pendidikan Ibu', 'Pekerjaan Ibu', 'Penghasilan Ibu', 'Jadwal Ujian'
+        ];
+
+        $callback = function() use($students, $columns) {
+            echo "<html><head><meta charset='UTF-8'></head><body>";
+            echo "<table border='1'>";
+            
+            // Header
+            echo "<tr>";
+            foreach ($columns as $column) {
+                echo "<th style='background-color: #f2f2f2; font-weight: bold;'>$column</th>";
+            }
+            echo "</tr>";
+
+            // Data
+            foreach ($students as $key => $student) {
+                $reg = $student->registration;
+                echo "<tr>";
+                echo "<td>" . ($key + 1) . "</td>";
+                echo "<td>" . $student->created_at->format('d/m/Y H:i') . "</td>";
+                echo "<td>" . ($student->full_name ?? $student->name) . "</td>";
+                echo "<td>" . ($reg->nama_panggilan ?? '-') . "</td>";
+                echo "<td>" . $student->email . "</td>";
+                echo "<td>&nbsp;" . $student->whatsapp_number . "</td>"; // Use &nbsp; to prevent number formatting
+                echo "<td>" . ($student->asal_sekolah ?? '-') . "</td>";
+                echo "<td>" . ($student->alasan_memilih ?? '-') . "</td>";
+                echo "<td>" . ($student->sumber_informasi ?? '-') . "</td>";
+                echo "<td>" . ($student->educationalLevel?->name ?? '-') . "</td>";
+                echo "<td>" . ($reg->academicYear->name ?? '-') . "</td>";
+                echo "<td>" . ($reg->registrationWave->name ?? '-') . "</td>";
+                echo "<td>" . $student->ppdb_status . "</td>";
+                echo "<td>" . strtoupper($reg->status ?? 'PROSES') . "</td>";
+                echo "<td>" . ($reg->reregistration_deadline ? date('d/m/Y', strtotime($reg->reregistration_deadline)) : '-') . "</td>";
+                echo "<td>" . ($reg->tempat_lahir ?? '-') . "</td>";
+                echo "<td>" . ($reg->tanggal_lahir ?? '-') . "</td>";
+                echo "<td>" . ($reg->jenis_kelamin ?? '-') . "</td>";
+                echo "<td>" . ($reg->agama ?? '-') . "</td>";
+                echo "<td>" . ($reg->alamat ?? '-') . "</td>";
+                echo "<td>" . ($reg->provinsi ?? '-') . "</td>";
+                echo "<td>" . ($reg->kabupaten ?? '-') . "</td>";
+                echo "<td>" . ($reg->kecamatan ?? '-') . "</td>";
+                echo "<td>" . ($reg->kebutuhan_khusus ?? '-') . "</td>";
+                echo "<td>" . ($reg->anak_ke ?? '-') . "</td>";
+                echo "<td>" . ($reg->dari_saudara ?? '-') . "</td>";
+                echo "<td>" . ($reg->nama_ayah ?? '-') . "</td>";
+                echo "<td>" . ($reg->pendidikan_ayah ?? '-') . "</td>";
+                echo "<td>" . ($reg->pekerjaan_ayah ?? '-') . "</td>";
+                echo "<td>" . ($reg->penghasilan_ayah ? 'Rp ' . number_format($reg->penghasilan_ayah, 0, ',', '.') : '-') . "</td>";
+                echo "<td>" . ($reg->nama_ibu ?? '-') . "</td>";
+                echo "<td>" . ($reg->pendidikan_ibu ?? '-') . "</td>";
+                echo "<td>" . ($reg->pekerjaan_ibu ?? '-') . "</td>";
+                echo "<td>" . ($reg->penghasilan_ibu ? 'Rp ' . number_format($reg->penghasilan_ibu, 0, ',', '.') : '-') . "</td>";
+                echo "<td>" . ($reg->examSchedule ? $reg->examSchedule->date . ' ' . substr($reg->examSchedule->time_start, 0, 5) : '-') . "</td>";
+                echo "</tr>";
+            }
+
+            echo "</table></body></html>";
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function calculateStatus($user, $feesGrouped)
+    {
+        $reg = $user->registration;
+        if (!$reg) return 'tamu';
+
+        $levelFees = $feesGrouped->get($user->educational_level_id) ?? collect();
+        $formulirFeeName = $levelFees->where('sort_order', 1)->first()?->name;
+        
+        $successPayments = $reg->payments->where('status', 'success');
+
+        // 1. daftar: sudah membayar selain formulir (sort_order > 1)
+        $otherFeeNames = $levelFees->where('sort_order', '>', 1)->pluck('name')->toArray();
+        if ($successPayments->whereIn('fee_type', $otherFeeNames)->isNotEmpty()) {
+            return 'daftar';
+        }
+
+        // 2. Lulus: sudah dinyatakan lulus, tapi belum bayar daftar ulang
+        if ($reg->status === 'lulus') {
+            return 'Lulus';
+        }
+
+        // 3. Formulir: sudah membayar formulir
+        if ($formulirFeeName && $successPayments->where('fee_type', $formulirFeeName)->isNotEmpty()) {
+            return 'Formulir';
+        }
+
+        return 'tamu';
     }
 
     public function show(Registration $registration)
@@ -138,7 +293,7 @@ class StudentManagementController extends Controller
         $user = auth()->user();
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
-            if (!in_array($registration->user->educational_level_id, $levelIds)) {
+            if ($registration->user && !in_array($registration->user->educational_level_id, $levelIds)) {
                 abort(403, 'Anda tidak memiliki akses ke data siswa unit lain.');
             }
         }
