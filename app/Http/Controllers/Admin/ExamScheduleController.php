@@ -12,7 +12,7 @@ class ExamScheduleController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = ExamSchedule::with('academicYear')->withCount('registrations');
+        $query = ExamSchedule::with(['academicYear', 'educationalLevel'])->withCount('registrations');
 
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
