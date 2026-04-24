@@ -60,3 +60,13 @@
     </div>
     <span class="font-medium">Backup & Restore</span>
 </a>
+
+<a href="{{ route('admin.information-sources.index') }}"
+   class="sidebar-link group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-300 {{ request()->routeIs('admin.information-sources.*') ? 'active' : 'themed-text-muted' }}">
+    <div class="p-2 rounded-lg group-hover:bg-primary/10 transition-colors" :style="'background: var(--border-color)'">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+    </div>
+    <span class="font-medium">Sumber Informasi</span>
+</a>

@@ -154,16 +154,11 @@
                     <div>
                         <label for="sumber_informasi" class="block text-xs font-medium text-slate-400 mb-1.5">Dari Mana Anda Tahu Sekolah Ini? <span class="text-red-400">*</span></label>
                         <select id="sumber_informasi" name="sumber_informasi"
-                                class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border {{ $errors->has('sumber_informasi') ? 'border-red-500/50' : 'border-slate-700' }} text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all {{ old('sumber_informasi') ? 'text-white' : 'text-slate-500' }} appearance-none">
+                                 class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border {{ $errors->has('sumber_informasi') ? 'border-red-500/50' : 'border-slate-700' }} text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all {{ old('sumber_informasi') ? 'text-white' : 'text-slate-500' }} appearance-none">
                             <option value="" disabled {{ old('sumber_informasi') ? '' : 'selected' }}>-- Pilih sumber informasi --</option>
-                            <option value="Teman/Keluarga" {{ old('sumber_informasi') === 'Teman/Keluarga' ? 'selected' : '' }} class="text-white bg-slate-800">Teman / Keluarga</option>
-                            <option value="Instagram" {{ old('sumber_informasi') === 'Instagram' ? 'selected' : '' }} class="text-white bg-slate-800">Instagram</option>
-                            <option value="Facebook" {{ old('sumber_informasi') === 'Facebook' ? 'selected' : '' }} class="text-white bg-slate-800">Facebook</option>
-                            <option value="TikTok" {{ old('sumber_informasi') === 'TikTok' ? 'selected' : '' }} class="text-white bg-slate-800">TikTok</option>
-                            <option value="YouTube" {{ old('sumber_informasi') === 'YouTube' ? 'selected' : '' }} class="text-white bg-slate-800">YouTube</option>
-                            <option value="Website Sekolah" {{ old('sumber_informasi') === 'Website Sekolah' ? 'selected' : '' }} class="text-white bg-slate-800">Website Sekolah</option>
-                            <option value="Brosur/Pamflet" {{ old('sumber_informasi') === 'Brosur/Pamflet' ? 'selected' : '' }} class="text-white bg-slate-800">Brosur / Pamflet</option>
-                            <option value="Lainnya" {{ old('sumber_informasi') === 'Lainnya' ? 'selected' : '' }} class="text-white bg-slate-800">Lainnya</option>
+                            @foreach($sources as $source)
+                                <option value="{{ $source->name }}" {{ old('sumber_informasi') === $source->name ? 'selected' : '' }} class="text-white bg-slate-800">{{ $source->name }}</option>
+                            @endforeach
                         </select>
                         @error('sumber_informasi') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>

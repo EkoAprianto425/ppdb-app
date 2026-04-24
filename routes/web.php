@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/backup/proofs', [\App\Http\Controllers\Admin\BackupController::class, 'downloadProofs'])->name('backup.download-proofs');
             Route::post('/backup/restore-db', [\App\Http\Controllers\Admin\BackupController::class, 'restoreDatabase'])->name('backup.restore-db');
             Route::post('/backup/restore-proofs', [\App\Http\Controllers\Admin\BackupController::class, 'restoreProofs'])->name('backup.restore-proofs');
+            Route::resource('information-sources', \App\Http\Controllers\Admin\InformationSourceController::class);
         });
 
         // Unit Admin & Super Admin Management
