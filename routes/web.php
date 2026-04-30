@@ -77,6 +77,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/schedules', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'index'])->name('schedules.index');
             Route::post('/schedules', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'store'])->name('schedules.store');
             Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+            Route::resource('discounts', \App\Http\Controllers\Admin\DiscountController::class);
         });
 
         // Financial Admin & Super Admin Management

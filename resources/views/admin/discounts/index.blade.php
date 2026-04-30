@@ -1,0 +1,362 @@
+@extends('layouts.app')
+
+@section('title', 'Manajemen Potongan Harga')
+@section('page-title', 'Master Potongan Harga')
+@section('page-subtitle', 'Kelola kriteria diskon untuk alumni, umum, dan anak pegawai')
+
+@section('content')
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {{-- Form Tambah Potongan --}}
+    <div class="card-glass rounded-3xl p-8 h-fit lg:sticky lg:top-8 border border-white/5 shadow-2xl" x-data="{ category: 'alumni' }">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-black themed-text leading-none">Tambah Master</h3>
+                <p class="text-[10px] themed-text-muted uppercase tracking-widest mt-1">Buat kebijakan potongan baru</p>
+            </div>
+        </div>
+
+        <form action="{{ route('admin.discounts.store') }}" method="POST" class="space-y-5">
+            @csrf
+            
+            {{-- Kategori --}}
+            <div>
+                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kategori Potongan</label>
+                <select name="category" x-model="category" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                    <option value="alumni">Alumni</option>
+                    <option value="umum">Umum</option>
+                    <option value="anak_pegawai">Anak Pegawai</option>
+                </select>
+            </div>
+
+            {{-- Fields for Alumni & Umum --}}
+            <template x-if="category === 'alumni' || category === 'umum'">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kriteria</label>
+                        <input type="text" name="name" required placeholder="Contoh: Prestasi Akademik"
+                               class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan (Rp)</label>
+                        <input type="text" name="amount" required placeholder="0"
+                               onkeyup="formatRupiah(this)"
+                               class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kuota (Qty)</label>
+                        <input type="number" name="qty" required placeholder="Contoh: 10"
+                               class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Untuk Siapa</label>
+                        <select name="apply_to" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            <option value="alumni">Alumni</option>
+                            <option value="umum">Umum</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3 px-1">
+                        <input type="checkbox" name="require_document" id="req_doc" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                        <label for="req_doc" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Upload Dokumen?</label>
+                    </div>
+                </div>
+            </template>
+
+            {{-- Fields for Anak Pegawai --}}
+            <template x-if="category === 'anak_pegawai'">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jabatan Orang Tua</label>
+                        <input type="text" name="name" required placeholder="Contoh: Guru, Staff, dll"
+                               class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Gelombang</label>
+                        <select name="registration_wave_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            @foreach($waves as $wave)
+                                <option value="{{ $wave->id }}">{{ $wave->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya Masuk (Rp)</label>
+                        <input type="text" name="amount" required placeholder="0"
+                               onkeyup="formatRupiah(this)"
+                               class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
+                        <input type="text" name="spp_amount" required placeholder="0"
+                               onkeyup="formatRupiah(this)"
+                               class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                </div>
+            </template>
+
+            {{-- Common Fields --}}
+            <div>
+                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
+                <select name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                    @foreach($levels as $level)
+                        <option value="{{ $level->id }}">{{ $level->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
+                <textarea name="description" rows="3" placeholder="Keterangan tambahan..."
+                          class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10 resize-none"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-5 rounded-2xl bg-primary text-white font-black uppercase tracking-[0.2em] text-xs shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:shadow-primary/40 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                <span>Simpan Kebijakan</span>
+            </button>
+        </form>
+    </div>
+
+    {{-- Daftar Potongan --}}
+    <div class="lg:col-span-2">
+        <div class="card-glass rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+            @if($discounts->isNotEmpty())
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse datatable">
+                    <thead>
+                        <tr class="bg-black/20 border-b border-white/5">
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Kebijakan & Jenjang</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Kategori</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Besaran</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Status</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        @foreach($discounts as $discount)
+                        <tr class="hover:bg-primary/5 transition-all group">
+                            <td class="px-6 py-4">
+                                <p class="text-xs font-black themed-text group-hover:text-primary transition-colors mb-1">{{ $discount->name }}</p>
+                                <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-black themed-text-muted uppercase tracking-widest">
+                                    {{ $discount->educationalLevel->name }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-[10px] font-bold themed-text-muted uppercase tracking-wider">
+                                    {{ str_replace('_', ' ', $discount->category) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[11px] font-black themed-text text-primary">Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
+                                    @if($discount->category === 'anak_pegawai')
+                                        <span class="text-[9px] themed-text-muted font-bold italic">SPP: Rp {{ number_format($discount->spp_amount, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="text-[9px] themed-text-muted font-bold italic">Sisa Kuota: {{ $discount->qty }}</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($discount->is_active)
+                                    <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest text-emerald-500">Aktif</span>
+                                @else
+                                    <span class="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest text-rose-500">Non-Aktif</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button onclick="openEditModal({{ json_encode($discount) }})" 
+                                            class="p-2 rounded-lg bg-white/5 text-white/20 hover:bg-primary/10 hover:text-primary transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </button>
+                                    <form action="{{ route('admin.discounts.destroy', $discount) }}" method="POST" onsubmit="return confirm('Hapus master potongan ini?')">
+                                        @csrf @method('DELETE')
+                                        <button class="p-2 rounded-lg bg-white/5 text-white/20 hover:bg-rose-500/10 hover:text-rose-500 transition-all">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="p-20 text-center">
+                <div class="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-12 h-12 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h4 class="themed-text text-lg font-black mb-2 tracking-tight">Belum Ada Kebijakan Potongan</h4>
+                <p class="text-xs themed-text-muted max-w-[280px] mx-auto leading-relaxed uppercase tracking-widest">Gunakan formulir di samping untuk mulai mengatur skema potongan harga bagi calon siswa.</p>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+{{-- Edit Modal --}}
+<div id="editModal" class="fixed inset-0 z-50 hidden" x-data="{ category: 'alumni' }">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div class="card-glass rounded-[2rem] p-8 border border-white/10 shadow-2xl">
+            <h3 class="text-xl font-black themed-text mb-6">Edit Kebijakan Potongan</h3>
+            
+            <form id="editForm" method="POST" class="space-y-5">
+                @csrf
+                @method('PUT')
+                
+                <div>
+                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kategori Potongan</label>
+                    <select id="edit_category" name="category" x-model="category" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                        <option value="alumni">Alumni</option>
+                        <option value="umum">Umum</option>
+                        <option value="anak_pegawai">Anak Pegawai</option>
+                    </select>
+                </div>
+
+                {{-- Fields for Alumni & Umum --}}
+                <template x-if="category === 'alumni' || category === 'umum'">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kriteria</label>
+                            <input type="text" id="edit_name" name="name" required
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan (Rp)</label>
+                            <input type="text" id="edit_amount" name="amount" required
+                                   onkeyup="formatRupiah(this)"
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kuota (Qty)</label>
+                            <input type="number" id="edit_qty" name="qty" required
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Untuk Siapa</label>
+                            <select id="edit_apply_to" name="apply_to" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none">
+                                <option value="alumni">Alumni</option>
+                                <option value="umum">Umum</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-3 px-1">
+                            <input type="checkbox" id="edit_require_document" name="require_document" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                            <label for="edit_require_document" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Upload Dokumen?</label>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- Fields for Anak Pegawai --}}
+                <template x-if="category === 'anak_pegawai'">
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jabatan Orang Tua</label>
+                            <input type="text" id="edit_name_pegawai" name="name" required
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Gelombang</label>
+                            <select id="edit_registration_wave_id" name="registration_wave_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none">
+                                @foreach($waves as $wave)
+                                    <option value="{{ $wave->id }}">{{ $wave->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya Masuk (Rp)</label>
+                            <input type="text" id="edit_amount_pegawai" name="amount" required
+                                   onkeyup="formatRupiah(this)"
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
+                            <input type="text" id="edit_spp_amount" name="spp_amount" required
+                                   onkeyup="formatRupiah(this)"
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                    </div>
+                </template>
+
+                <div>
+                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
+                    <select id="edit_educational_level_id" name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                        @foreach($levels as $level)
+                            <option value="{{ $level->id }}">{{ $level->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
+                    <textarea id="edit_description" name="description" rows="3"
+                              class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10 resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center gap-3 px-1">
+                    <input type="checkbox" id="edit_is_active" name="is_active" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                    <label for="edit_is_active" class="text-xs font-black themed-text-muted uppercase tracking-widest">Status Aktif</label>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 py-4 rounded-2xl bg-white/5 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all">Batal</button>
+                    <button type="submit" class="flex-1 py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section('scripts')
+<script>
+    function formatRupiah(el) {
+        let value = el.value.replace(/[^0-9]/g, '');
+        el.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function openEditModal(discount) {
+        const modal = document.getElementById('editModal');
+        const form = document.getElementById('editForm');
+        
+        // Use Alpine's scope to set category
+        const alpineData = Alpine.$data(modal);
+        alpineData.category = discount.category;
+
+        form.action = `/admin/discounts/${discount.id}`;
+        
+        // Common fields
+        document.getElementById('edit_educational_level_id').value = discount.educational_level_id;
+        document.getElementById('edit_description').value = discount.description || '';
+        document.getElementById('edit_is_active').checked = discount.is_active;
+
+        // Category specific fields
+        setTimeout(() => {
+            if (discount.category === 'anak_pegawai') {
+                document.getElementById('edit_name_pegawai').value = discount.name;
+                document.getElementById('edit_registration_wave_id').value = discount.registration_wave_id;
+                document.getElementById('edit_amount_pegawai').value = formatNumber(discount.amount);
+                document.getElementById('edit_spp_amount').value = formatNumber(discount.spp_amount);
+            } else {
+                document.getElementById('edit_name').value = discount.name;
+                document.getElementById('edit_amount').value = formatNumber(discount.amount);
+                document.getElementById('edit_qty').value = discount.qty;
+                document.getElementById('edit_apply_to').value = discount.apply_to;
+                document.getElementById('edit_require_document').checked = discount.require_document;
+            }
+        }, 50);
+
+        modal.classList.remove('hidden');
+    }
+
+    function formatNumber(num) {
+        return num.toString().split('.')[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
+</script>
+@endsection
+@endsection
