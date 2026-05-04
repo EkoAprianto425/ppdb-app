@@ -98,22 +98,55 @@
                         @error('full_name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
-                    {{-- WhatsApp & Asal Sekolah --}}
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label for="whatsapp_number" class="block text-xs font-medium text-slate-400 mb-1.5">Nomor WhatsApp <span class="text-red-400">*</span></label>
-                            <input id="whatsapp_number" type="text" name="whatsapp_number" value="{{ old('whatsapp_number') }}"
-                                   placeholder="08xxxxxxxxxx"
-                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border {{ $errors->has('whatsapp_number') ? 'border-red-500/50' : 'border-slate-700' }} text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all">
-                            @error('whatsapp_number') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    {{-- WhatsApp --}}
+                    <div>
+                        <label for="whatsapp_number" class="block text-xs font-medium text-slate-400 mb-1.5">Nomor WhatsApp <span class="text-red-400">*</span></label>
+                        <input id="whatsapp_number" type="text" name="whatsapp_number" value="{{ old('whatsapp_number') }}"
+                               placeholder="08xxxxxxxxxx"
+                               class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border {{ $errors->has('whatsapp_number') ? 'border-red-500/50' : 'border-slate-700' }} text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all">
+                        @error('whatsapp_number') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- Data Asal Sekolah (Cascading Dropdown) --}}
+                    <div class="space-y-4 pt-4 mt-4 border-t border-slate-700/50">
+                        <p class="text-sm font-medium text-white">Data Asal Sekolah</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="provinsi" class="block text-xs font-medium text-slate-400 mb-1.5">Provinsi <span class="text-red-400">*</span></label>
+                                <select id="provinsi" class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all appearance-none">
+                                    <option value="">-- Memuat Provinsi... --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="kabupaten" class="block text-xs font-medium text-slate-400 mb-1.5">Kabupaten/Kota <span class="text-red-400">*</span></label>
+                                <select id="kabupaten" disabled class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all appearance-none disabled:opacity-50">
+                                    <option value="">Pilih Provinsi Dulu</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="kecamatan" class="block text-xs font-medium text-slate-400 mb-1.5">Kecamatan <span class="text-red-400">*</span></label>
+                                <select id="kecamatan" disabled class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all appearance-none disabled:opacity-50">
+                                    <option value="">Pilih Kabupaten Dulu</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sekolah_select" class="block text-xs font-medium text-slate-400 mb-1.5">Sekolah <span class="text-red-400">*</span></label>
+                                <select id="sekolah_select" disabled class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all appearance-none disabled:opacity-50">
+                                    <option value="">Pilih Kecamatan Dulu</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label for="asal_sekolah" class="block text-xs font-medium text-slate-400 mb-1.5">Asal Sekolah <span class="text-red-400">*</span></label>
+
+                        {{-- Input Manual / Penampung Asal Sekolah --}}
+                        <div id="manual_sekolah_container" class="{{ old('asal_sekolah') ? 'block' : 'hidden' }}">
+                            <label for="asal_sekolah" class="block text-xs font-medium text-slate-400 mb-1.5">Ketik Nama Asal Sekolah <span class="text-red-400">*</span></label>
                             <input id="asal_sekolah" type="text" name="asal_sekolah" value="{{ old('asal_sekolah') }}"
-                                   placeholder="SD/SMP asal"
+                                   placeholder="Contoh: SMPN 1 Jakarta"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-800 border {{ $errors->has('asal_sekolah') ? 'border-red-500/50' : 'border-slate-700' }} text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all">
-                            @error('asal_sekolah') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                            <p class="text-[10px] text-slate-500 mt-1">Isi manual jika sekolah tidak ada dalam daftar atau pilih dari dropdown di atas.</p>
                         </div>
+                        @error('asal_sekolah') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Tujuan Masuk --}}
@@ -183,3 +216,124 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const provinsiSelect = document.getElementById('provinsi');
+        const kabupatenSelect = document.getElementById('kabupaten');
+        const kecamatanSelect = document.getElementById('kecamatan');
+        const sekolahSelect = document.getElementById('sekolah_select');
+        const asalSekolahInput = document.getElementById('asal_sekolah');
+        const manualSekolahContainer = document.getElementById('manual_sekolah_container');
+        
+        const baseUrl = "{{ url('') }}";
+
+        // Fetch Provinsi
+        fetch(baseUrl + '/api/region/provinsi')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                provinsiSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                data.forEach(item => {
+                    provinsiSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                });
+            })
+            .catch(error => console.error('Error fetching provinsi:', error));
+
+        // Event: Provinsi Changed
+        provinsiSelect.addEventListener('change', function () {
+            const val = this.value;
+            kabupatenSelect.innerHTML = '<option value="">-- Memuat... --</option>';
+            kabupatenSelect.disabled = true;
+            kecamatanSelect.innerHTML = '<option value="">Pilih Kabupaten Dulu</option>';
+            kecamatanSelect.disabled = true;
+            sekolahSelect.innerHTML = '<option value="">Pilih Kecamatan Dulu</option>';
+            sekolahSelect.disabled = true;
+
+            if (val) {
+                fetch(baseUrl + `/api/region/kabupaten?propinsi=${encodeURIComponent(val)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        kabupatenSelect.innerHTML = '<option value="">-- Pilih Kabupaten --</option>';
+                        data.forEach(item => {
+                            kabupatenSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                        });
+                        kabupatenSelect.disabled = false;
+                    });
+            } else {
+                kabupatenSelect.innerHTML = '<option value="">Pilih Provinsi Dulu</option>';
+            }
+        });
+
+        // Event: Kabupaten Changed
+        kabupatenSelect.addEventListener('change', function () {
+            const val = this.value;
+            kecamatanSelect.innerHTML = '<option value="">-- Memuat... --</option>';
+            kecamatanSelect.disabled = true;
+            sekolahSelect.innerHTML = '<option value="">Pilih Kecamatan Dulu</option>';
+            sekolahSelect.disabled = true;
+
+            if (val) {
+                fetch(baseUrl + `/api/region/kecamatan?kabupaten=${encodeURIComponent(val)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                        data.forEach(item => {
+                            kecamatanSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                        });
+                        kecamatanSelect.disabled = false;
+                    });
+            } else {
+                kecamatanSelect.innerHTML = '<option value="">Pilih Kabupaten Dulu</option>';
+            }
+        });
+
+        // Event: Kecamatan Changed
+        kecamatanSelect.addEventListener('change', function () {
+            const val = this.value;
+            sekolahSelect.innerHTML = '<option value="">-- Memuat... --</option>';
+            sekolahSelect.disabled = true;
+
+            if (val) {
+                fetch(baseUrl + `/api/region/sekolah?kecamatan=${encodeURIComponent(val)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        sekolahSelect.innerHTML = '<option value="">-- Pilih Sekolah --</option>';
+                        data.forEach(item => {
+                            sekolahSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                        });
+                        sekolahSelect.innerHTML += `<option value="lainnya" class="font-bold text-indigo-400">++ LAINNYA (Ketik Manual) ++</option>`;
+                        sekolahSelect.disabled = false;
+                    });
+            } else {
+                sekolahSelect.innerHTML = '<option value="">Pilih Kecamatan Dulu</option>';
+            }
+        });
+
+        // Event: Sekolah Changed
+        sekolahSelect.addEventListener('change', function () {
+            const val = this.value;
+            
+            if (val === 'lainnya') {
+                manualSekolahContainer.classList.remove('hidden');
+                manualSekolahContainer.classList.add('block');
+                if (asalSekolahInput.value === 'lainnya' || document.querySelector(`#sekolah_select option[value="${asalSekolahInput.value}"]`)) {
+                    asalSekolahInput.value = ''; 
+                }
+                asalSekolahInput.focus();
+            } else if (val) {
+                manualSekolahContainer.classList.remove('block');
+                manualSekolahContainer.classList.add('hidden');
+                asalSekolahInput.value = val;
+            } else {
+                manualSekolahContainer.classList.remove('block');
+                manualSekolahContainer.classList.add('hidden');
+                asalSekolahInput.value = '';
+            }
+        });
+    });
+</script>
+@endpush

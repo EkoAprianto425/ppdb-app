@@ -15,6 +15,12 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Region API for Registration
+Route::get('/api/region/provinsi', [\App\Http\Controllers\RegionController::class, 'getProvinsi']);
+Route::get('/api/region/kabupaten', [\App\Http\Controllers\RegionController::class, 'getKabupaten']);
+Route::get('/api/region/kecamatan', [\App\Http\Controllers\RegionController::class, 'getKecamatan']);
+Route::get('/api/region/sekolah', [\App\Http\Controllers\RegionController::class, 'getSekolah']);
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

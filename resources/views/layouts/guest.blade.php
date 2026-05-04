@@ -21,5 +21,6 @@
 </head>
 <body class="h-full bg-slate-950">
     @yield('content')
+    @stack('scripts')
 </body>
 </html>
