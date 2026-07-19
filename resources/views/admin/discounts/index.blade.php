@@ -68,42 +68,41 @@
             <template x-if="category === 'anak_pegawai'">
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jabatan Orang Tua</label>
-                        <input type="text" name="name" required placeholder="Contoh: Guru, Staff, dll"
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Status Kepegawaian Orang Tua</label>
+                        <input type="text" name="name" required placeholder="Contoh: Guru Tetap, Guru Tidak Tetap, Staff, dll"
                                class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Gelombang</label>
-                        <select name="registration_wave_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                            @foreach($waves as $wave)
-                                <option value="{{ $wave->id }}">{{ $wave->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya Masuk (Rp)</label>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan / Biaya Masuk (Rp)</label>
                         <input type="text" name="amount" required placeholder="0"
                                onkeyup="formatRupiah(this)"
                                class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
                     </div>
                     <div>
                         <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
-                        <input type="text" name="spp_amount" required placeholder="0"
+                        <input type="text" name="spp_amount" placeholder="0"
                                onkeyup="formatRupiah(this)"
                                class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                    </div>
+                    {{-- Info: Gelombang & Jenjang tidak diperlukan untuk Anak Pegawai --}}
+                    <div class="rounded-xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3 flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-[10px] text-indigo-400 font-bold leading-relaxed">Keringanan Anak Pegawai berlaku lintas gelombang dan semua jenjang — tidak perlu memilih gelombang & jenjang.</p>
                     </div>
                 </div>
             </template>
 
-            {{-- Common Fields --}}
-            <div>
-                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
-                <select name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                    @foreach($levels as $level)
-                        <option value="{{ $level->id }}">{{ $level->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            {{-- Common Fields: Jenjang hanya untuk Alumni & Umum --}}
+            <template x-if="category !== 'anak_pegawai'">
+                <div>
+                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
+                    <select name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                        @foreach($levels as $level)
+                            <option value="{{ $level->id }}">{{ $level->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </template>
             
             <div>
                 <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
@@ -139,7 +138,7 @@
                             <td class="px-6 py-4">
                                 <p class="text-xs font-black themed-text group-hover:text-primary transition-colors mb-1">{{ $discount->name }}</p>
                                 <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-black themed-text-muted uppercase tracking-widest">
-                                    {{ $discount->educationalLevel->name }}
+                                    {{ $discount->educationalLevel?->name ?? 'Semua Jenjang' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -253,41 +252,41 @@
                 <template x-if="category === 'anak_pegawai'">
                     <div class="space-y-5">
                         <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jabatan Orang Tua</label>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Status Kepegawaian Orang Tua</label>
                             <input type="text" id="edit_name_pegawai" name="name" required
                                    class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Gelombang</label>
-                            <select id="edit_registration_wave_id" name="registration_wave_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none">
-                                @foreach($waves as $wave)
-                                    <option value="{{ $wave->id }}">{{ $wave->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya Masuk (Rp)</label>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan / Biaya Masuk (Rp)</label>
                             <input type="text" id="edit_amount_pegawai" name="amount" required
                                    onkeyup="formatRupiah(this)"
                                    class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
-                            <input type="text" id="edit_spp_amount" name="spp_amount" required
+                            <input type="text" id="edit_spp_amount" name="spp_amount"
                                    onkeyup="formatRupiah(this)"
                                    class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                        </div>
+                        {{-- Info: Gelombang & Jenjang tidak diperlukan untuk Anak Pegawai --}}
+                        <div class="rounded-xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3 flex items-start gap-2.5">
+                            <svg class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <p class="text-[10px] text-indigo-400 font-bold leading-relaxed">Keringanan Anak Pegawai berlaku lintas gelombang dan semua jenjang — tidak perlu memilih gelombang & jenjang.</p>
                         </div>
                     </div>
                 </template>
 
-                <div>
-                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
-                    <select id="edit_educational_level_id" name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                        @foreach($levels as $level)
-                            <option value="{{ $level->id }}">{{ $level->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                {{-- Jenjang hanya untuk Alumni & Umum --}}
+                <template x-if="category !== 'anak_pegawai'">
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
+                        <select id="edit_educational_level_id" name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            @foreach($levels as $level)
+                                <option value="{{ $level->id }}">{{ $level->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </template>
                 
                 <div>
                     <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
@@ -326,26 +325,29 @@
 
         form.action = `/admin/discounts/${discount.id}`;
         
-        // Common fields
-        document.getElementById('edit_educational_level_id').value = discount.educational_level_id;
+        // Common fields (Jenjang hanya ada untuk non anak_pegawai)
         document.getElementById('edit_description').value = discount.description || '';
         document.getElementById('edit_is_active').checked = discount.is_active;
 
-        // Category specific fields
+        // Category specific fields — tunggu Alpine render konten kondisional
         setTimeout(() => {
             if (discount.category === 'anak_pegawai') {
-                document.getElementById('edit_name_pegawai').value = discount.name;
-                document.getElementById('edit_registration_wave_id').value = discount.registration_wave_id;
-                document.getElementById('edit_amount_pegawai').value = formatNumber(discount.amount);
-                document.getElementById('edit_spp_amount').value = formatNumber(discount.spp_amount);
+                const namePegawai = document.getElementById('edit_name_pegawai');
+                const amtPegawai  = document.getElementById('edit_amount_pegawai');
+                const sppEl       = document.getElementById('edit_spp_amount');
+                if (namePegawai) namePegawai.value = discount.name || '';
+                if (amtPegawai)  amtPegawai.value  = formatNumber(discount.amount);
+                if (sppEl)       sppEl.value        = formatNumber(discount.spp_amount);
             } else {
-                document.getElementById('edit_name').value = discount.name;
-                document.getElementById('edit_amount').value = formatNumber(discount.amount);
-                document.getElementById('edit_qty').value = discount.qty;
+                const levelEl = document.getElementById('edit_educational_level_id');
+                if (levelEl) levelEl.value = discount.educational_level_id;
+                document.getElementById('edit_name').value    = discount.name || '';
+                document.getElementById('edit_amount').value  = formatNumber(discount.amount);
+                document.getElementById('edit_qty').value     = discount.qty;
                 document.getElementById('edit_apply_to').value = discount.apply_to;
                 document.getElementById('edit_require_document').checked = discount.require_document;
             }
-        }, 50);
+        }, 80);
 
         modal.classList.remove('hidden');
     }

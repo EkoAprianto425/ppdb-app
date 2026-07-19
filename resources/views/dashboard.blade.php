@@ -92,10 +92,30 @@
     $status2 = $p2 ? $p2->status : 'none';
     $isPassed = $registration && $registration->status === 'lulus';
     $isNotPassed = $registration && $registration->status === 'tidak_lulus';
+    $approvedDiscount = $registration ? $registration->discountApplications()->where('status', 'approved')->with('discount')->first() : null;
+    $discountAmount = $approvedDiscount ? $approvedDiscount->discount->amount : 0;
+
     $activeFee = null;
     foreach ($allFees as $f) {
         $p = $registration ? $registration->payments()->where('fee_type', $f->name)->latest()->first() : null;
-        if (!$p || $p->status !== 'success') { $activeFee = (object)['id'=>$f->id,'name'=>$f->name,'amount'=>$f->amount,'sort_order'=>$f->sort_order,'payment'=>$p,'status'=>$p?$p->status:'none']; break; }
+        if (!$p || $p->status !== 'success') { 
+            $amt = $f->amount;
+            if ($f->sort_order > 1) {
+                $amt -= $discountAmount;
+            }
+            if ($amt < 0) $amt = 0;
+
+            $activeFee = (object)[
+                'id'=>$f->id,
+                'name'=>$f->name,
+                'amount'=>$amt,
+                'original_amount'=>$f->amount,
+                'sort_order'=>$f->sort_order,
+                'payment'=>$p,
+                'status'=>$p?$p->status:'none'
+            ]; 
+            break; 
+        }
     }
     if ($activeFee && $activeFee->sort_order > 1 && !$isPassed) $activeFee = null;
 @endphp
@@ -116,7 +136,14 @@
         @elseif($activeFee)
             <p class="text-xs themed-text-muted mb-1">Tagihan yang harus dibayar:</p>
             <p class="text-lg font-black themed-text mb-1">{{ $activeFee->name }}</p>
-            <p class="text-xl font-black text-purple-400 mb-3">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
+            @if(isset($activeFee->original_amount) && $activeFee->amount < $activeFee->original_amount)
+                <div class="flex flex-col mb-3">
+                    <span class="text-[10px] themed-text-muted line-through opacity-60">Rp {{ number_format($activeFee->original_amount, 0, ',', '.') }}</span>
+                    <p class="text-xl font-black text-purple-400 leading-none mt-1">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
+                </div>
+            @else
+                <p class="text-xl font-black text-purple-400 mb-3">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
+            @endif
             @if($activeFee->status === 'pending')
                 <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-amber-500/15 text-amber-400 border-amber-500/20">Menunggu Verifikasi</span>
             @else
@@ -173,7 +200,35 @@
                 <p class="text-sm font-black text-rose-400 mt-0.5">{{ \Carbon\Carbon::parse($registration->reregistration_deadline)->translatedFormat('d F Y') }}</p>
             </div>
             @endif
-            <a href="{{ route('pendaftaran.announcement') }}" class="flex items-center justify-center w-full py-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-bold uppercase">Lihat SKL</a>
+            
+            <a href="{{ route('pendaftaran.announcement') }}" class="flex items-center justify-center w-full py-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-bold uppercase mb-2">Lihat SKL</a>
+            
+            @php
+                $activeDiscountApp = $registration->discountApplications()->latest()->first();
+            @endphp
+            @if($status2 !== 'success')
+                @if($activeDiscountApp)
+                    <div class="mt-4 p-4 rounded-2xl border {{ $activeDiscountApp->status === 'approved' ? 'bg-emerald-500/10 border-emerald-500/20' : ($activeDiscountApp->status === 'rejected' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-amber-500/10 border-amber-500/20') }}">
+                        <p class="text-[9px] font-black uppercase tracking-widest {{ $activeDiscountApp->status === 'approved' ? 'text-emerald-400' : ($activeDiscountApp->status === 'rejected' ? 'text-rose-400' : 'text-amber-400') }} mb-1">Status Keringanan</p>
+                        <p class="text-xs font-bold themed-text mb-1">{{ $activeDiscountApp->discount->name }}</p>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase {{ $activeDiscountApp->status === 'approved' ? 'bg-emerald-500 text-white' : ($activeDiscountApp->status === 'rejected' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white') }}">
+                                {{ $activeDiscountApp->status }}
+                            </span>
+                        </div>
+                        @if($activeDiscountApp->notes)
+                            <p class="text-[10px] italic themed-text-muted border-t pt-2 mt-2" :style="'border-color: var(--border-color)'">
+                                <span class="font-bold">Catatan:</span> {{ $activeDiscountApp->notes }}
+                            </p>
+                        @endif
+                    </div>
+                @else
+                    <button @click="$dispatch('open-discount-modal')" class="w-full py-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all text-[10px] font-bold uppercase">
+                        Ajukan Keringanan
+                    </button>
+                    @include('pendaftaran.partials.discount-modal')
+                @endif
+            @endif
         @elseif($isNotPassed)
             <p class="text-2xl font-black text-rose-400 mb-2">TIDAK LULUS</p>
             <p class="text-xs text-rose-500/70">Tetap semangat! Daftar di gelombang berikutnya.</p>

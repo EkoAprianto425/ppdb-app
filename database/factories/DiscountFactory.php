@@ -31,7 +31,7 @@ class DiscountFactory extends Factory
                 'qty' => null,
                 'description' => $this->faker->sentence(),
                 'apply_to' => null,
-                'require_document' => false,
+                'require_document' => true, // Wajib upload dokumen (KK) untuk anak karyawan
                 'is_active' => $this->faker->boolean(80),
             ];
         }
@@ -46,7 +46,7 @@ class DiscountFactory extends Factory
             'qty' => $this->faker->numberBetween(5, 50),
             'description' => $this->faker->sentence(),
             'apply_to' => $category,
-            'require_document' => $this->faker->boolean(),
+            'require_document' => false,
             'is_active' => $this->faker->boolean(80),
         ];
     }

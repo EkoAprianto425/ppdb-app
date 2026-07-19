@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengumuman', [RegistrationController::class, 'announcementIndex'])->name('pendaftaran.announcement');
     Route::get('/pengumuman/skl', [RegistrationController::class, 'downloadSKL'])->name('pendaftaran.announcement.skl');
 
+    // Discount
+    Route::post('/discount/apply', [App\Http\Controllers\DiscountController::class, 'apply'])->name('discount.apply');
+
     Route::get('/pendaftaran/create', [\App\Http\Controllers\RegistrationController::class, 'create'])->name('pendaftaran.create');
     Route::get('/pendaftaran/edit', [\App\Http\Controllers\RegistrationController::class, 'edit'])->name('pendaftaran.edit');
     Route::put('/pendaftaran', [\App\Http\Controllers\RegistrationController::class, 'update'])->name('pendaftaran.update');
@@ -85,6 +88,8 @@ Route::middleware('auth')->group(function () {
             Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'destroy'])->name('schedules.destroy');
 
             Route::resource('discounts', \App\Http\Controllers\Admin\DiscountController::class);
+            Route::get('/discount-applications', [\App\Http\Controllers\Admin\DiscountApplicationController::class, 'index'])->name('discount-applications.index');
+            Route::put('/discount-applications/{application}', [\App\Http\Controllers\Admin\DiscountApplicationController::class, 'update'])->name('discount-applications.update');
         });
 
         // Financial Admin & Super Admin Management

@@ -14,11 +14,15 @@ return new class extends Migration
     public function up(): void
     {
         // Convert ENUM to VARCHAR(255) - preserves existing data
-        DB::statement("ALTER TABLE users MODIFY COLUMN tujuan_masuk VARCHAR(255) NULL");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN tujuan_masuk VARCHAR(255) NULL");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE users MODIFY COLUMN tujuan_masuk ENUM('SMP', 'SMA Reguler', 'SMA Tahfidz', 'SMK TKJ', 'SMK PBS', 'SMK Kuliner') NULL");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN tujuan_masuk ENUM('SMP', 'SMA Reguler', 'SMA Tahfidz', 'SMK TKJ', 'SMK PBS', 'SMK Kuliner') NULL");
+        }
     }
 };

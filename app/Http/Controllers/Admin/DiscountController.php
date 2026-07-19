@@ -39,9 +39,9 @@ class DiscountController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category' => 'required|in:anak_pegawai,alumni,umum',
-            'educational_level_id' => 'required|exists:educational_levels,id',
-            'is_active' => 'boolean',
+            'category'             => 'required|in:anak_pegawai,alumni,umum',
+            'educational_level_id' => 'nullable|exists:educational_levels,id',
+            'is_active'            => 'boolean',
         ]);
 
         $data = $request->all();
@@ -56,13 +56,15 @@ class DiscountController extends Controller
 
         // Handle specific fields based on category
         if ($request->category === 'anak_pegawai') {
-            $data['apply_to'] = null;
-            $data['qty'] = null;
-            $data['require_document'] = false;
+            $data['educational_level_id'] = null; // berlaku lintas jenjang
+            $data['registration_wave_id'] = null; // berlaku lintas gelombang
+            $data['apply_to']             = null;
+            $data['qty']                  = null;
+            $data['require_document']     = 1;
         } else {
             $data['registration_wave_id'] = null;
-            $data['spp_amount'] = 0;
-            $data['require_document'] = $request->has('require_document');
+            $data['spp_amount']           = 0;
+            $data['require_document']     = $request->has('require_document');
         }
 
         Discount::create($data);
@@ -83,13 +85,15 @@ class DiscountController extends Controller
         }
 
         if ($request->category === 'anak_pegawai') {
-            $data['apply_to'] = null;
-            $data['qty'] = null;
-            $data['require_document'] = false;
+            $data['educational_level_id'] = null; // berlaku lintas jenjang
+            $data['registration_wave_id'] = null; // berlaku lintas gelombang
+            $data['apply_to']             = null;
+            $data['qty']                  = null;
+            $data['require_document']     = 1;
         } else {
             $data['registration_wave_id'] = null;
-            $data['spp_amount'] = 0;
-            $data['require_document'] = $request->has('require_document');
+            $data['spp_amount']           = 0;
+            $data['require_document']     = $request->has('require_document');
         }
         
         $data['is_active'] = $request->has('is_active');

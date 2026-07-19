@@ -85,6 +85,43 @@
     </div>
 </div>
 
+@php
+    $fee2 = $feeData->where('sort_order', '>', 1)->first();
+    $status2 = $fee2 ? $fee2->status : 'none';
+    $isPassed = $registration && $registration->status === 'lulus';
+    $activeDiscountApp = $registration ? $registration->discountApplications()->latest()->first() : null;
+@endphp
+
+@if($isPassed && $status2 !== 'success')
+    <div class="mb-8 card-glass rounded-3xl p-6 border-l-4 border-purple-500 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
+        <div>
+            <h3 class="text-sm font-bold themed-text uppercase tracking-widest mb-1">Pengajuan Keringanan Biaya</h3>
+            <p class="text-xs themed-text-muted">Tersedia potongan biaya untuk Keluarga Karyawan, Alumni, atau Prestasi/Umum.</p>
+        </div>
+        <div>
+            @if($activeDiscountApp)
+                <div class="flex flex-col items-end">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[9px] font-black uppercase tracking-widest themed-text-muted">Status:</span>
+                        <span class="px-3 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest {{ $activeDiscountApp->status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ($activeDiscountApp->status === 'rejected' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20') }}">
+                            {{ $activeDiscountApp->status }}
+                        </span>
+                    </div>
+                    <p class="text-[10px] font-bold themed-text">{{ $activeDiscountApp->discount->name }}</p>
+                    @if($activeDiscountApp->notes)
+                        <p class="text-[9px] themed-text-muted italic max-w-[200px] text-right mt-1">{{ $activeDiscountApp->notes }}</p>
+                    @endif
+                </div>
+            @else
+                <button @click="$dispatch('open-discount-modal')" class="px-6 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-[10px] font-bold uppercase shadow-lg shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap">
+                    Ajukan Keringanan
+                </button>
+                @include('pendaftaran.partials.discount-modal')
+            @endif
+        </div>
+    </div>
+@endif
+
 {{-- Fee List --}}
 <div class="card-glass rounded-3xl overflow-hidden mb-8">
     <div class="px-8 py-6 border-b" :style="'border-color: var(--border-color)'">
@@ -112,7 +149,14 @@
                             <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $fee->name }}</p>
                         </td>
                         <td class="px-8 py-6 text-sm themed-text text-right font-bold">
-                            Rp {{ number_format($fee->amount, 0, ',', '.') }}
+                            @if($fee->is_discounted)
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[10px] themed-text-muted line-through opacity-60">Rp {{ number_format($fee->original_amount, 0, ',', '.') }}</span>
+                                    <span class="text-emerald-500">Rp {{ number_format($fee->amount, 0, ',', '.') }}</span>
+                                </div>
+                            @else
+                                Rp {{ number_format($fee->amount, 0, ',', '.') }}
+                            @endif
                         </td>
                         <td class="px-8 py-6 text-center">
                             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border {{ $statusColors[$fee->status] }}">

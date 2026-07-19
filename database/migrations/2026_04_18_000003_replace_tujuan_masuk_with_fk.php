@@ -24,12 +24,24 @@ return new class extends Migration
         });
 
         // 2. Populate from existing tujuan_masuk data
-        DB::statement("
-            UPDATE users u
-            INNER JOIN educational_levels el ON el.name = u.tujuan_masuk
-            SET u.educational_level_id = el.id
-            WHERE u.tujuan_masuk IS NOT NULL
-        ");
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement("
+                UPDATE users
+                SET educational_level_id = (
+                    SELECT id FROM educational_levels
+                    WHERE educational_levels.name = users.tujuan_masuk
+                    LIMIT 1
+                )
+                WHERE tujuan_masuk IS NOT NULL
+            ");
+        } else {
+            DB::statement("
+                UPDATE users u
+                INNER JOIN educational_levels el ON el.name = u.tujuan_masuk
+                SET u.educational_level_id = el.id
+                WHERE u.tujuan_masuk IS NOT NULL
+            ");
+        }
 
         // 3. Drop old column
         Schema::table('users', function (Blueprint $table) {
@@ -45,11 +57,22 @@ return new class extends Migration
         });
 
         // 2. Populate back from FK
-        DB::statement("
-            UPDATE users u
-            INNER JOIN educational_levels el ON el.id = u.educational_level_id
-            SET u.tujuan_masuk = el.name
-        ");
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement("
+                UPDATE users
+                SET tujuan_masuk = (
+                    SELECT name FROM educational_levels
+                    WHERE educational_levels.id = users.educational_level_id
+                    LIMIT 1
+                )
+            ");
+        } else {
+            DB::statement("
+                UPDATE users u
+                INNER JOIN educational_levels el ON el.id = u.educational_level_id
+                SET u.tujuan_masuk = el.name
+            ");
+        }
 
         // 3. Drop FK column
         Schema::table('users', function (Blueprint $table) {

@@ -52,6 +52,16 @@
         </div>
         <span class="font-medium">Master Potongan</span>
     </a>
+
+    <a href="{{ route('admin.discount-applications.index') }}"
+       class="sidebar-link group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-300 {{ request()->routeIs('admin.discount-applications.*') ? 'active' : 'themed-text-muted' }}">
+        <div class="p-2 rounded-lg group-hover:bg-primary/10 transition-colors" :style="'background: var(--border-color)'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A3.323 3.323 0 0010.605 8.3c-.643.085-1.25.4-1.743.894l-3.323 3.323a3.323 3.323 0 000 4.698l.698.698a3.323 3.323 0 004.698 0l3.323-3.323a3.323 3.323 0 00.894-1.743 3.323 3.323 0 00-.016-1.618z"/>
+            </svg>
+        </div>
+        <span class="font-medium">Validasi Keringanan</span>
+    </a>
 @endif
 
 @if(auth()->user()->role == 'admin_administrasi' || auth()->user()->isSuperAdmin())

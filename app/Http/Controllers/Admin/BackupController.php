@@ -140,7 +140,11 @@ class BackupController extends Controller
 
         try {
             $file = $request->file('sql_file');
-            $sqlContent = file_get_contents($file->getRealPath());
+            $realPath = $file->getRealPath();
+            if ($realPath === false && isset($_FILES['sql_file']) && $_FILES['sql_file']['error'] === UPLOAD_ERR_OK) {
+                $realPath = $_FILES['sql_file']['tmp_name'];
+            }
+            $sqlContent = file_get_contents($realPath);
 
             // Nonaktifkan pemeriksaan kunci asing sementara
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
@@ -165,9 +169,13 @@ class BackupController extends Controller
 
         try {
             $file = $request->file('zip_file');
+            $realPath = $file->getRealPath();
+            if ($realPath === false && isset($_FILES['zip_file']) && $_FILES['zip_file']['error'] === UPLOAD_ERR_OK) {
+                $realPath = $_FILES['zip_file']['tmp_name'];
+            }
             
             $zip = new ZipArchive;
-            if ($zip->open($file->getRealPath()) === TRUE) {
+            if ($zip->open($realPath) === TRUE) {
                 // Tentukan lokasi target ekstrak
                 $targetPath = storage_path('app/public/payments');
                 if (!File::isDirectory($targetPath)) {

@@ -65,4 +65,9 @@ class Registration extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function discountApplications()
+    {
+        return $this->hasMany(DiscountApplication::class);
+    }
 }

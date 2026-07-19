@@ -84,6 +84,47 @@
                     </div>
                 </div>
 
+                @php
+                    $level = $registration->user->educationalLevel;
+                    $allFees = $level ? $level->fees()->orderBy('sort_order')->get() : collect();
+                    $fee2 = $allFees->where('sort_order', '>', 1)->first();
+                    $p2 = $fee2 && $registration ? $registration->payments()->where('fee_type', $fee2->name)->latest()->first() : null;
+                    $status2 = $p2 ? $p2->status : 'none';
+                    $activeDiscountApp = $registration->discountApplications()->latest()->first();
+                @endphp
+                
+                @if($status2 !== 'success')
+                <div class="max-w-2xl mx-auto mb-10 text-left">
+                    <div class="p-6 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
+                        <div>
+                            <h4 class="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-1">Keringanan Biaya</h4>
+                            <p class="text-sm themed-text leading-relaxed">Tersedia potongan biaya masuk untuk jalur Karyawan, Alumni, atau Umum.</p>
+                        </div>
+                        <div>
+                            @if($activeDiscountApp)
+                                <div class="flex flex-col items-end">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-[9px] font-black uppercase tracking-widest themed-text-muted">Status:</span>
+                                        <span class="px-3 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest {{ $activeDiscountApp->status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ($activeDiscountApp->status === 'rejected' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20') }}">
+                                            {{ $activeDiscountApp->status }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[10px] font-bold themed-text">{{ $activeDiscountApp->discount->name }}</p>
+                                    @if($activeDiscountApp->notes)
+                                        <p class="text-[9px] themed-text-muted italic max-w-[200px] text-right mt-1">{{ $activeDiscountApp->notes }}</p>
+                                    @endif
+                                </div>
+                            @else
+                                <button @click="$dispatch('open-discount-modal')" class="px-6 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-[10px] font-bold uppercase shadow-lg shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap">
+                                    Ajukan Keringanan
+                                </button>
+                                @include('pendaftaran.partials.discount-modal')
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="{{ route('pendaftaran.announcement.skl') }}" target="_blank" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-sm uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] hover:-translate-y-1 hover:shadow-emerald-500/40 transition-all flex items-center justify-center gap-3 active:scale-95">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

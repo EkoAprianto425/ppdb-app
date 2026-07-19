@@ -29,21 +29,39 @@ class RegistrationController extends Controller
         $user = Auth::user();
         $registration = $user->registration;
 
+        // dd($user);
+
         if (!$registration) {
             return redirect()->route('pendaftaran.create');
         }
 
-        // Ambil Jenjang via relationship
-        $level = $user->educationalLevel;
-        $fees = $level ? $level->fees()->orderBy('sort_order')->get() : collect();
+        // Cek Diskon Approved
+        $approvedDiscount = $registration->discountApplications()
+            ->where('status', 'approved')
+            ->with('discount')
+            ->first();
+        $discountAmount = $approvedDiscount ? $approvedDiscount->discount->amount : 0;
+
+        $fees = AdministrativeFee::where('educational_level_id', $user->educational_level_id)->get()->sortBy('sort_order');
 
         // Mapping status pembayaran untuk setiap biaya
-        $feeData = $fees->map(function($fee) use ($registration) {
+        $feeData = $fees->map(function($fee) use ($registration, $discountAmount) {
             $payment = $registration->payments()->where('fee_type', $fee->name)->latest()->first();
+            
+            // Terapkan diskon jika sort_order > 1 (biasanya biaya masuk/daftar ulang)
+            $amount = $fee->amount;
+            if ($fee->sort_order > 1) {
+                $amount -= $discountAmount;
+            }
+            if ($amount < 0) $amount = 0;
+
             return (object) [
                 'id' => $fee->id,
                 'name' => $fee->name,
-                'amount' => $fee->amount,
+                'amount' => $amount,
+                'original_amount' => $fee->amount,
+                'is_discounted' => ($fee->sort_order > 1 && $discountAmount > 0),
+                'discount_amount' => ($fee->sort_order > 1) ? $discountAmount : 0,
                 'sort_order' => $fee->sort_order,
                 'payment' => $payment,
                 'status' => $payment ? $payment->status : 'none',
@@ -51,11 +69,11 @@ class RegistrationController extends Controller
         });
 
         // Hitung Summary
-        $totalFees = $fees->sum('amount');
+        $totalFees = $feeData->sum('amount');
         $totalPaid = $registration->payments()->where('status', 'success')->sum('amount');
         $remaining = $totalFees - $totalPaid;
 
-        return view('pendaftaran.financial', compact('registration', 'feeData', 'totalFees', 'totalPaid', 'remaining'));
+        return view('pendaftaran.financial', compact('registration', 'feeData', 'totalFees', 'totalPaid', 'remaining', 'approvedDiscount'));
     }
 
     public function create()
@@ -195,6 +213,19 @@ class RegistrationController extends Controller
         $noid_base = $educational_level_id . Auth::id();
         $no_id = str_pad($noid_base, 7, '0', STR_PAD_LEFT) . $kode_adm;
 
+        // Terapkan Diskon jika ada yang disetujui
+        $finalAmount = $fee->amount;
+        if ($fee->sort_order > 1) {
+            $approvedDiscount = $registration->discountApplications()
+                ->where('status', 'approved')
+                ->with('discount')
+                ->first();
+            if ($approvedDiscount) {
+                $finalAmount -= $approvedDiscount->discount->amount;
+            }
+        }
+        if ($finalAmount < 0) $finalAmount = 0;
+
         $data = [
             'id_calsis'     => Auth::id(),
             'ref'           => $ref,
@@ -203,7 +234,7 @@ class RegistrationController extends Controller
             'jenis_bayar'   => $fee->name,
             'no_urut'       => $fee->sort_order,
             'no_id'         => $no_id,
-            'tagihan'       => (string) (int) $fee->amount,
+            'tagihan'       => (string) (int) $finalAmount,
             'flag'          => $flag
         ];
 
@@ -213,7 +244,7 @@ class RegistrationController extends Controller
             if ($result['status']) {
                 $registration->payments()->create([
                     'fee_type' => $fee->name,
-                    'amount'   => $fee->amount,
+                    'amount'   => $finalAmount,
                     'va_number' => $no_va,
                     'va_ref' => $ref,
                     'payment_method' => Payment::METHOD_VA,

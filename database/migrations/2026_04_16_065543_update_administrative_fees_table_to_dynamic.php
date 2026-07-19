@@ -18,6 +18,7 @@ return new class extends Migration
 
             // Hapus kolom lama jika ada
             if (Schema::hasColumn('administrative_fees', 'unit')) {
+                $table->dropUnique(['unit', 'type']);
                 $table->dropColumn(['unit', 'type', 'is_active']);
             }
             
