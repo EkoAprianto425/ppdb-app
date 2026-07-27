@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class DiscountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $query = Discount::with(['educationalLevel', 'registrationWave']);
@@ -19,7 +19,22 @@ class DiscountController extends Controller
         // Filter based on role
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
-            $query->whereIn('educational_level_id', $levelIds);
+            $query->where(function ($q) use ($levelIds) {
+                $q->whereIn('educational_level_id', $levelIds)
+                  ->orWhereNull('educational_level_id');
+            });
+        }
+
+        // Filter based on Jenjang / Jurusan selected
+        if ($request->filled('level_id')) {
+            if ($request->level_id === 'general') {
+                $query->whereNull('educational_level_id');
+            } else {
+                $query->where(function ($q) use ($request) {
+                    $q->where('educational_level_id', $request->level_id)
+                      ->orWhereNull('educational_level_id');
+                });
+            }
         }
 
         $discounts = $query->latest()->get();
