@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,27 +26,30 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Registration Routes
-    Route::get('/formulir', [RegistrationController::class, 'index'])->name('pendaftaran.index');
-    Route::post('/formulir', [RegistrationController::class, 'store'])->name('pendaftaran.store');
-    Route::get('/administrasi', [RegistrationController::class, 'financialIndex'])->name('pendaftaran.financial');
+    Route::get('/formulir', [\App\Http\Controllers\Siswa\RegistrationController::class, 'index'])->name('pendaftaran.index');
+    Route::post('/formulir', [\App\Http\Controllers\Siswa\RegistrationController::class, 'store'])->name('pendaftaran.store');
     
-    // Student Payment & Exam
-    Route::post('/payment/create-va', [RegistrationController::class, 'createVaPayment'])->name('pendaftaran.payment.create-va');
-    Route::post('/payment/check-va', [RegistrationController::class, 'checkVaStatus'])->name('pendaftaran.payment.check-va');
-    Route::get('/exam', [RegistrationController::class, 'examIndex'])->name('pendaftaran.exam');
-    Route::post('/exam/select', [RegistrationController::class, 'selectExam'])->name('pendaftaran.exam.select');
-    Route::get('/exam/card', [RegistrationController::class, 'downloadExamCard'])->name('pendaftaran.exam-card');
+    // Administrasi / Payment
+    Route::get('/administrasi', [\App\Http\Controllers\Siswa\PaymentController::class, 'index'])->name('pendaftaran.financial');
+    Route::post('/payment/create-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'createVa'])->name('pendaftaran.payment.create-va');
+    Route::post('/payment/check-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'checkVa'])->name('pendaftaran.payment.check-va');
     
-    // Student Announcement
-    Route::get('/pengumuman', [RegistrationController::class, 'announcementIndex'])->name('pendaftaran.announcement');
-    Route::get('/pengumuman/skl', [RegistrationController::class, 'downloadSKL'])->name('pendaftaran.announcement.skl');
+    // Ujian / Exam
+    Route::get('/exam', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('pendaftaran.exam');
+    Route::post('/exam/select', [\App\Http\Controllers\Siswa\ExamController::class, 'select'])->name('pendaftaran.exam.select');
+    Route::get('/exam/card', [\App\Http\Controllers\Siswa\ExamController::class, 'downloadCard'])->name('pendaftaran.exam-card');
+    
+    // Pengumuman / Announcement
+    Route::get('/pengumuman', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'index'])->name('pendaftaran.announcement');
+    Route::get('/pengumuman/skl', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'downloadSKL'])->name('pendaftaran.announcement.skl');
 
     // Discount
-    Route::post('/discount/apply', [App\Http\Controllers\DiscountController::class, 'apply'])->name('discount.apply');
+    Route::post('/discount/apply', [\App\Http\Controllers\Siswa\DiscountController::class, 'apply'])->name('discount.apply');
 
-    Route::get('/pendaftaran/create', [\App\Http\Controllers\RegistrationController::class, 'create'])->name('pendaftaran.create');
-    Route::get('/pendaftaran/edit', [\App\Http\Controllers\RegistrationController::class, 'edit'])->name('pendaftaran.edit');
-    Route::put('/pendaftaran', [\App\Http\Controllers\RegistrationController::class, 'update'])->name('pendaftaran.update');
+    // Formulir Actions
+    Route::get('/pendaftaran/create', [\App\Http\Controllers\Siswa\RegistrationController::class, 'create'])->name('pendaftaran.create');
+    Route::get('/pendaftaran/edit', [\App\Http\Controllers\Siswa\RegistrationController::class, 'edit'])->name('pendaftaran.edit');
+    Route::put('/pendaftaran', [\App\Http\Controllers\Siswa\RegistrationController::class, 'update'])->name('pendaftaran.update');
 
     // Admin Access
     Route::middleware(['role:admin_smp,admin_sma,admin_smk,admin_administrasi,super_admin'])->prefix('admin')->name('admin.')->group(function () {
