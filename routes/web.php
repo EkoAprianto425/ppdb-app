@@ -29,19 +29,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/formulir', [\App\Http\Controllers\Siswa\RegistrationController::class, 'index'])->name('pendaftaran.index');
     Route::post('/formulir', [\App\Http\Controllers\Siswa\RegistrationController::class, 'store'])->name('pendaftaran.store');
     
-    // Administrasi / Payment
-    Route::get('/administrasi', [\App\Http\Controllers\Siswa\PaymentController::class, 'index'])->name('pendaftaran.financial');
-    Route::post('/payment/create-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'createVa'])->name('pendaftaran.payment.create-va');
-    Route::post('/payment/check-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'checkVa'])->name('pendaftaran.payment.check-va');
-    
-    // Ujian / Exam
-    Route::get('/exam', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('pendaftaran.exam');
-    Route::post('/exam/select', [\App\Http\Controllers\Siswa\ExamController::class, 'select'])->name('pendaftaran.exam.select');
-    Route::get('/exam/card', [\App\Http\Controllers\Siswa\ExamController::class, 'downloadCard'])->name('pendaftaran.exam-card');
-    
-    // Pengumuman / Announcement
-    Route::get('/pengumuman', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'index'])->name('pendaftaran.announcement');
-    Route::get('/pengumuman/skl', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'downloadSKL'])->name('pendaftaran.announcement.skl');
+    // Routes that are blocked for students with special needs
+    Route::middleware([\App\Http\Middleware\CheckKebutuhanKhusus::class])->group(function () {
+        // Administrasi / Payment
+        Route::get('/administrasi', [\App\Http\Controllers\Siswa\PaymentController::class, 'index'])->name('pendaftaran.financial');
+        Route::post('/payment/create-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'createVa'])->name('pendaftaran.payment.create-va');
+        Route::post('/payment/check-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'checkVa'])->name('pendaftaran.payment.check-va');
+        
+        // Ujian / Exam
+        Route::get('/exam', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('pendaftaran.exam');
+        Route::post('/exam/select', [\App\Http\Controllers\Siswa\ExamController::class, 'select'])->name('pendaftaran.exam.select');
+        Route::get('/exam/card', [\App\Http\Controllers\Siswa\ExamController::class, 'downloadCard'])->name('pendaftaran.exam-card');
+        
+        // Pengumuman / Announcement
+        Route::get('/pengumuman', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'index'])->name('pendaftaran.announcement');
+        Route::get('/pengumuman/skl', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'downloadSKL'])->name('pendaftaran.announcement.skl');
+    });
 
     // Discount
     Route::post('/discount/apply', [\App\Http\Controllers\Siswa\DiscountController::class, 'apply'])->name('discount.apply');
