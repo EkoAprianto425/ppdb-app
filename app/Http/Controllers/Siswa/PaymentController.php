@@ -20,36 +20,25 @@ class PaymentController extends Controller
             return redirect()->route('pendaftaran.create');
         }
 
-        // Cek Diskon Approved
+        // Cek Diskon Approved (hanya untuk informasi, tidak mengurangi biaya)
         $approvedDiscount = $registration->discountApplications()
             ->where('status', 'approved')
             ->with('discount')
             ->first();
-        $discountAmount = $approvedDiscount ? $approvedDiscount->discount->amount : 0;
 
         $fees = AdministrativeFee::where('educational_level_id', $user->educational_level_id)->get()->sortBy('sort_order');
 
-        // Mapping status pembayaran untuk setiap biaya
-        $feeData = $fees->map(function($fee) use ($registration, $discountAmount) {
+        // Mapping status pembayaran untuk setiap biaya (nominal penuh, tanpa potongan diskon)
+        $feeData = $fees->map(function($fee) use ($registration) {
             $payment = $registration->payments()->where('fee_type', $fee->name)->latest()->first();
-            
-            // Terapkan diskon jika sort_order > 1 (biasanya biaya masuk/daftar ulang)
-            $amount = $fee->amount;
-            if ($fee->sort_order > 1) {
-                $amount -= $discountAmount;
-            }
-            if ($amount < 0) $amount = 0;
 
             return (object) [
-                'id' => $fee->id,
-                'name' => $fee->name,
-                'amount' => $amount,
-                'original_amount' => $fee->amount,
-                'is_discounted' => ($fee->sort_order > 1 && $discountAmount > 0),
-                'discount_amount' => ($fee->sort_order > 1) ? $discountAmount : 0,
-                'sort_order' => $fee->sort_order,
-                'payment' => $payment,
-                'status' => $payment ? $payment->status : 'none',
+                'id'          => $fee->id,
+                'name'        => $fee->name,
+                'amount'      => $fee->amount,
+                'sort_order'  => $fee->sort_order,
+                'payment'     => $payment,
+                'status'      => $payment ? $payment->status : 'none',
             ];
         });
 
@@ -388,22 +377,12 @@ class PaymentController extends Controller
     }
 
     /**
-     * Hitung jumlah tagihan final setelah diskon (jika ada).
+     * Hitung jumlah tagihan final.
+     * Diskon tidak diterapkan ke nominal VA — diskon dikelola secara terpisah
+     * untuk keperluan cashback / program keringanan lainnya.
      */
     private function resolveFinalAmount($registration, $fee): float
     {
-        $finalAmount = $fee->amount;
-
-        if ($fee->sort_order > 1) {
-            $approvedDiscount = $registration->discountApplications()
-                ->where('status', 'approved')
-                ->with('discount')
-                ->first();
-            if ($approvedDiscount) {
-                $finalAmount -= $approvedDiscount->discount->amount;
-            }
-        }
-
-        return max(0, $finalAmount);
+        return (float) $fee->amount;
     }
 }
