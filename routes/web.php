@@ -34,7 +34,10 @@ Route::middleware('auth')->group(function () {
         // Administrasi / Payment
         Route::get('/administrasi', [\App\Http\Controllers\Siswa\PaymentController::class, 'index'])->name('pendaftaran.financial');
         Route::post('/payment/create-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'createVa'])->name('pendaftaran.payment.create-va');
+        Route::post('/payment/create-va-bca', [\App\Http\Controllers\Siswa\PaymentController::class, 'createVaBca'])->name('pendaftaran.payment.create-va-bca');
         Route::post('/payment/check-va', [\App\Http\Controllers\Siswa\PaymentController::class, 'checkVa'])->name('pendaftaran.payment.check-va');
+        Route::post('/payment/switch-to-bca', [\App\Http\Controllers\Siswa\PaymentController::class, 'switchToBca'])->name('pendaftaran.payment.switch-to-bca');
+        Route::post('/payment/switch-to-btn', [\App\Http\Controllers\Siswa\PaymentController::class, 'switchToBtn'])->name('pendaftaran.payment.switch-to-btn');
         
         // Ujian / Exam
         Route::get('/exam', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('pendaftaran.exam');

@@ -134,6 +134,7 @@
                     <th class="px-8 py-4">No. Urut</th>
                     <th class="px-8 py-4">Nama Komponen</th>
                     <th class="px-8 py-4 text-right">Nominal</th>
+                    <th class="px-8 py-4 text-right">No. VA</th>
                     <th class="px-8 py-4 text-center">Status</th>
                     <th class="px-8 py-4 text-right">Aksi</th>
                 </tr>
@@ -158,6 +159,24 @@
                                 Rp {{ number_format($fee->amount, 0, ',', '.') }}
                             @endif
                         </td>
+                        <td class="px-8 py-6 text-right">
+                            @if($fee->status === 'pending' && $fee->payment)
+                                @php
+                                    $vaBank = $fee->payment->va_bank ?? 'btn';
+                                    $isBcaVaCell = $vaBank === 'bca';
+                                @endphp
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[12px] text-amber-500 font-bold font-mono">{{ $fee->payment->va_number }}</span>
+                                    <span class="px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border
+                                        {{ $isBcaVaCell ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' }}">
+                                        {{ strtoupper($vaBank) }}
+                                    </span>
+                                    
+                                </div>
+                            @else
+                                <span class="text-[10px] themed-text-muted opacity-40">—</span>
+                            @endif
+                        </td>
                         <td class="px-8 py-6 text-center">
                             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border {{ $statusColors[$fee->status] }}">
                                 {{ $statusLabels[$fee->status] }}
@@ -167,17 +186,26 @@
                             @if($fee->status === 'none' || $fee->status === 'failed')
                                 @if($canPayNext)
                                     @if($fee->sort_order == 1 || ($registration && $registration->status === 'lulus'))
-                                        <div class="flex flex-col items-end gap-1.5">
+                                        <div class="flex flex-col items-end gap-2">
                                             @if($fee->sort_order == 2 && $registration && $registration->reregistration_deadline)
                                                 <span class="text-[9px] font-bold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
                                                     Batas: {{ \Carbon\Carbon::parse($registration->reregistration_deadline)->translatedFormat('d M Y') }}
                                                 </span>
                                             @endif
+                                            {{-- Tombol VA BTN --}}
                                             <form action="{{ route('pendaftaran.payment.create-va') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="fee_id" value="{{ $fee->id }}">
                                                 <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all">
                                                     Bayar via VA BTN
+                                                </button>
+                                            </form>
+                                            {{-- Tombol VA BCA --}}
+                                            <form action="{{ route('pendaftaran.payment.create-va-bca') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="fee_id" value="{{ $fee->id }}">
+                                                <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
+                                                    Bayar via VA BCA
                                                 </button>
                                             </form>
                                         </div>
@@ -188,18 +216,51 @@
                                 @else
                                     <span class="text-[10px] themed-text-muted italic opacity-50">Menunggu Tahap Sebelumnya</span>
                                 @endif
+
                             @elseif($fee->status === 'pending')
-                                <div class="flex flex-col items-end gap-1.5">
-                                    <span class="text-[10px] text-amber-500 font-bold uppercase tracking-widest">VA: {{ $fee->payment->va_number }}</span>
-                                    <form action="{{ route('pendaftaran.payment.check-va') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="payment_id" value="{{ $fee->payment->id }}">
-                                        <button type="submit" class="px-3 py-1.5 rounded-lg btn-soft-secondary text-[9px] font-bold uppercase tracking-widest">
-                                            Cek Status
-                                        </button>
-                                    </form>
+                                @php
+                                    $pendingPayment = $fee->payment;
+                                    $vaBank = $pendingPayment->va_bank ?? 'btn';
+                                    $isBtnVa = $vaBank === 'btn';
+                                    $isBcaVa = $vaBank === 'bca';
+                                @endphp
+                                <div class="flex flex-col items-end gap-2">
+                                    {{-- Cek Status (hanya untuk VA BTN) --}}
+                                    @if($isBtnVa)
+                                        <form action="{{ route('pendaftaran.payment.check-va') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="payment_id" value="{{ $pendingPayment->id }}">
+                                            <button type="submit" class="px-3 py-1.5 rounded-lg btn-soft-secondary text-[9px] font-bold uppercase tracking-widest">
+                                                Cek Status
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    {{-- Tombol Switch --}}
+                                    @if($isBtnVa)
+                                        {{-- Ganti dari BTN ke BCA --}}
+                                        <form action="{{ route('pendaftaran.payment.switch-to-bca') }}" method="POST"
+                                              onsubmit="return confirm('VA BTN akan dihapus dan diganti VA BCA. Lanjutkan?')">
+                                            @csrf
+                                            <input type="hidden" name="payment_id" value="{{ $pendingPayment->id }}">
+                                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 text-[9px] font-bold uppercase tracking-widest transition-all">
+                                                Ganti ke VA BCA
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Ganti dari BCA ke BTN --}}
+                                        <form action="{{ route('pendaftaran.payment.switch-to-btn') }}" method="POST"
+                                              onsubmit="return confirm('VA BCA akan dihapus dan diganti VA BTN. Lanjutkan?')">
+                                            @csrf
+                                            <input type="hidden" name="payment_id" value="{{ $pendingPayment->id }}">
+                                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-widest transition-all">
+                                                Ganti ke VA BTN
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                                 @php $canPayNext = false; @endphp
+
                             @else
                                 <div class="flex justify-end">
                                     <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 border border-emerald-500/30">

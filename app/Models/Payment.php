@@ -14,6 +14,7 @@ class Payment extends Model
         'va_number',
         'va_ref',
         'payment_method',
+        'va_bank',
         'payment_proof',
         'status',
         'admin_note',
@@ -26,7 +27,11 @@ class Payment extends Model
     const STATUS_FAILED = 'failed';
 
     const METHOD_VA = 'va';
+    const METHOD_VA_BCA = 'va_bca';
     const METHOD_MANUAL = 'manual';
+
+    const BANK_BTN = 'btn';
+    const BANK_BCA = 'bca';
 
     public function registration(): BelongsTo
     {
