@@ -102,18 +102,7 @@
                         </div>
                         <div>
                             @if($activeDiscountApp)
-                                <div class="flex flex-col items-end">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-[9px] font-black uppercase tracking-widest themed-text-muted">Status:</span>
-                                        <span class="px-3 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest {{ $activeDiscountApp->status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ($activeDiscountApp->status === 'rejected' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20') }}">
-                                            {{ $activeDiscountApp->status }}
-                                        </span>
-                                    </div>
-                                    <p class="text-[10px] font-bold themed-text">{{ $activeDiscountApp->discount->name }}</p>
-                                    @if($activeDiscountApp->notes)
-                                        <p class="text-[9px] themed-text-muted italic max-w-[200px] text-right mt-1">{{ $activeDiscountApp->notes }}</p>
-                                    @endif
-                                </div>
+                                @include('pendaftaran.partials.discount-info')
                             @else
                                 <button @click="$dispatch('open-discount-modal')" class="px-6 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-[10px] font-bold uppercase shadow-lg shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap">
                                     Ajukan Keringanan
