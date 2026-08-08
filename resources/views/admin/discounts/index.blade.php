@@ -73,10 +73,11 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col gap-1">
-                                <span class="text-[11px] font-black themed-text text-primary">Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
                                 @if($discount->category === 'anak_pegawai')
-                                    <span class="text-[9px] themed-text-muted font-bold italic">SPP: Rp {{ number_format($discount->spp_amount, 0, ',', '.') }}</span>
+                                    <span class="text-[11px] font-black themed-text text-primary">Biaya Pendaftaran: Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
+                                    <span class="text-[9px] themed-text-muted font-bold italic">Biaya SPP: Rp {{ number_format($discount->spp_amount, 0, ',', '.') }}</span>
                                 @else
+                                    <span class="text-[11px] font-black themed-text text-primary">Potongan: Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
                                     <span class="text-[9px] themed-text-muted font-bold italic">Sisa Kuota: {{ $discount->qty }}</span>
                                 @endif
                             </div>

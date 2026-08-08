@@ -40,7 +40,12 @@
                     </td>
                     <td class="px-8 py-5">
                         <p class="text-sm font-bold themed-text">{{ $app->discount->name }}</p>
+                        @if($app->discount->category === 'anak_pegawai')
+                        <p class="text-[10px] themed-text-muted">Biaya Pendaftaran: Rp {{ number_format($app->discount->amount, 0, ',', '.') }}</p>
+                        <p class="text-[10px] themed-text-muted">Biaya SPP: Rp {{ number_format($app->discount->spp_amount, 0, ',', '.') }}</p>
+                        @else
                         <p class="text-[10px] themed-text-muted">Potongan: Rp {{ number_format($app->discount->amount, 0, ',', '.') }}</p>
+                        @endif
                     </td>
                     <td class="px-8 py-5">
                         @if($app->employee_status)
