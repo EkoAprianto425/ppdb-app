@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | VA Inquiry API Authentication (HMAC-SHA256 / BI SNAP Standard)
+    |--------------------------------------------------------------------------
+    |
+    | Konfigurasi untuk autentikasi API inquiry Virtual Account.
+    | Gunakan credential ini saat memanggil endpoint:
+    |   GET /api/va/{va_number}
+    |   GET|POST /api/va/inquiry
+    |
+    */
+    'va_inquiry' => [
+        'client_key'          => env('VA_INQUIRY_CLIENT_KEY'),
+        'client_secret'       => env('VA_INQUIRY_CLIENT_SECRET'),
+        'timestamp_tolerance' => env('VA_INQUIRY_TIMESTAMP_TOLERANCE', 5),
+    ],
+
 ];
