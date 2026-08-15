@@ -1,0 +1,239 @@
+{
+  "info": {
+    "name": "PPDB VA API",
+    "description": "Collection API untuk integrasi Virtual Account PPDB (Standar BI SNAP)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. VA Inquiry (GET By Path)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const clientKey = pm.collectionVariables.get(\"CLIENT_KEY\");",
+              "const clientSecret = pm.collectionVariables.get(\"CLIENT_SECRET\");",
+              "",
+              "if (!clientKey || !clientSecret) {",
+              "    console.error('CLIENT_KEY or CLIENT_SECRET is missing. Please set them in Collection Variables.');",
+              "}",
+              "",
+              "const moment = require('moment');",
+              "const timestamp = moment().format(); // Format ISO 8601",
+              "",
+              "const stringToSign = clientKey + \"|\" + timestamp;",
+              "const signature = CryptoJS.HmacSHA256(stringToSign, clientSecret).toString(CryptoJS.enc.Hex);",
+              "",
+              "pm.variables.set(\"X-CLIENT-KEY\", clientKey);",
+              "pm.variables.set(\"X-TIMESTAMP\", timestamp);",
+              "pm.variables.set(\"X-SIGNATURE\", signature);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-CLIENT-KEY",
+            "value": "{{X-CLIENT-KEY}}",
+            "type": "text"
+          },
+          {
+            "key": "X-TIMESTAMP",
+            "value": "{{X-TIMESTAMP}}",
+            "type": "text"
+          },
+          {
+            "key": "X-SIGNATURE",
+            "value": "{{X-SIGNATURE}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{BASE_URL}}/api/va/{{VA_NUMBER}}",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "va",
+            "{{VA_NUMBER}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. VA Inquiry (POST)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const clientKey = pm.collectionVariables.get(\"CLIENT_KEY\");",
+              "const clientSecret = pm.collectionVariables.get(\"CLIENT_SECRET\");",
+              "",
+              "const moment = require('moment');",
+              "const timestamp = moment().format();",
+              "",
+              "const stringToSign = clientKey + \"|\" + timestamp;",
+              "const signature = CryptoJS.HmacSHA256(stringToSign, clientSecret).toString(CryptoJS.enc.Hex);",
+              "",
+              "pm.variables.set(\"X-CLIENT-KEY\", clientKey);",
+              "pm.variables.set(\"X-TIMESTAMP\", timestamp);",
+              "pm.variables.set(\"X-SIGNATURE\", signature);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-CLIENT-KEY",
+            "value": "{{X-CLIENT-KEY}}",
+            "type": "text"
+          },
+          {
+            "key": "X-TIMESTAMP",
+            "value": "{{X-TIMESTAMP}}",
+            "type": "text"
+          },
+          {
+            "key": "X-SIGNATURE",
+            "value": "{{X-SIGNATURE}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"va\": \"{{VA_NUMBER}}\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/va/inquiry",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "va",
+            "inquiry"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. VA Payment Notification",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const clientKey = pm.collectionVariables.get(\"CLIENT_KEY\");",
+              "const clientSecret = pm.collectionVariables.get(\"CLIENT_SECRET\");",
+              "",
+              "const moment = require('moment');",
+              "const timestamp = moment().format();",
+              "",
+              "const stringToSign = clientKey + \"|\" + timestamp;",
+              "const signature = CryptoJS.HmacSHA256(stringToSign, clientSecret).toString(CryptoJS.enc.Hex);",
+              "",
+              "pm.variables.set(\"X-CLIENT-KEY\", clientKey);",
+              "pm.variables.set(\"X-TIMESTAMP\", timestamp);",
+              "pm.variables.set(\"X-SIGNATURE\", signature);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-CLIENT-KEY",
+            "value": "{{X-CLIENT-KEY}}",
+            "type": "text"
+          },
+          {
+            "key": "X-TIMESTAMP",
+            "value": "{{X-TIMESTAMP}}",
+            "type": "text"
+          },
+          {
+            "key": "X-SIGNATURE",
+            "value": "{{X-SIGNATURE}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"va_number\": \"{{VA_NUMBER}}\",\n  \"amount\": 500000,\n  \"paid_at\": \"2026-08-15 10:00:00\",\n  \"va_ref\": \"REF123456\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/va/payment-notify",
+          "host": [
+            "{{BASE_URL}}"
+          ],
+          "path": [
+            "api",
+            "va",
+            "payment-notify"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "CLIENT_KEY",
+      "value": "PPDBALHASRA",
+      "type": "string"
+    },
+    {
+      "key": "CLIENT_SECRET",
+      "value": "AEkvExg92F",
+      "type": "string"
+    },
+    {
+      "key": "VA_NUMBER",
+      "value": "1234567890",
+      "type": "string"
+    }
+  ]
+}
