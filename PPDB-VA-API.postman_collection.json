@@ -217,7 +217,7 @@
   "variable": [
     {
       "key": "BASE_URL",
-      "value": "http://localhost:8000",
+      "value": "https://dev.spmbalhasra.com/",
       "type": "string"
     },
     {
