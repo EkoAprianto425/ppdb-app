@@ -161,7 +161,6 @@ class VaPaymentNotifyController extends Controller
             'responseMessage' => 'Successful',
             'message'         => 'Pembayaran berhasil diproses.',
             'data'            => [
-                'payment_id'  => $payment->id,
                 'va_number'   => $payment->va_number,
                 'nama_siswa'  => $namaSiswa,
                 'fee_type'    => $payment->fee_type,
