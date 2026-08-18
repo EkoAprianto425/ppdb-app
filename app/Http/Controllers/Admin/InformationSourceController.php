@@ -23,6 +23,7 @@ class InformationSourceController extends Controller
         InformationSource::create([
             'name' => $request->name,
             'is_active' => true,
+            'requires_manual_input' => $request->has('requires_manual_input'),
         ]);
 
         return redirect()->back()->with('success', 'Sumber informasi berhasil ditambahkan.');
@@ -37,6 +38,7 @@ class InformationSourceController extends Controller
         $information_source->update([
             'name' => $request->name,
             'is_active' => $request->has('is_active'),
+            'requires_manual_input' => $request->has('requires_manual_input'),
         ]);
 
         return redirect()->back()->with('success', 'Sumber informasi berhasil diperbarui.');

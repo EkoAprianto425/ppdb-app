@@ -214,20 +214,24 @@
                     {{-- Sumber Informasi --}}
                     <div>
                         <label for="sumber_informasi_select" class="block text-xs font-medium text-amber-900/80 mb-1.5">Dari Mana Anda Tahu Sekolah Ini? <span class="text-red-500">*</span></label>
-                        <select id="sumber_informasi_select"
-                                 class="w-full px-4 py-2.5 rounded-xl bg-white border border-amber-900/20 text-sm focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all appearance-none">
+                        <select id="sumber_informasi_select" name="sumber_informasi"
+                                 class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('sumber_informasi') ? 'border-red-500/50' : 'border-amber-900/20' }} text-sm focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all appearance-none">
                             <option value="" disabled {{ !old('sumber_informasi') ? 'selected' : '' }}>-- Pilih sumber informasi --</option>
                             @foreach($sources as $source)
-                                <option value="{{ $source->name }}" {{ old('sumber_informasi') === $source->name ? 'selected' : '' }} class="text-amber-950 bg-white">{{ $source->name }}</option>
+                                <option value="{{ $source->name }}" data-requires-manual="{{ $source->requires_manual_input ? 'true' : 'false' }}" {{ old('sumber_informasi') === $source->name ? 'selected' : '' }} class="text-amber-950 bg-white">{{ $source->name }}</option>
                             @endforeach
-                            <option value="lainnya" class="font-bold text-amber-700" {{ old('sumber_informasi') && !collect($sources)->contains('name', old('sumber_informasi')) ? 'selected' : '' }}>++ LAINNYA (Ketik Manual) ++</option>
+                            <option value="lainnya" class="font-bold text-amber-700" {{ old('sumber_informasi') == 'lainnya' ? 'selected' : '' }}>++ LAINNYA (Ketik Manual) ++</option>
                         </select>
                         
-                        <div id="manual_sumber_container" class="{{ old('sumber_informasi') && !collect($sources)->contains('name', old('sumber_informasi')) ? 'block' : 'hidden' }} mt-3">
-                            <label for="sumber_informasi" class="block text-xs font-medium text-amber-900/80 mb-1.5">Ketik Sumber Informasi <span class="text-red-500">*</span></label>
-                            <input id="sumber_informasi" type="text" name="sumber_informasi" value="{{ old('sumber_informasi') }}"
-                                   placeholder="Contoh: Brosur di jalan, Teman, dll"
-                                   class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('sumber_informasi') ? 'border-red-500/50' : 'border-amber-900/20' }} text-amber-950 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all">
+                        @php
+                            $showManualSumber = old('sumber_informasi') == 'lainnya' || (collect($sources)->firstWhere('name', old('sumber_informasi'))?->requires_manual_input ?? false);
+                        @endphp
+                        <div id="manual_sumber_container" class="{{ $showManualSumber ? 'block' : 'hidden' }} mt-3">
+                            <label for="sumber_informasi_tambahan" class="block text-xs font-medium text-amber-900/80 mb-1.5">Ketik Keterangan / Sumber Spesifik <span class="text-red-500">*</span></label>
+                            <input id="sumber_informasi_tambahan" type="text" name="sumber_informasi_tambahan" value="{{ old('sumber_informasi_tambahan') }}"
+                                   placeholder="Contoh: Nama teman, nama akun IG, dll"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('sumber_informasi_tambahan') ? 'border-red-500/50' : 'border-amber-900/20' }} text-amber-950 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all">
+                            @error('sumber_informasi_tambahan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         @error('sumber_informasi') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -398,28 +402,23 @@
         });
 
         const sumberSelect = document.getElementById('sumber_informasi_select');
-        const sumberInput = document.getElementById('sumber_informasi');
+        const sumberTambahanInput = document.getElementById('sumber_informasi_tambahan');
         const manualSumberContainer = document.getElementById('manual_sumber_container');
 
         // Event: Sumber Informasi Changed
         sumberSelect.addEventListener('change', function () {
             const val = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            const requiresManual = selectedOption.getAttribute('data-requires-manual') === 'true' || val === 'lainnya';
             
-            if (val === 'lainnya') {
+            if (requiresManual) {
                 manualSumberContainer.classList.remove('hidden');
                 manualSumberContainer.classList.add('block');
-                if (sumberInput.value === 'lainnya' || document.querySelector(`#sumber_informasi_select option[value="${sumberInput.value}"]`)) {
-                    sumberInput.value = ''; 
-                }
-                sumberInput.focus();
-            } else if (val) {
-                manualSumberContainer.classList.remove('block');
-                manualSumberContainer.classList.add('hidden');
-                sumberInput.value = val;
+                sumberTambahanInput.focus();
             } else {
                 manualSumberContainer.classList.remove('block');
                 manualSumberContainer.classList.add('hidden');
-                sumberInput.value = '';
+                sumberTambahanInput.value = '';
             }
         });
     });

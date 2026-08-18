@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class InformationSource extends Model
 {
-    protected $fillable = ['name', 'is_active'];
+    protected $fillable = ['name', 'is_active', 'requires_manual_input'];
 }

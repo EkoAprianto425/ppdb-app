@@ -33,6 +33,7 @@ class RegisteredUserController extends Controller
             'educational_level_id' => $request->educational_level_id,
             'alasan_memilih'   => $request->alasan_memilih,
             'sumber_informasi' => $request->sumber_informasi,
+            'sumber_informasi_tambahan' => $request->sumber_informasi_tambahan,
             'role'             => 'siswa',
         ]);
 

@@ -44,7 +44,7 @@
                             'Asal Sekolah' => $registration->user->asal_sekolah,
                             'Tujuan Masuk' => $registration->user->educationalLevel?->name,
                             'Alasan Memilih' => $registration->user->alasan_memilih,
-                            'Sumber Informasi' => $registration->user->sumber_informasi,
+                            'Sumber Informasi' => $registration->user->sumber_informasi . ($registration->user->sumber_informasi_tambahan ? ' (' . $registration->user->sumber_informasi_tambahan . ')' : ''),
                             'No. WhatsApp' => $registration->user->whatsapp_number,
                         ];
                     @endphp

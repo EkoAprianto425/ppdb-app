@@ -43,7 +43,7 @@
                     $accFields = [
                         'Asal Sekolah' => auth()->user()->asal_sekolah,
                         'Tujuan Masuk' => auth()->user()->educationalLevel?->name,
-                        'Sumber Info' => auth()->user()->sumber_informasi,
+                        'Sumber Info' => auth()->user()->sumber_informasi  . (auth()->user()->sumber_informasi_tambahan ? ' (' . auth()->user()->sumber_informasi_tambahan . ')' : ''),
                     ];
                 @endphp
                 @foreach($accFields as $label => $val)

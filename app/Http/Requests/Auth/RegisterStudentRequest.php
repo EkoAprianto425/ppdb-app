@@ -25,6 +25,7 @@ class RegisterStudentRequest extends FormRequest
             'educational_level_id' => ['required', 'exists:educational_levels,id'],
             'alasan_memilih'   => ['required', 'string', 'max:1000'],
             'sumber_informasi' => ['required', 'string', 'max:255'],
+            'sumber_informasi_tambahan' => ['nullable', 'string', 'max:255'],
         ];
     }
 

@@ -30,6 +30,11 @@
                     <p class="text-rose-500 text-[10px] mt-2 px-1 font-bold">{{ $message }}</p>
                 @enderror
             </div>
+            
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="requires_manual_input" id="requires_manual_input" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                <label for="requires_manual_input" class="text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] pt-0.5">Wajib Input Manual (Tambahan)</label>
+            </div>
 
             <button type="submit" class="w-full py-5 rounded-2xl bg-primary text-white font-black uppercase tracking-[0.2em] text-xs shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:shadow-primary/40 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
@@ -49,6 +54,7 @@
                             <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">No</th>
                             <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Nama Sumber</th>
                             <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Status</th>
+                            <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Input Manual</th>
                             <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted text-right" data-dt-order="disable">Aksi</th>
                         </tr>
                     </thead>
@@ -66,10 +72,17 @@
                                     <span class="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest text-rose-500">Non-Aktif</span>
                                 @endif
                             </td>
+                            <td class="px-6 py-4">
+                                @if($source->requires_manual_input)
+                                    <span class="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[9px] font-black uppercase tracking-widest text-amber-500">Ya</span>
+                                @else
+                                    <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/50">Tidak</span>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     {{-- Edit Trigger --}}
-                                    <button onclick="openEditModal({{ $source->id }}, {{ json_encode($source->name) }}, {{ $source->is_active ? 1 : 0 }})" 
+                                    <button onclick="openEditModal({{ $source->id }}, {{ json_encode($source->name) }}, {{ $source->is_active ? 1 : 0 }}, {{ $source->requires_manual_input ? 1 : 0 }})" 
                                             class="p-2 rounded-lg bg-white/5 text-white/20 hover:bg-primary/10 hover:text-primary transition-all">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -128,6 +141,11 @@
                     <label for="edit_is_active" class="text-xs font-black themed-text-muted uppercase tracking-widest">Aktifkan Sumber</label>
                 </div>
 
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="edit_requires_manual_input" name="requires_manual_input" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                    <label for="edit_requires_manual_input" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Input Manual</label>
+                </div>
+
                 <div class="flex gap-4">
                     <button type="button" onclick="closeEditModal()" class="flex-1 py-4 rounded-2xl bg-white/5 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all">Batal</button>
                     <button type="submit" class="flex-1 py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">Simpan Perubahan</button>
@@ -139,15 +157,17 @@
 
 @section('scripts')
 <script>
-    function openEditModal(id, name, isActive) {
+    function openEditModal(id, name, isActive, requiresManual) {
         const modal = document.getElementById('editModal');
         const form = document.getElementById('editForm');
         const nameInput = document.getElementById('edit_name');
         const activeInput = document.getElementById('edit_is_active');
+        const requiresManualInput = document.getElementById('edit_requires_manual_input');
         
         form.action = `/admin/information-sources/${id}`;
         nameInput.value = name;
         activeInput.checked = isActive;
+        requiresManualInput.checked = requiresManual;
         
         modal.classList.remove('hidden');
     }

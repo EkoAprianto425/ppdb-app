@@ -22,6 +22,7 @@ class User extends Authenticatable
         'educational_level_id',
         'alasan_memilih',
         'sumber_informasi',
+        'sumber_informasi_tambahan',
         'role',
     ];
 
