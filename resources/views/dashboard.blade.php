@@ -20,7 +20,7 @@
     $hasExam = $registration && $registration->exam_schedule_id;
 
     $statusColors = [
-        'none' => 'bg-orange-700/50 text-orange-400 border-orange-700',
+        'none' => 'bg-orange-700/50 text-white-400 border-orange-700',
         'pending' => 'bg-amber-500/15 text-amber-400 border-amber-500/20',
         'success' => 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
         'failed' => 'bg-rose-500/15 text-rose-400 border-rose-500/20',
@@ -124,7 +124,7 @@
         </div>
         @if(!$hasRegistration)
             <p class="text-xs themed-text-muted mb-3">Silakan isi formulir pendaftaran terlebih dahulu.</p>
-            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-orange-400 border-orange-700">Menunggu Formulir</span>
+            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Menunggu Formulir</span>
         @elseif($activeFee)
             <p class="text-xs themed-text-muted mb-1">Tagihan yang harus dibayar:</p>
             <p class="text-lg font-black themed-text mb-1">{{ $activeFee->name }}</p>
@@ -158,10 +158,10 @@
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Unduh Kartu Ujian</a>
         @elseif($status1 !== 'success')
             <p class="text-xs themed-text-muted mb-3">Selesaikan pembayaran formulir untuk memilih jadwal.</p>
-            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-orange-400 border-orange-700">Belum Tersedia</span>
+            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Belum Tersedia</span>
         @elseif($schedules->count() === 0)
             <p class="text-xs themed-text-muted mb-3">Jadwal ujian untuk unit {{ $user->educationalLevel?->name }} belum tersedia.</p>
-            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-orange-400 border-orange-700">Belum Dijadwalkan</span>
+            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Belum Dijadwalkan</span>
         @else
             <p class="text-xs themed-text-muted mb-3">{{ $schedules->count() }} sesi tersedia.</p>
             <button @click="$dispatch('open-modal', 'modal-select-exam')" class="w-full py-2.5 rounded-xl bg-blue-500 text-white text-[10px] font-black uppercase shadow-lg shadow-blue-500/20 active:scale-95 transition-all">Pilih Jadwal</button>
@@ -209,7 +209,7 @@
             <p class="text-xs text-rose-500/70">Tetap semangat! Daftar di gelombang berikutnya.</p>
         @elseif(!$hasExam)
             <p class="text-xs themed-text-muted mb-3">Pengumuman setelah ujian dilaksanakan.</p>
-            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-orange-400 border-orange-700">Menunggu Ujian</span>
+            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Menunggu Ujian</span>
         @else
             <p class="text-xs themed-text-muted mb-3">Ujian selesai. Tunggu pengumuman.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-amber-500/15 text-amber-400 border-amber-500/20">Dalam Validasi</span>
