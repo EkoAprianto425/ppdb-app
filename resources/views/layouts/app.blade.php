@@ -228,12 +228,39 @@
         table.dataTable thead .dt-column-order { display: none !important; }
     </style>
 </head>
+<script>
+    function appData() {
+        return {
+            sidebarOpen: false,
+            scrolled: false,
+            themeDropdownOpen: false,
+            currentTheme: localStorage.getItem('app_theme') || 'amber',
+            themes: {
+                'amber': { label: 'Amber', primary: '#92400e', rgb: '146, 64, 14', surface: '#fdfbf7', text_main: '#451a03', text_muted: '#92400e', card_bg: 'rgba(254, 243, 199, 0.4)', border: 'rgba(217, 119, 6, 0.15)', sidebar_bg: 'rgba(254, 243, 199, 0.7)', header_bg: 'rgba(253, 251, 247, 0.8)' },
+                'indigo': { label: 'Indigo', primary: '#3730a3', rgb: '55, 48, 163', surface: '#f8f9ff', text_main: '#1e1b4b', text_muted: '#4338ca', card_bg: 'rgba(224, 231, 255, 0.4)', border: 'rgba(99, 102, 241, 0.15)', sidebar_bg: 'rgba(224, 231, 255, 0.7)', header_bg: 'rgba(248, 249, 255, 0.8)' },
+                'emerald': { label: 'Emerald', primary: '#065f46', rgb: '6, 95, 70', surface: '#f0fdf9', text_main: '#022c22', text_muted: '#059669', card_bg: 'rgba(209, 250, 229, 0.4)', border: 'rgba(16, 185, 129, 0.15)', sidebar_bg: 'rgba(209, 250, 229, 0.7)', header_bg: 'rgba(240, 253, 249, 0.8)' },
+                'rose': { label: 'Rose', primary: '#9f1239', rgb: '159, 18, 57', surface: '#fff1f2', text_main: '#4c0519', text_muted: '#be123c', card_bg: 'rgba(254, 205, 211, 0.4)', border: 'rgba(244, 63, 94, 0.15)', sidebar_bg: 'rgba(254, 205, 211, 0.7)', header_bg: 'rgba(255, 241, 242, 0.8)' },
+                'sky': { label: 'Sky', primary: '#0c4a6e', rgb: '12, 74, 110', surface: '#f0f9ff', text_main: '#082f49', text_muted: '#0369a1', card_bg: 'rgba(186, 230, 253, 0.4)', border: 'rgba(14, 165, 233, 0.15)', sidebar_bg: 'rgba(186, 230, 253, 0.7)', header_bg: 'rgba(240, 249, 255, 0.8)' },
+                'violet': { label: 'Violet', primary: '#4c1d95', rgb: '76, 29, 149', surface: '#faf5ff', text_main: '#2e1065', text_muted: '#7c3aed', card_bg: 'rgba(221, 214, 254, 0.4)', border: 'rgba(139, 92, 246, 0.15)', sidebar_bg: 'rgba(221, 214, 254, 0.7)', header_bg: 'rgba(250, 245, 255, 0.8)' },
+                'slate': { label: 'Slate', primary: '#1e293b', rgb: '30, 41, 59', surface: '#f8fafc', text_main: '#0f172a', text_muted: '#475569', card_bg: 'rgba(226, 232, 240, 0.5)', border: 'rgba(100, 116, 139, 0.15)', sidebar_bg: 'rgba(226, 232, 240, 0.7)', header_bg: 'rgba(248, 250, 252, 0.8)' },
+                'teal': { label: 'Teal', primary: '#134e4a', rgb: '19, 78, 74', surface: '#f0fdfa', text_main: '#042f2e', text_muted: '#0d9488', card_bg: 'rgba(204, 251, 241, 0.4)', border: 'rgba(20, 184, 166, 0.15)', sidebar_bg: 'rgba(204, 251, 241, 0.7)', header_bg: 'rgba(240, 253, 250, 0.8)' }
+            },
+            setTheme(key) {
+                this.currentTheme = key;
+                localStorage.setItem('app_theme', key);
+                this.themeDropdownOpen = false;
+            },
+            get themeStyle() {
+                const t = this.themes[this.currentTheme] || this.themes['amber'];
+                return `--primary-color: ${t.primary}; --primary-rgb: ${t.rgb}; --surface-color: ${t.surface}; --text-main: ${t.text_main}; --text-muted: ${t.text_muted}; --card-bg: ${t.card_bg}; --border-color: ${t.border}; --sidebar-bg: ${t.sidebar_bg}; --header-bg: ${t.header_bg};`;
+            }
+        }
+    }
+</script>
 <body class="h-full" 
-      x-data="{ 
-        sidebarOpen: false,
-        scrolled: false
-      }"
+      x-data="appData()"
       x-init="window.addEventListener('scroll', () => scrolled = window.scrollY > 20)"
+      :style="themeStyle"
 >
 <div class="flex h-full min-h-screen">
     {{-- Mobile Overlay --}}
@@ -334,8 +361,40 @@
                 </div>
 
                 <div class="flex items-center gap-4 relative z-10">
-                    <div class="hidden sm:flex items-center gap-2 h-10 px-4 rounded-xl border font-bold transition-all duration-700 bg-[var(--card-bg)] border-amber-700/30 text-amber-800">
-                        <span class="w-2 h-2 rounded-full animate-pulse bg-amber-700"></span>
+                    {{-- Theme Picker --}}
+                    <div class="relative">
+                        <button @click="themeDropdownOpen = !themeDropdownOpen" @click.away="themeDropdownOpen = false" class="w-10 h-10 flex items-center justify-center rounded-xl border transition-all duration-300 hover:bg-black/5" :style="'background: var(--card-bg); border-color: var(--border-color); color: var(--primary-color)'">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                            </svg>
+                        </button>
+                        
+                        <div x-show="themeDropdownOpen" 
+                             x-transition
+                             x-cloak
+                             class="absolute right-0 mt-2 w-48 rounded-2xl shadow-xl border py-2 z-50 backdrop-blur-xl"
+                             :style="'background: var(--surface-color); border-color: var(--border-color)'">
+                            <div class="px-3 pb-2 mb-2 border-b text-[10px] font-bold uppercase tracking-widest text-center" :style="'border-color: var(--border-color); color: var(--text-muted)'">
+                                Pilih Tema
+                            </div>
+                            <div class="px-2 space-y-1">
+                                <template x-for="(theme, key) in themes" :key="key">
+                                    <button @click="setTheme(key)" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all hover:bg-black/5"
+                                            :style="'color: var(--text-main);' + (currentTheme === key ? 'background: rgba(var(--primary-rgb), 0.1);' : '')">
+                                        <span class="w-3 h-3 rounded-full shadow-sm" :style="'background-color: ' + theme.primary"></span>
+                                        <span x-text="theme.label"></span>
+                                        <svg x-show="currentTheme === key" class="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" :style="'color: var(--primary-color)'">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hidden sm:flex items-center gap-2 h-10 px-4 rounded-xl border font-bold transition-all duration-700 bg-[var(--card-bg)]"
+                         :style="'border-color: rgba(var(--primary-rgb), 0.3); color: var(--primary-color)'">
+                        <span class="w-2 h-2 rounded-full animate-pulse" :style="'background-color: var(--primary-color)'"></span>
                         <span class="text-xs uppercase tracking-widest">{{ auth()->user()->educationalLevel?->name ?? 'CALON' }}</span>
                     </div>
                 </div>

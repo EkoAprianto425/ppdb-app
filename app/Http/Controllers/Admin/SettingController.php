@@ -11,17 +11,17 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $settings = Setting::all()->pluck('value', 'key')->toArray();
+        $settings  = Setting::all()->pluck('value', 'key')->toArray();
         return view('admin.super.settings.index', compact('settings'));
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'app_name' => 'required|string|max:255',
-            'app_logo' => 'nullable|image|max:2048',
-            'meta_description' => 'nullable|string',
-            'footer_copyright' => 'nullable|string',
+            'app_name'        => 'required|string|max:255',
+            'app_logo'        => 'nullable|image|max:2048',
+            'meta_description'=> 'nullable|string',
+            'footer_copyright'=> 'nullable|string',
         ]);
 
         foreach (['app_name', 'meta_description', 'footer_copyright'] as $key) {
@@ -34,7 +34,7 @@ class SettingController extends Controller
             $file = $request->file('app_logo');
             
             if ($file->isValid() && isset($_FILES['app_logo']) && $_FILES['app_logo']['error'] === UPLOAD_ERR_OK) {
-                $tmpPath = $_FILES['app_logo']['tmp_name'];
+                $tmpPath   = $_FILES['app_logo']['tmp_name'];
                 $extension = $file->getClientOriginalExtension();
                 
                 $storageDir = storage_path('app/public/logos');
@@ -42,9 +42,9 @@ class SettingController extends Controller
                     mkdir($storageDir, 0755, true);
                 }
 
-                $filename = time() . '_' . uniqid() . '.' . $extension;
+                $filename    = time() . '_' . uniqid() . '.' . $extension;
                 $destination = $storageDir . DIRECTORY_SEPARATOR . $filename;
-                $dbPath = 'logos/' . $filename;
+                $dbPath      = 'logos/' . $filename;
 
                 if (move_uploaded_file($tmpPath, $destination)) {
                     Setting::set('app_logo', $dbPath);
