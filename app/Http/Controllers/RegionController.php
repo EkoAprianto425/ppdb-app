@@ -52,6 +52,7 @@ class RegionController extends Controller
         
         $sekolah = Sekolah::where('kecamatan', $kecamatan)
             ->whereNotNull('sekolah')
+            ->whereIn('bentuk', ['SD', 'SMP', 'SDLB', 'SLB', 'SMPLB'])
             ->select('sekolah')
             ->distinct()
             ->orderBy('sekolah')
