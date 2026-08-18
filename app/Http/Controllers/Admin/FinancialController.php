@@ -59,11 +59,18 @@ class FinancialController extends Controller
             ->where('status', $status);
 
         $user = auth()->user();
+        if (!$user) {
+            abort(401);
+        }
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
-            $query->whereHas('registration.user', function($q) use ($levelIds) {
-                $q->whereIn('educational_level_id', $levelIds);
-            });
+            if (empty($levelIds)) {
+                $query->whereRaw('0 = 1'); // user has no managed levels
+            } else {
+                $query->whereHas('registration.user', function($q) use ($levelIds) {
+                    $q->whereIn('educational_level_id', $levelIds);
+                });
+            }
         }
 
         // Filter by Unit/Jenjang
