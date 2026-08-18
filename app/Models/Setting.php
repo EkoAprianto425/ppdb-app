@@ -10,16 +10,13 @@ class Setting extends Model
 
     public static function get($key, $default = null)
     {
-        return \Illuminate\Support\Facades\Cache::rememberForever('setting_' . $key, function () use ($key, $default) {
-            $setting = self::where('key', $key)->first();
-            return $setting ? $setting->value : $default;
-        });
+        $setting = self::where('key', $key)->first();
+        return $setting ? $setting->value : $default;
     }
 
     public static function set($key, $value)
     {
         self::updateOrCreate(['key' => $key], ['value' => $value]);
-        \Illuminate\Support\Facades\Cache::forget('setting_' . $key);
     }
 }
 

@@ -696,7 +696,8 @@ code {
   </div>
 
   <div class="doc-footer">
-    PPDB Al-Hasra &bull; Virtual Account API Documentation &bull; v1.0.0 &bull; {{ date('Y') }}
+    Virtual Account API Documentation &bull; v1.0.0 <br>
+    {{ \App\Models\Setting::get('footer_copyright', '© ' . date('Y') . ' Yayasan Pendidikan Nusantara. All rights reserved.') }}
   </div>
 </div>
 

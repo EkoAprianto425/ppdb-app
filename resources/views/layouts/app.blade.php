@@ -419,7 +419,7 @@
         </div>
         
         <footer class="p-8 text-center border-t" :style="'border-color: var(--border-color)'">
-            <p class="text-[10px] font-bold themed-text-muted uppercase tracking-[0.3em]">PPDB APP &copy; 2025 - Professional Registration System</p>
+            <p class="text-[10px] font-bold themed-text-muted uppercase tracking-[0.3em]">{{ \App\Models\Setting::get('footer_copyright', '© ' . date('Y') . ' Yayasan Pendidikan Nusantara. All rights reserved.') }}</p>
         </footer>
     </main>
 </div>

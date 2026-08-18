@@ -18,9 +18,7 @@ class ActiveAcademicYearScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $activeYearId = cache()->rememberForever('active_academic_year_id', function () {
-            return AcademicYear::where('is_active', true)->value('id');
-        });
+        $activeYearId = AcademicYear::where('is_active', true)->value('id');
 
         if ($activeYearId) {
             $builder->where($model->getTable() . '.academic_year_id', $activeYearId);

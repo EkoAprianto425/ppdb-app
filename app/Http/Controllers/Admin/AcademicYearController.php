@@ -21,7 +21,6 @@ class AcademicYearController extends Controller
             'name' => $request->name,
             'is_active' => \App\Models\AcademicYear::count() === 0 // Active if first
         ]);
-        \Illuminate\Support\Facades\Cache::forget('active_academic_year_id');
 
         return back()->with('status', 'Tahun ajaran berhasil ditambahkan.');
     }
@@ -32,11 +31,9 @@ class AcademicYearController extends Controller
             if ($request->activate == '1') {
                 \App\Models\AcademicYear::where('id', '!=', $year->id)->update(['is_active' => false]);
                 $year->update(['is_active' => true]);
-                \Illuminate\Support\Facades\Cache::forget('active_academic_year_id');
                 $msg = 'Tahun ajaran berhasil diaktifkan.';
             } else {
                 $year->update(['is_active' => false]);
-                \Illuminate\Support\Facades\Cache::forget('active_academic_year_id');
                 $msg = 'Tahun ajaran berhasil dinonaktifkan.';
             }
             return back()->with('status', $msg);
