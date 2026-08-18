@@ -192,23 +192,43 @@
 
                     {{-- Alasan Memilih --}}
                     <div>
-                        <label for="alasan_memilih" class="block text-xs font-medium text-amber-900/80 mb-1.5">Alasan Memilih Sekolah Ini <span class="text-red-500">*</span></label>
-                        <textarea id="alasan_memilih" name="alasan_memilih" rows="3"
-                               placeholder="Tuliskan alasan Anda memilih sekolah ini... (min. 20 karakter)"
-                               class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('alasan_memilih') ? 'border-red-500/50' : 'border-amber-900/20' }} text-amber-950 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all resize-none">{{ old('alasan_memilih') }}</textarea>
+                        <label for="alasan_memilih_select" class="block text-xs font-medium text-amber-900/80 mb-1.5">Alasan Memilih Sekolah Ini <span class="text-red-500">*</span></label>
+                        <select id="alasan_memilih_select"
+                                 class="w-full px-4 py-2.5 rounded-xl bg-white border border-amber-900/20 text-sm focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all appearance-none">
+                            <option value="" disabled {{ !old('alasan_memilih') ? 'selected' : '' }}>-- Pilih alasan memilih sekolah --</option>
+                            @foreach($reasons as $reason)
+                                <option value="{{ $reason->name }}" {{ old('alasan_memilih') === $reason->name ? 'selected' : '' }} class="text-amber-950 bg-white">{{ $reason->name }}</option>
+                            @endforeach
+                            <option value="lainnya" class="font-bold text-amber-700" {{ old('alasan_memilih') && !collect($reasons)->contains('name', old('alasan_memilih')) ? 'selected' : '' }}>++ LAINNYA (Ketik Manual) ++</option>
+                        </select>
+                        
+                        <div id="manual_alasan_container" class="{{ old('alasan_memilih') && !collect($reasons)->contains('name', old('alasan_memilih')) ? 'block' : 'hidden' }} mt-3">
+                            <label for="alasan_memilih" class="block text-xs font-medium text-amber-900/80 mb-1.5">Ketik Alasan Memilih Sekolah Ini <span class="text-red-500">*</span></label>
+                            <textarea id="alasan_memilih" name="alasan_memilih" rows="3"
+                                   placeholder="Tuliskan alasan Anda memilih sekolah ini... (min. 20 karakter)"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('alasan_memilih') ? 'border-red-500/50' : 'border-amber-900/20' }} text-amber-950 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all resize-none">{{ old('alasan_memilih') }}</textarea>
+                        </div>
                         @error('alasan_memilih') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Sumber Informasi --}}
                     <div>
-                        <label for="sumber_informasi" class="block text-xs font-medium text-amber-900/80 mb-1.5">Dari Mana Anda Tahu Sekolah Ini? <span class="text-red-500">*</span></label>
-                        <select id="sumber_informasi" name="sumber_informasi"
-                                 class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('sumber_informasi') ? 'border-red-500/50' : 'border-amber-900/20' }} text-sm focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all {{ old('sumber_informasi') ? 'text-amber-950' : 'text-amber-900/50' }} appearance-none">
-                            <option value="" disabled {{ old('sumber_informasi') ? '' : 'selected' }}>-- Pilih sumber informasi --</option>
+                        <label for="sumber_informasi_select" class="block text-xs font-medium text-amber-900/80 mb-1.5">Dari Mana Anda Tahu Sekolah Ini? <span class="text-red-500">*</span></label>
+                        <select id="sumber_informasi_select"
+                                 class="w-full px-4 py-2.5 rounded-xl bg-white border border-amber-900/20 text-sm focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all appearance-none">
+                            <option value="" disabled {{ !old('sumber_informasi') ? 'selected' : '' }}>-- Pilih sumber informasi --</option>
                             @foreach($sources as $source)
                                 <option value="{{ $source->name }}" {{ old('sumber_informasi') === $source->name ? 'selected' : '' }} class="text-amber-950 bg-white">{{ $source->name }}</option>
                             @endforeach
+                            <option value="lainnya" class="font-bold text-amber-700" {{ old('sumber_informasi') && !collect($sources)->contains('name', old('sumber_informasi')) ? 'selected' : '' }}>++ LAINNYA (Ketik Manual) ++</option>
                         </select>
+                        
+                        <div id="manual_sumber_container" class="{{ old('sumber_informasi') && !collect($sources)->contains('name', old('sumber_informasi')) ? 'block' : 'hidden' }} mt-3">
+                            <label for="sumber_informasi" class="block text-xs font-medium text-amber-900/80 mb-1.5">Ketik Sumber Informasi <span class="text-red-500">*</span></label>
+                            <input id="sumber_informasi" type="text" name="sumber_informasi" value="{{ old('sumber_informasi') }}"
+                                   placeholder="Contoh: Brosur di jalan, Teman, dll"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-white border {{ $errors->has('sumber_informasi') ? 'border-red-500/50' : 'border-amber-900/20' }} text-amber-950 text-sm placeholder-slate-500 focus:outline-none focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 shadow-sm transition-all">
+                        </div>
                         @error('sumber_informasi') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
@@ -348,6 +368,58 @@
                 manualSekolahContainer.classList.remove('block');
                 manualSekolahContainer.classList.add('hidden');
                 asalSekolahInput.value = '';
+            }
+        });
+
+        const alasanSelect = document.getElementById('alasan_memilih_select');
+        const alasanInput = document.getElementById('alasan_memilih');
+        const manualAlasanContainer = document.getElementById('manual_alasan_container');
+
+        // Event: Alasan Memilih Changed
+        alasanSelect.addEventListener('change', function () {
+            const val = this.value;
+            
+            if (val === 'lainnya') {
+                manualAlasanContainer.classList.remove('hidden');
+                manualAlasanContainer.classList.add('block');
+                if (alasanInput.value === 'lainnya' || document.querySelector(`#alasan_memilih_select option[value="${alasanInput.value}"]`)) {
+                    alasanInput.value = ''; 
+                }
+                alasanInput.focus();
+            } else if (val) {
+                manualAlasanContainer.classList.remove('block');
+                manualAlasanContainer.classList.add('hidden');
+                alasanInput.value = val;
+            } else {
+                manualAlasanContainer.classList.remove('block');
+                manualAlasanContainer.classList.add('hidden');
+                alasanInput.value = '';
+            }
+        });
+
+        const sumberSelect = document.getElementById('sumber_informasi_select');
+        const sumberInput = document.getElementById('sumber_informasi');
+        const manualSumberContainer = document.getElementById('manual_sumber_container');
+
+        // Event: Sumber Informasi Changed
+        sumberSelect.addEventListener('change', function () {
+            const val = this.value;
+            
+            if (val === 'lainnya') {
+                manualSumberContainer.classList.remove('hidden');
+                manualSumberContainer.classList.add('block');
+                if (sumberInput.value === 'lainnya' || document.querySelector(`#sumber_informasi_select option[value="${sumberInput.value}"]`)) {
+                    sumberInput.value = ''; 
+                }
+                sumberInput.focus();
+            } else if (val) {
+                manualSumberContainer.classList.remove('block');
+                manualSumberContainer.classList.add('hidden');
+                sumberInput.value = val;
+            } else {
+                manualSumberContainer.classList.remove('block');
+                manualSumberContainer.classList.add('hidden');
+                sumberInput.value = '';
             }
         });
     });

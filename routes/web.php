@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/backup/restore-db', [\App\Http\Controllers\Admin\BackupController::class, 'restoreDatabase'])->name('backup.restore-db');
             Route::post('/backup/restore-proofs', [\App\Http\Controllers\Admin\BackupController::class, 'restoreProofs'])->name('backup.restore-proofs');
             Route::resource('information-sources', \App\Http\Controllers\Admin\InformationSourceController::class);
+            Route::resource('school-reasons', \App\Http\Controllers\Admin\SchoolReasonController::class);
         });
 
         // Unit Admin & Super Admin Management

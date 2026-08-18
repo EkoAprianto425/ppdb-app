@@ -17,7 +17,8 @@ class RegisteredUserController extends Controller
     {
         $levels = \App\Models\EducationalLevel::orderBy('sort_order')->get();
         $sources = \App\Models\InformationSource::where('is_active', true)->get();
-        return view('auth.register', compact('levels', 'sources'));
+        $reasons = \App\Models\SchoolReason::where('is_active', true)->get();
+        return view('auth.register', compact('levels', 'sources', 'reasons'));
     }
 
     public function store(RegisterStudentRequest $request): RedirectResponse
