@@ -19,7 +19,7 @@
         * { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="h-full bg-slate-950">
+<body class="h-full bg-[#fdfbf7]">
     @yield('content')
     @stack('scripts')
 </body>

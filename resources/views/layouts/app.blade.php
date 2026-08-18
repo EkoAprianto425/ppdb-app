@@ -42,16 +42,16 @@
     <style>
         * { font-family: 'Inter', sans-serif; }
         :root {
-            --primary-color: #0ea5e9;
-            --primary-rgb: 14, 165, 233;
-            --surface-color: #081b33;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --sidebar-bg: rgba(7, 25, 48, 0.5);
-            --header-bg: rgba(255, 255, 255, 0.04);
-            --input-bg: rgba(0, 0, 0, 0.2);
+            --primary-color: #92400e;
+            --primary-rgb: 146, 64, 14;
+            --surface-color: #fdfbf7;
+            --text-main: #451a03;
+            --text-muted: #92400e;
+            --card-bg: rgba(254, 243, 199, 0.4);
+            --border-color: rgba(217, 119, 6, 0.15);
+            --sidebar-bg: rgba(254, 243, 199, 0.7);
+            --header-bg: rgba(253, 251, 247, 0.8);
+            --input-bg: rgba(255, 255, 255, 0.8);
         }
         
         body {
@@ -231,49 +231,9 @@
 <body class="h-full" 
       x-data="{ 
         sidebarOpen: false,
-        scrolled: false,
-        currentTheme: localStorage.getItem('ppdb_theme') || 'sky',
-        currentBg: localStorage.getItem('ppdb_bg') || 'ocean',
-        themes: {
-            indigo: { color: '#6366f1', rgb: '99, 102, 241' },
-            emerald: { color: '#10b981', rgb: '16, 185, 129' },
-            rose: { color: '#f43f5e', rgb: '244, 63, 94' },
-            amber: { color: '#f59e0b', rgb: '245, 158, 11' },
-            sky: { color: '#0ea5e9', rgb: '14, 165, 233' }
-        },
-        bgThemes: {
-            softlight: { color: '#f8fafc', name: 'Soft Light', text: '#334155', muted: '#64748b', card: 'rgba(255,255,255,0.8)', border: 'rgba(0,0,0,0.06)', sidebar: 'rgba(255, 255, 255, 0.8)', header: 'rgba(255, 255, 255, 0.6)', input: '#ffffff', isLight: true },
-            midnight: { color: '#020617', name: 'Midnight', text: '#f1f5f9', muted: '#64748b', card: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)', sidebar: 'rgba(15, 23, 42, 0.4)', header: 'rgba(255,255,255,0.03)', input: 'rgba(0,0,0,0.2)', isLight: false },
-            ocean: { color: '#081b33', name: 'Ocean', text: '#f1f5f9', muted: '#94a3b8', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.1)', sidebar: 'rgba(7, 25, 48, 0.5)', header: 'rgba(255,255,255,0.04)', input: 'rgba(0,0,0,0.2)', isLight: false },
-            royal: { color: '#1a0b32', name: 'Royal', text: '#f1f5f9', muted: '#a5b4fc', card: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.12)', sidebar: 'rgba(22, 9, 44, 0.6)', header: 'rgba(255,255,255,0.05)', input: 'rgba(0,0,0,0.2)', isLight: false }
-        },
-        setTheme(name) {
-            this.currentTheme = name;
-            localStorage.setItem('ppdb_theme', name);
-            this.applyTheme();
-        },
-        setBg(name) {
-            this.currentBg = name;
-            localStorage.setItem('ppdb_bg', name);
-            this.applyTheme();
-        },
-        applyTheme() {
-            const theme = this.themes[this.currentTheme];
-            const bg = this.bgThemes[this.currentBg];
-            const root = document.documentElement.style;
-            root.setProperty('--primary-color', theme.color);
-            root.setProperty('--primary-rgb', theme.rgb);
-            root.setProperty('--surface-color', bg.color);
-            root.setProperty('--text-main', bg.text);
-            root.setProperty('--text-muted', bg.muted);
-            root.setProperty('--card-bg', bg.card);
-            root.setProperty('--border-color', bg.border);
-            root.setProperty('--sidebar-bg', bg.sidebar);
-            root.setProperty('--header-bg', bg.header);
-            root.setProperty('--input-bg', bg.input);
-        }
+        scrolled: false
       }"
-      x-init="applyTheme(); window.addEventListener('scroll', () => scrolled = window.scrollY > 20)"
+      x-init="window.addEventListener('scroll', () => scrolled = window.scrollY > 20)"
 >
 <div class="flex h-full min-h-screen">
     {{-- Mobile Overlay --}}
@@ -293,12 +253,11 @@
         {{-- Logo --}}
         <div class="px-6 py-8">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-700 hover:rotate-12 overflow-hidden"
-                     :style="'background: linear-gradient(135deg, ' + themes[currentTheme].color + ', #a855f7)'">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-700 hover:rotate-12 overflow-hidden bg-gradient-to-br from-amber-700/20 to-amber-900/20 border border-amber-900/10">
                     @if(\App\Models\Setting::get('app_logo'))
-                        <img src="{{ Storage::url(\App\Models\Setting::get('app_logo')) }}" alt="Logo" class="w-full h-full object-cover">
+                        <img src="{{ Storage::url(\App\Models\Setting::get('app_logo')) }}" alt="Logo" class="w-full h-full object-contain p-1">
                     @else
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                     @endif
@@ -329,8 +288,7 @@
         <div class="p-6">
             <div class="p-4 rounded-2xl border space-y-4" :style="'background: var(--card-bg); border-color: var(--border-color)'">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white transition-all duration-700"
-                         :style="'background: linear-gradient(135deg, ' + themes[currentTheme].color + ', #a855f7)'">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-amber-700 transition-all duration-700 bg-gradient-to-br from-amber-700/20 to-amber-900/20 border border-amber-900/10">
                         {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->name, 0, 1)) }}
                     </div>
                     <div class="flex-1 min-w-0">
@@ -359,8 +317,7 @@
                     :class="scrolled ? 'scrolled' : ''">
                 {{-- Subtle Glow Effect (Clipped) --}}
                 <div class="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                    <div class="absolute -top-10 -right-10 w-32 h-32 blur-3xl opacity-20 transition-all duration-700" 
-                         :style="'background:' + themes[currentTheme].color"></div>
+                    <div class="absolute -top-10 -right-10 w-32 h-32 blur-3xl opacity-20 transition-all duration-700 bg-amber-700"></div>
                 </div>
 
                 <div class="flex items-center gap-4 relative z-10">
@@ -377,62 +334,8 @@
                 </div>
 
                 <div class="flex items-center gap-4 relative z-10">
-                    {{-- Compact Theme Switcher --}}
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" 
-                                class="flex items-center gap-2 p-2 px-3 rounded-xl text-xs font-bold transition-all btn-soft-secondary">
-                            <span class="w-4 h-4 rounded-lg flex items-center justify-center" :style="'background:' + themes[currentTheme].color + '33'">
-                                <span class="w-2 h-2 rounded-full" :style="'background:' + themes[currentTheme].color"></span>
-                            </span>
-                            <span class="hidden sm:inline">Pengaturan Tema</span>
-                        </button>
-                        
-                        <div x-show="open" 
-                             @click.away="open = false"
-                             x-cloak
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                             class="absolute right-0 mt-4 w-64 border rounded-3xl shadow-2xl p-4 space-y-5 z-[60]"
-                             :style="'background: var(--surface-color); border-color: var(--border-color)'">
-                            
-                            <div>
-                                <p class="text-[10px] font-bold themed-text-muted uppercase tracking-widest mb-3">Warna Aksen</p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <template x-for="(theme, name) in themes" :key="name">
-                                        <button @click="setTheme(name)" 
-                                                class="w-full aspect-square rounded-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
-                                                :style="'background: ' + theme.color"
-                                                :class="currentTheme === name ? 'ring-2 ring-primary ring-offset-4' : ''"
-                                                :style="'ring-offset-color: var(--surface-color)'">
-                                            <svg x-show="currentTheme === name" class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
-                                            </svg>
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <div class="pt-4 border-t" :style="'border-color: var(--border-color)'">
-                                <p class="text-[10px] font-bold themed-text-muted uppercase tracking-widest mb-3">Latar Belakang</p>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <template x-for="(bg, name) in bgThemes" :key="name">
-                                        <button @click="setBg(name)" 
-                                                class="w-full py-2 rounded-xl text-[10px] font-bold transition-all border flex items-center px-2 gap-2"
-                                                :class="currentBg === name ? 'bg-primary/10 text-primary' : 'themed-text-muted hover:bg-primary/5'"
-                                                :style="'border-color: var(--border-color)'">
-                                            <span class="w-3 h-3 rounded-md" :style="'background:' + bg.color"></span>
-                                            <span x-text="bg.name"></span>
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hidden sm:flex items-center gap-2 h-10 px-4 rounded-xl border font-bold transition-all duration-700"
-                         :style="'background: var(--card-bg); border-color: ' + themes[currentTheme].color + '33; color: ' + themes[currentTheme].color">
-                        <span class="w-2 h-2 rounded-full animate-pulse" :style="'background:' + themes[currentTheme].color"></span>
+                    <div class="hidden sm:flex items-center gap-2 h-10 px-4 rounded-xl border font-bold transition-all duration-700 bg-[var(--card-bg)] border-amber-700/30 text-amber-800">
+                        <span class="w-2 h-2 rounded-full animate-pulse bg-amber-700"></span>
                         <span class="text-xs uppercase tracking-widest">{{ auth()->user()->educationalLevel?->name ?? 'CALON' }}</span>
                     </div>
                 </div>
