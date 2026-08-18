@@ -82,16 +82,23 @@ class FinancialController extends Controller
     public function verifyPayment(Request $request, \App\Models\Payment $payment)
     {
         $request->validate([
-            'status' => 'required|in:success,failed',
-            'admin_note' => 'nullable|string'
+            'status'      => 'required|in:success,failed',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'admin_note'  => 'nullable|string'
         ]);
 
-        $payment->update([
-            'status' => $request->status,
-            'admin_note' => $request->admin_note,
+        $updateData = [
+            'status'      => $request->status,
+            'admin_note'  => $request->admin_note,
             'verified_by' => auth()->id(),
             'verified_at' => now(),
-        ]);
+        ];
+
+        if ($request->filled('paid_amount')) {
+            $updateData['paid_amount'] = $request->paid_amount;
+        }
+
+        $payment->update($updateData);
 
         // Logic check success status for registration
         if ($request->status === 'success') {
@@ -99,6 +106,28 @@ class FinancialController extends Controller
         }
 
         return back()->with('status', "Pembayaran {$payment->fee_type} berhasil diverifikasi.");
+    }
+
+    public function recordCashPayment(Request $request, \App\Models\Payment $payment)
+    {
+        $request->validate([
+            'paid_amount' => 'required|numeric|min:1',
+            'admin_note'  => 'nullable|string|max:500',
+        ]);
+
+        $payment->update([
+            'paid_amount'     => $request->paid_amount,
+            'payment_method'  => \App\Models\Payment::METHOD_CASH,
+            'status'          => \App\Models\Payment::STATUS_SUCCESS,
+            'admin_note'      => $request->admin_note ?? 'Pembayaran tunai diterima di sekolah',
+            'verified_by'     => auth()->id(),
+            'verified_at'     => now(),
+        ]);
+
+        // Update status registrasi
+        $payment->registration->update(['payment_status' => 'success']);
+
+        return back()->with('status', "Pembayaran cash untuk {$payment->fee_type} atas nama {$payment->registration->user->full_name} berhasil dicatat.");
     }
 
     public function checkVaStatus(Request $request, \App\Models\Payment $payment, \App\Services\BtnService $btnService)

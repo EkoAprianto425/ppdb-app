@@ -128,6 +128,7 @@ class VaPaymentNotifyController extends Controller
         // --- 4. Update status payment ke sukses ---
         $payment->update([
             'status'      => Payment::STATUS_SUCCESS,
+            'paid_amount' => $amount,   // Nominal yang benar-benar dibayarkan via VA
             'va_ref'      => $vaRef ?? $payment->va_ref,
             'verified_at' => $paidAt,
             'admin_note'  => $notes ?? ('Dibayar via API notifikasi pada ' . $paidAt),

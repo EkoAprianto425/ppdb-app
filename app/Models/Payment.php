@@ -15,7 +15,7 @@ class Payment extends Model
         'va_ref',
         'payment_method',
         'va_bank',
-        'payment_proof',
+        'paid_amount',  // Nominal yang benar-benar dibayarkan (cash, VA BTN, VA BCA)
         'status',
         'admin_note',
         'verified_by',
@@ -29,6 +29,7 @@ class Payment extends Model
     const METHOD_VA = 'va';
     const METHOD_VA_BCA = 'va_bca';
     const METHOD_MANUAL = 'manual';
+    const METHOD_CASH = 'cash'; // Bayar tunai di sekolah
 
     const BANK_BTN = 'btn';
     const BANK_BCA = 'bca';

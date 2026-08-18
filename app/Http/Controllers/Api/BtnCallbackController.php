@@ -58,11 +58,15 @@ class BtnCallbackController extends Controller
             ]);
         }
 
+        // Ambil nominal terbayar dari payload jika ada, fallback ke amount tagihan
+        $terbayar = $payload['terbayar'] ?? $payment->amount;
+
         // Update Payment
         $payment->update([
-            'status' => Payment::STATUS_SUCCESS,
+            'status'      => Payment::STATUS_SUCCESS,
+            'paid_amount' => $terbayar,
             'verified_at' => now(),
-            'admin_note' => 'Paid via BTN VA Callback'
+            'admin_note'  => 'Paid via BTN VA Callback'
         ]);
 
         // Check if it's the first fee (Formulir) to update registration status

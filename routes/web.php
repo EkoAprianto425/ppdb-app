@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/payments', [\App\Http\Controllers\Admin\FinancialController::class, 'indexPayments'])->name('financial.payments');
             Route::post('/payments/{payment}/verify', [\App\Http\Controllers\Admin\FinancialController::class, 'verifyPayment'])->name('financial.verify');
             Route::post('/payments/{payment}/check-va', [\App\Http\Controllers\Admin\FinancialController::class, 'checkVaStatus'])->name('financial.check-va');
+            Route::post('/payments/{payment}/record-cash', [\App\Http\Controllers\Admin\FinancialController::class, 'recordCashPayment'])->name('financial.record-cash');
         });
     });
 });
