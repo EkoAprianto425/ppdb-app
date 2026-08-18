@@ -21,10 +21,10 @@
         <div class="flex flex-wrap items-center gap-3 flex-1 sm:flex-initial justify-end">
             <form action="{{ route('admin.discounts.index') }}" method="GET" class="flex items-center gap-3">
                 <select name="level_id" onchange="this.form.submit()" class="bg-black/20 border-2 border-white/5 rounded-2xl px-4 py-2.5 text-xs themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none cursor-pointer min-w-[200px]">
-                    <option value="" class="text-slate-900">Semua Jenjang / Jurusan</option>
-                    <option value="general" {{ request('level_id') === 'general' ? 'selected' : '' }} class="text-slate-900">Semua Jenjang (Lintas Unit)</option>
-                    @foreach($levels as $level)
-                        <option value="{{ $level->id }}" {{ request('level_id') == $level->id ? 'selected' : '' }} class="text-slate-900">{{ $level->name }}</option>
+                    <option value="" class="text-slate-900">Semua Jenjang</option>
+                    <option value="general" {{ request('level_id') === 'general' ? 'selected' : '' }} class="text-slate-900">Lintas Jenjang (Semua Unit)</option>
+                    @foreach($levelsByParent as $parentName => $repLevel)
+                        <option value="{{ $parentName }}" {{ request('level_id') === $parentName ? 'selected' : '' }} class="text-slate-900">{{ $parentName }}</option>
                     @endforeach
                 </select>
 
@@ -63,7 +63,7 @@
                         <td class="px-6 py-4">
                             <p class="text-xs font-black themed-text group-hover:text-primary transition-colors mb-1">{{ $discount->name }}</p>
                             <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-black themed-text-muted uppercase tracking-widest">
-                                {{ $discount->educationalLevel?->name ?? 'Semua Jenjang' }}
+                                {{ $discount->educationalLevel?->parent_unit ?? 'Semua Jenjang' }}
                             </span>
                         </td>
                         <td class="px-6 py-4">
@@ -219,9 +219,9 @@
                 <template x-if="category !== 'anak_pegawai'">
                     <div>
                         <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
-                        <select name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                            @foreach($levels as $level)
-                                <option value="{{ $level->id }}">{{ $level->name }}</option>
+                        <select name="level_parent_unit" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            @foreach($levelsByParent as $parentName => $repLevel)
+                                <option value="{{ $parentName }}">{{ $parentName }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -327,9 +327,9 @@
                 <template x-if="category !== 'anak_pegawai'">
                     <div>
                         <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
-                        <select id="edit_educational_level_id" name="educational_level_id" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                            @foreach($levels as $level)
-                                <option value="{{ $level->id }}">{{ $level->name }}</option>
+                        <select id="edit_level_parent_unit" name="level_parent_unit" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            @foreach($levelsByParent as $parentName => $repLevel)
+                                <option value="{{ $parentName }}">{{ $parentName }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -394,8 +394,9 @@
                 if (amtPegawai)  amtPegawai.value  = formatNumber(discount.amount);
                 if (sppEl)       sppEl.value        = formatNumber(discount.spp_amount);
             } else {
-                const levelEl = document.getElementById('edit_educational_level_id');
-                if (levelEl) levelEl.value = discount.educational_level_id;
+                // Populate parent_unit (SMP / SMA / SMK) dari relasi educational_level
+                const levelEl = document.getElementById('edit_level_parent_unit');
+                if (levelEl) levelEl.value = discount.educational_level?.parent_unit ?? '';
                 document.getElementById('edit_name').value    = discount.name || '';
                 document.getElementById('edit_amount').value  = formatNumber(discount.amount);
                 document.getElementById('edit_qty').value     = discount.qty;

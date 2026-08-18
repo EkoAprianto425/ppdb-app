@@ -1,13 +1,20 @@
 @php
     $user = auth()->user();
     $registration = $user->registration;
-    
+
     $activeDiscountApp = $registration ? $registration->discountApplications()->latest()->first() : null;
-    
+
+    // Filter diskon berdasarkan parent_unit jenjang siswa (SMP / SMA / SMK)
+    $userParentUnit = $user->educationalLevel?->parent_unit;
+
     $discounts = \App\Models\Discount::where('is_active', true)
-        ->where(function($q) use($user) {
-            $q->whereNull('educational_level_id')
-              ->orWhere('educational_level_id', $user->educational_level_id);
+        ->where(function ($q) use ($userParentUnit) {
+            $q->whereNull('educational_level_id');
+            if ($userParentUnit) {
+                $q->orWhereHas('educationalLevel', function ($q2) use ($userParentUnit) {
+                    $q2->where('parent_unit', $userParentUnit);
+                });
+            }
         })->get();
         
     $isAlumni = stripos($user->asal_sekolah ?? '', 'AL HASRA') !== false;

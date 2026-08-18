@@ -25,42 +25,48 @@ class DiscountController extends Controller
             });
         }
 
-        // Filter based on Jenjang / Jurusan selected
+        // Filter based on parent_unit (SMP / SMA / SMK)
         if ($request->filled('level_id')) {
             if ($request->level_id === 'general') {
                 $query->whereNull('educational_level_id');
             } else {
-                $query->where(function ($q) use ($request) {
-                    $q->where('educational_level_id', $request->level_id)
-                      ->orWhereNull('educational_level_id');
+                // level_id is now a parent_unit string (SMP / SMA / SMK)
+                $parentUnit = $request->level_id;
+                $query->where(function ($q) use ($parentUnit) {
+                    $q->whereNull('educational_level_id')
+                      ->orWhereHas('educationalLevel', function ($q2) use ($parentUnit) {
+                          $q2->where('parent_unit', $parentUnit);
+                      });
                 });
             }
         }
 
         $discounts = $query->latest()->get();
-        
-        // Data for dropdowns
+
+        // Build parent-unit options (distinct parent_unit from accessible levels)
         $activeYear = AcademicYear::where('is_active', true)->first();
-        $levels = EducationalLevel::all();
+        $allLevels  = EducationalLevel::all();
         if (!$user->isSuperAdmin()) {
-            $levels = $levels->whereIn('id', $user->getManagedLevelIds());
+            $allLevels = $allLevels->whereIn('id', $user->getManagedLevelIds());
         }
-        
+        // $levelsByParent: ['SMP' => <representative level>, 'SMA' => ..., 'SMK' => ...]
+        $levelsByParent = $allLevels->groupBy('parent_unit')->map->first();
+
         $waves = RegistrationWave::where('academic_year_id', $activeYear?->id)->get();
 
-        return view('admin.discounts.index', compact('discounts', 'levels', 'waves'));
+        return view('admin.discounts.index', compact('discounts', 'levelsByParent', 'waves'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'category'             => 'required|in:anak_pegawai,alumni,umum',
-            'educational_level_id' => 'nullable|exists:educational_levels,id',
-            'is_active'            => 'boolean',
+        $request->validate([
+            'category'          => 'required|in:anak_pegawai,alumni,umum',
+            'level_parent_unit' => 'nullable|in:SMP,SMA,SMK',
+            'is_active'         => 'boolean',
         ]);
 
         $data = $request->all();
-        
+
         // Clean currency formats
         if (isset($data['amount'])) {
             $data['amount'] = $this->parseCurrency($data['amount']);
@@ -77,6 +83,13 @@ class DiscountController extends Controller
             $data['qty']                  = null;
             $data['require_document']     = 1;
         } else {
+            // Convert parent_unit string → representative educational_level_id
+            if ($request->filled('level_parent_unit')) {
+                $rep = EducationalLevel::where('parent_unit', $request->level_parent_unit)->first();
+                $data['educational_level_id'] = $rep?->id;
+            } else {
+                $data['educational_level_id'] = null;
+            }
             $data['registration_wave_id'] = null;
             $data['spp_amount']           = 0;
             $data['require_document']     = $request->has('require_document');
@@ -90,7 +103,7 @@ class DiscountController extends Controller
     public function update(Request $request, Discount $discount)
     {
         $data = $request->all();
-        
+
         // Clean currency formats
         if (isset($data['amount'])) {
             $data['amount'] = $this->parseCurrency($data['amount']);
@@ -106,11 +119,18 @@ class DiscountController extends Controller
             $data['qty']                  = null;
             $data['require_document']     = 1;
         } else {
+            // Convert parent_unit string → representative educational_level_id
+            if ($request->filled('level_parent_unit')) {
+                $rep = EducationalLevel::where('parent_unit', $request->level_parent_unit)->first();
+                $data['educational_level_id'] = $rep?->id;
+            } else {
+                $data['educational_level_id'] = null;
+            }
             $data['registration_wave_id'] = null;
             $data['spp_amount']           = 0;
             $data['require_document']     = $request->has('require_document');
         }
-        
+
         $data['is_active'] = $request->has('is_active');
 
         $discount->update($data);
