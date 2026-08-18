@@ -28,17 +28,33 @@ class PaymentController extends Controller
 
         $fees = AdministrativeFee::where('educational_level_id', $user->educational_level_id)->get()->sortBy('sort_order');
 
+        $isAlumni = str_contains(strtolower($user->asal_sekolah ?? ''), 'al hasra');
+
         // Mapping status pembayaran untuk setiap biaya (nominal penuh, tanpa potongan diskon)
-        $feeData = $fees->map(function($fee) use ($registration) {
+        $feeData = $fees->map(function($fee) use ($registration, $isAlumni) {
             $payment = $registration->payments()->where('fee_type', $fee->name)->latest()->first();
 
+            $originalAmount = $fee->amount;
+            $finalAmount = $fee->amount;
+            $discountAmount = 0;
+            $discountName = null;
+
+            if ($isAlumni && $fee->sort_order == 1) { // Biaya Formulir
+                $finalAmount = 200000;
+                $discountAmount = $originalAmount - 200000;
+                $discountName = 'Discount Formulir untuk Alumni';
+            }
+
             return (object) [
-                'id'          => $fee->id,
-                'name'        => $fee->name,
-                'amount'      => $fee->amount,
-                'sort_order'  => $fee->sort_order,
-                'payment'     => $payment,
-                'status'      => $payment ? $payment->status : 'none',
+                'id'              => $fee->id,
+                'name'            => $fee->name,
+                'amount'          => $finalAmount,
+                'original_amount' => $originalAmount,
+                'discount_amount' => $discountAmount,
+                'discount_name'   => $discountName,
+                'sort_order'      => $fee->sort_order,
+                'payment'         => $payment,
+                'status'          => $payment ? $payment->status : 'none',
             ];
         });
 
@@ -116,7 +132,7 @@ class PaymentController extends Controller
 
         try {
             $result = $btnService->inquiryVA($data);
-            
+            // dd($result);
             if ($result['status']) {
                 $rspData = $result['data'];
                 if (isset($rspData['terbayar']) && $rspData['terbayar'] > 0) {
@@ -383,6 +399,13 @@ class PaymentController extends Controller
      */
     private function resolveFinalAmount($registration, $fee): float
     {
+        $user = $registration->user;
+        $isAlumni = str_contains(strtolower($user->asal_sekolah ?? ''), 'al hasra');
+        
+        if ($isAlumni && $fee->sort_order == 1) {
+            return 200000;
+        }
+
         return (float) $fee->amount;
     }
 }

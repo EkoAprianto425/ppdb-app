@@ -44,16 +44,89 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Jenis Kelamin</label>
+                        <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">
+                            JENIS KELAMIN
+                        </label>
+
                         <div class="flex gap-4">
                             @foreach(['Laki-laki', 'Perempuan'] as $jk)
-                            <label class="flex-1 cursor-pointer group">
-                                <input type="radio" name="jenis_kelamin" value="{{ $jk }}" class="hidden peer" {{ old('jenis_kelamin', $registration->jenis_kelamin ?? '') == $jk ? 'checked' : '' }} required>
-                                <div class="w-full py-3 px-4 rounded-xl border text-center text-sm themed-text-muted peer-checked:bg-primary/20 peer-checked:border-primary/50 peer-checked:text-primary transition-all overflow-hidden relative"
-                                     :style="'border-color: var(--border-color); background: var(--card-bg)'">
-                                    {{ $jk }}
-                                </div>
-                            </label>
+                                <label class="flex-1 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="jenis_kelamin"
+                                        value="{{ $jk }}"
+                                        class="sr-only peer"
+                                        {{ old('jenis_kelamin', $registration->jenis_kelamin ?? '') == $jk ? 'checked' : '' }}
+                                        required
+                                    >
+
+                                    <div
+                                        class="
+                                            relative
+                                            w-full
+                                            py-3
+                                            px-4
+                                            rounded-xl
+                                            border-2
+                                            text-center
+                                            text-sm
+                                            font-medium
+
+                                            bg-[var(--card-bg)]
+                                            border-[var(--border-color)]
+                                            text-[var(--text-color)]
+
+                                            transition-all
+                                            duration-200
+                                            cursor-pointer
+
+                                            hover:border-primary
+                                            hover:-translate-y-0.5
+
+                                            peer-checked:bg-primary
+                                            peer-checked:border-primary
+                                            peer-checked:text-white
+                                            peer-checked:font-semibold
+                                            peer-checked:shadow-lg
+                                            peer-checked:shadow-primary/30
+                                        "
+                                    >
+                                        {{ $jk }}
+
+                                        <span
+                                            class="
+                                                absolute
+                                                right-3
+                                                top-1/2
+                                                -translate-y-1/2
+
+                                                flex
+                                                items-center
+                                                justify-center
+
+                                                w-5
+                                                h-5
+                                                rounded-full
+
+                                                bg-white
+                                                text-primary
+                                                text-xs
+                                                font-bold
+
+                                                opacity-0
+                                                scale-50
+
+                                                transition-all
+                                                duration-200
+
+                                                peer-checked:opacity-100
+                                                peer-checked:scale-100
+                                            "
+                                        >
+                                            ✓
+                                        </span>
+                                    </div>
+                                </label>
                             @endforeach
                         </div>
                     </div>

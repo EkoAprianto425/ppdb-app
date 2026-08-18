@@ -148,7 +148,17 @@
                             <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $fee->name }}</p>
                         </td>
                         <td class="px-8 py-6 text-sm themed-text text-right font-bold">
-                            Rp {{ number_format($fee->amount, 0, ',', '.') }}
+                            @if(isset($fee->discount_amount) && $fee->discount_amount > 0)
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[10px] text-gray-400 line-through">Rp {{ number_format($fee->original_amount, 0, ',', '.') }}</span>
+                                    <span class="text-[10px] text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                        {{ $fee->discount_name }} (-Rp {{ number_format($fee->discount_amount, 0, ',', '.') }})
+                                    </span>
+                                    <span class="text-sm">Rp {{ number_format($fee->amount, 0, ',', '.') }}</span>
+                                </div>
+                            @else
+                                Rp {{ number_format($fee->amount, 0, ',', '.') }}
+                            @endif
                         </td>
                         <td class="px-8 py-6 text-right">
                             @if($fee->status === 'pending' && $fee->payment)

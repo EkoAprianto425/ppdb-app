@@ -167,7 +167,7 @@ class FinancialController extends Controller
 
         try {
             $result = $btnService->inquiryVA($data);
-            
+            // dd($result);
             if ($result['status']) {
                 $rspData = $result['data'];
                 if (isset($rspData['terbayar']) && $rspData['terbayar'] > 0) {
