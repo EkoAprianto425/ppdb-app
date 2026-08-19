@@ -31,6 +31,12 @@
         'success' => 'Lunas',
         'failed' => 'Gagal / Ditolak',
     ];
+
+        
+    $unitLower = strtolower($user->educationalLevel?->parent_unit);
+    $brosurPdf = \App\Models\InformationPdf::where('type', 'brosur_' . $unitLower)->first();
+    $biayaPdf = \App\Models\InformationPdf::where('type', 'info_biaya_' . $unitLower)->first();
+        
 @endphp
 
 @if(session('status'))
@@ -265,7 +271,7 @@
             </div>
         </div>
     </div>
-
+    
     {{-- Sidebar (Kanan) --}}
     <div class="space-y-6">
         <div class="card-glass rounded-3xl p-6">
@@ -282,7 +288,39 @@
             </div>
         </div>
 
-
+        
+        @if($brosurPdf || $biayaPdf)
+        <div class="card-glass rounded-3xl p-6">
+            <h3 class="text-[10px] font-bold themed-text-muted uppercase tracking-[0.2em] mb-6">Dokumen Pendukung</h3>
+            <div class="space-y-3">
+                @if($brosurPdf)
+                <a href="{{ Storage::url($brosurPdf->file_path) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold uppercase text-red-400 tracking-widest mb-0.5">Brosur</p>
+                        <p class="text-xs font-medium themed-text truncate group-hover:text-primary transition-colors">{{ $brosurPdf->title }}</p>
+                    </div>
+                    <svg class="w-4 h-4 text-white/30 group-hover:text-primary transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+                @endif
+                
+                @if($biayaPdf)
+                <a href="{{ Storage::url($biayaPdf->file_path) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[10px] font-bold uppercase text-emerald-400 tracking-widest mb-0.5">Info Biaya</p>
+                        <p class="text-xs font-medium themed-text truncate group-hover:text-primary transition-colors">{{ $biayaPdf->title }}</p>
+                    </div>
+                    <svg class="w-4 h-4 text-white/30 group-hover:text-primary transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 
