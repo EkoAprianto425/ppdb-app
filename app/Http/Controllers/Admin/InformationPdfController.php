@@ -29,7 +29,7 @@ class InformationPdfController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'type' => 'required|in:brosur_smp,brosur_sma,brosur_smk,info_biaya_smp,info_biaya_sma,info_biaya_smk',
-            'file' => 'required|file|mimes:pdf|max:10240', // max 10MB
+            'file' => 'required|file|mimes:pdf|max:51200', // max 50MB
         ]);
 
         $file = $request->file('file');
