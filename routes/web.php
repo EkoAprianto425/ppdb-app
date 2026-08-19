@@ -76,9 +76,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/backup/proofs', [\App\Http\Controllers\Admin\BackupController::class, 'downloadProofs'])->name('backup.download-proofs');
             Route::post('/backup/restore-db', [\App\Http\Controllers\Admin\BackupController::class, 'restoreDatabase'])->name('backup.restore-db');
             Route::post('/backup/restore-proofs', [\App\Http\Controllers\Admin\BackupController::class, 'restoreProofs'])->name('backup.restore-proofs');
-            Route::resource('information-sources', \App\Http\Controllers\Admin\InformationSourceController::class)->except(['create', 'show', 'edit', 'update'])->name('information-sources.index');
-            Route::resource('school-reasons', \App\Http\Controllers\Admin\SchoolReasonController::class)->except(['create', 'show', 'edit', 'update'])->name('school-reasons.index');
-            Route::resource('information-pdfs', \App\Http\Controllers\Admin\InformationPdfController::class)->except(['create', 'show', 'edit', 'update'])->name('information-pdfs.index');
+            Route::resource('information-sources', \App\Http\Controllers\Admin\InformationSourceController::class);
+            Route::resource('school-reasons', \App\Http\Controllers\Admin\SchoolReasonController::class);
+            Route::resource('information-pdfs', \App\Http\Controllers\Admin\InformationPdfController::class)->except(['create', 'show', 'edit', 'update']);
         });
 
         // Unit Admin & Super Admin Management
