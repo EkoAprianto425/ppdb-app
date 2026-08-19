@@ -395,7 +395,7 @@
                     <div class="hidden sm:flex items-center gap-2 h-10 px-4 rounded-xl border font-bold transition-all duration-700 bg-[var(--card-bg)]"
                          :style="'border-color: rgba(var(--primary-rgb), 0.3); color: var(--primary-color)'">
                         <span class="w-2 h-2 rounded-full animate-pulse" :style="'background-color: var(--primary-color)'"></span>
-                        <span class="text-xs uppercase tracking-widest">{{ auth()->user()->educationalLevel?->name ?? 'CALON' }}</span>
+                        <span class="text-xs uppercase tracking-widest">{{ auth()->user()->educationalLevel?->name ?? str_replace('_', ' ', auth()->user()->role) }}</span>
                     </div>
                 </div>
             </header>

@@ -137,7 +137,7 @@
                             </div>
                         </td>
                         <td class="px-4 py-4 text-center">
-                            <span class="text-[10px] font-bold text-white px-2 py-0.5 rounded-md bg-white/5 border border-white/10 uppercase">
+                            <span class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-md bg-white/5 border border-white/10 uppercase">
                                 {{ $student->educationalLevel->name ?? '-' }}
                             </span>
                         </td>
