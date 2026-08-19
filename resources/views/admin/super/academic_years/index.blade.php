@@ -65,7 +65,7 @@
                                 
                                 <form action="{{ route('admin.year.destroy', $year) }}" method="POST" onsubmit="return confirm('Hapus tahun ajaran ini?')">
                                     @csrf @method('DELETE')
-                                    <button class="p-2 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-all" title="Hapus">
+                                    <button class="p-2 rounded-lg btn-action-delete" title="Hapus">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -75,7 +75,7 @@
                                 <form action="{{ route('admin.year.update', $year) }}" method="POST" onsubmit="return confirm('Non-aktifkan tahun ajaran ini?')">
                                     @csrf @method('PUT')
                                     <input type="hidden" name="activate" value="0">
-                                    <button class="p-2 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all" title="Non-Aktifkan">
+                                    <button class="p-2 rounded-lg btn-action-deactivate" title="Non-Aktifkan">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>

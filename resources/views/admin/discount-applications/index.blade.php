@@ -90,10 +90,10 @@
                                 $refs.form.submit();
                             }
                         }">
-                            <button @click="action = 'approved'; openModal = true" class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all" title="Setujui">
+                            <button @click="action = 'approved'; openModal = true" class="p-2 rounded-lg btn-action-activate" title="Setujui">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
-                            <button @click="action = 'rejected'; openModal = true" class="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-all" title="Tolak">
+                            <button @click="action = 'rejected'; openModal = true" class="p-2 rounded-lg btn-action-reject" title="Tolak">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
 

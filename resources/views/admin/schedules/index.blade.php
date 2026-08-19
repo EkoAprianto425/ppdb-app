@@ -102,15 +102,15 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border" style="background: var(--card-bg); border-color: var(--border-color)">
                                     <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                                    <span class="text-[10px] font-black themed-text">{{ $schedule->registrations_count }} <span class="text-white/20 ml-0.5">Siswa</span></span>
+                                    <span class="text-[10px] font-black themed-text">{{ $schedule->registrations_count }} <span class="themed-text-muted ml-0.5">Siswa</span></span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <form action="{{ route('admin.schedules.destroy', $schedule) }}" method="POST" onsubmit="return confirm('Hapus jadwal ini?')">
                                     @csrf @method('DELETE')
-                                    <button class="p-2 rounded-lg bg-white/5 text-white/20 hover:bg-rose-500/10 hover:text-rose-500 transition-all">
+                                    <button class="p-2 rounded-lg btn-action-delete">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
