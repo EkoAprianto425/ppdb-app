@@ -90,34 +90,152 @@
     $status2 = $fee2 ? $fee2->status : 'none';
     $isPassed = $registration && $registration->status === 'lulus';
     $activeDiscountApp = $registration ? $registration->discountApplications()->latest()->first() : null;
+
+    // Cek apakah ada pembayaran (pending/success) untuk fee sort_order > 1
+    $hasPaidFee2 = $feeData->where('sort_order', '>', 1)->filter(function($f) {
+        return in_array($f->status, ['pending', 'success']);
+    })->isNotEmpty();
+
+    // Pop-up keringanan tampil jika: lulus, sudah bayar fee > 1, belum pernah mengajukan keringanan
+    $showKeringanPopup = $isPassed && $hasPaidFee2 && !$activeDiscountApp;
 @endphp
 
-{{-- Blok info keringanan: tampil jika ada pengajuan (apapun statusnya dan apapun status pembayaran) --}}
-@if($isPassed && $activeDiscountApp)
+{{-- Blok keringanan: selalu tampil jika siswa lulus --}}
+@if($isPassed)
     <div class="mb-8 card-glass rounded-3xl p-6 border-l-4 border-purple-500 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
         <div>
-            <h3 class="text-sm font-bold themed-text uppercase tracking-widest mb-1">Informasi Keringanan Biaya</h3>
-            <p class="text-xs themed-text-muted">Rincian keringanan biaya yang telah diajukan.</p>
+            <h3 class="text-sm font-bold themed-text uppercase tracking-widest mb-1">Informasi Administrasi</h3>
+            <p class="text-xs themed-text-muted">Bagi calon peserta didik baru yang <b>mengundurkan diri</b> maka <b>semua biaya</b> yang telah dibayarkan <b>tidak dapat ditarik kembali/tidak dikembalikan.</b></p>
         </div>
         <div>
-            @include('pendaftaran.partials.discount-info')
-        </div>
-    </div>
+            {{-- Jika sudah ada pengajuan keringanan: tampilkan info discount --}}
+            @if($activeDiscountApp)
+                @include('pendaftaran.partials.discount-info')
 
-{{-- Blok ajukan keringanan: hanya tampil jika belum ada pengajuan DAN biaya sudah lunas --}}
-@elseif($isPassed && !$activeDiscountApp && $status2 === 'success')
-    <div class="mb-8 card-glass rounded-3xl p-6 border-l-4 border-purple-500 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
-        <div>
-            <h3 class="text-sm font-bold themed-text uppercase tracking-widest mb-1">Pengajuan Keringanan Biaya</h3>
-            <p class="text-xs themed-text-muted">Tersedia potongan biaya untuk Keluarga Karyawan, Alumni, atau Prestasi/Umum.</p>
-        </div>
-        <div>
-            <button @click="$dispatch('open-discount-modal')" class="px-6 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-[10px] font-bold uppercase shadow-lg shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap">
-                Ajukan Keringanan
-            </button>
-            @include('pendaftaran.partials.discount-modal')
+            {{-- Jika belum ada pengajuan tapi sudah ada pembayaran sort_order > 1: tampilkan tombol --}}
+            @elseif($hasPaidFee2)
+                <button @click="$dispatch('open-discount-modal')" class="px-6 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-[10px] font-bold uppercase shadow-lg shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap">
+                    Ajukan Keringanan
+                </button>
+                @include('pendaftaran.partials.discount-modal')
+
+            {{-- Belum ada pembayaran selain formulir: hanya tampilkan info teks, tanpa tombol --}}
+            @else
         </div>
     </div>
+@endif
+
+{{-- ═══════════════ POP-UP KERINGANAN OTOMATIS ═══════════════ --}}
+@if($showKeringanPopup)
+<template x-teleport="body">
+    <div
+        x-data="{
+            open: false,
+            init() {
+                setTimeout(() => { this.open = true; }, 800);
+            },
+            dismiss() {
+                this.open = false;
+            },
+            openModal() {
+                this.open = false;
+                this.$nextTick(() => window.dispatchEvent(new CustomEvent('open-discount-modal')));
+            }
+        }"
+        x-show="open"
+        x-cloak
+        style="display:none;"
+        class="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-4"
+    >
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="dismiss()"></div>
+
+        {{-- Modal Card --}}
+        <div
+            class="relative w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border"
+            :style="'background: var(--surface-color); border-color: var(--border-color)'"
+            x-transition:enter="transition ease-out duration-400"
+            x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+        >
+            {{-- Header gradient --}}
+            <div class="h-1.5 w-full bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500"></div>
+
+            {{-- Content --}}
+            <div class="p-7">
+                {{-- Icon + Title --}}
+                <div class="flex items-start gap-4 mb-5">
+                    <div class="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-3xl"
+                         style="background: rgba(168,85,247,0.12);">
+                        🎁
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-extrabold themed-text mb-1 leading-tight">
+                            Tahukah Anda? Ada Keringanan Biaya!
+                        </h3>
+                        <p class="text-xs themed-text-muted leading-relaxed">
+                            Anda sudah melakukan pembayaran dan berpotensi mendapatkan keringanan biaya melalui program diskon yang tersedia.
+                        </p>
+                    </div>
+                    {{-- Close button --}}
+                    <button @click="dismiss()"
+                            class="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center themed-text-muted hover:text-red-400 transition-colors border"
+                            :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Kategori tersedia --}}
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="rounded-2xl p-3 text-center border" style="background: var(--card-bg); border-color: var(--border-color);">
+                        <div class="text-2xl mb-1">👨‍💼</div>
+                        <p class="text-[10px] font-bold themed-text leading-tight">Keluarga<br>Karyawan</p>
+                    </div>
+                    <div class="rounded-2xl p-3 text-center border" style="background: var(--card-bg); border-color: var(--border-color);">
+                        <div class="text-2xl mb-1">🎓</div>
+                        <p class="text-[10px] font-bold themed-text leading-tight">Alumni<br>Al Hasra</p>
+                    </div>
+                    <div class="rounded-2xl p-3 text-center border" style="background: var(--card-bg); border-color: var(--border-color);">
+                        <div class="text-2xl mb-1">🌟</div>
+                        <p class="text-[10px] font-bold themed-text leading-tight">Umum &<br>Prestasi</p>
+                    </div>
+                </div>
+
+                {{-- Info note --}}
+                <div class="rounded-xl p-3.5 mb-6 flex items-start gap-3 border-l-4 border-amber-500"
+                     style="background: rgba(245,158,11,0.08);">
+                    <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-[11px] text-amber-400 leading-relaxed">
+                        Pengajuan keringanan biaya hanya dapat dilakukan <strong>satu kali</strong>. Pastikan data dan dokumen yang Anda unggah sudah benar sebelum mengajukan.
+                    </p>
+                </div>
+
+                {{-- Actions --}}
+                <div class="flex gap-3">
+                    <button @click="dismiss()"
+                            class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border themed-text-muted hover:themed-text"
+                            :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                        Nanti Saja
+                    </button>
+                    <button @click="openModal()"
+                            class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-400 hover:to-violet-400 text-white text-xs font-bold shadow-lg shadow-purple-500/25 transition-all active:scale-95">
+                        Ajukan Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+@if(!$activeDiscountApp)
+    @include('pendaftaran.partials.discount-modal')
+@endif
 @endif
 
 {{-- Fee List --}}
