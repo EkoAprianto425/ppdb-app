@@ -24,7 +24,7 @@
             <label class="block text-[10px] font-bold themed-text-muted uppercase tracking-widest mb-2">Status PPDB</label>
             <select name="status" class="w-full themed-input rounded-xl px-4 py-2.5 text-xs themed-text focus:ring-primary appearance-none">
                 <option value="" class="text-slate-900">Semua Status</option>
-                @foreach(['tamu', 'Formulir', 'Lulus', 'daftar'] as $st)
+                @foreach(['tamu', 'formulir', 'lulus', 'daftar'] as $st)
                     <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }} class="text-slate-900">{{ ucfirst($st) }}</option>
                 @endforeach
             </select>
@@ -78,15 +78,15 @@
                     </td>
                     <td class="px-8 py-5 text-center">
                         <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
-                            {{ $student->registration->registrationWave->name ?? '-' }}
+                            {{ $student->registration?->registrationWave?->name ?? '-' }}
                         </span>
                     </td>
                     <td class="px-8 py-5 text-center">
                         @php
                             $statusColors = [
                                 'tamu' => 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-                                'Formulir' => 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-                                'Lulus' => 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+                                'formulir' => 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+                                'lulus' => 'bg-amber-500/10 text-amber-500 border-amber-500/20',
                                 'daftar' => 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
                             ];
                         @endphp

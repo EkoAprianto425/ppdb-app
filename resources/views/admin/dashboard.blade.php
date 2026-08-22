@@ -81,10 +81,10 @@
         {{-- 4. Status per Wave per Level (Detailed Grid) --}}
         @php
             $waveCharts = [
-                ['id' => 'waveTamuChart', 'title' => 'Tamu per Gelombang', 'status' => 'Tamu'],
-                ['id' => 'waveFormulirChart', 'title' => 'Formulir per Gelombang', 'status' => 'Formulir'],
-                ['id' => 'waveLulusChart', 'title' => 'Lulus per Gelombang', 'status' => 'Lulus'],
-                ['id' => 'waveDaftarChart', 'title' => 'Daftar per Gelombang', 'status' => 'Daftar'],
+                ['id' => 'waveTamuChart', 'title' => 'Tamu per Gelombang', 'status' => 'tamu'],
+                ['id' => 'waveFormulirChart', 'title' => 'Formulir per Gelombang', 'status' => 'formulir'],
+                ['id' => 'waveLulusChart', 'title' => 'Lulus per Gelombang', 'status' => 'lulus'],
+                ['id' => 'waveDaftarChart', 'title' => 'Daftar per Gelombang', 'status' => 'daftar'],
             ];
         @endphp
 
@@ -229,8 +229,8 @@
         ];
         
         if (waveNames && waveNames.length > 0) {
-            @foreach(['Tamu', 'Formulir', 'Lulus', 'Daftar'] as $status)
-            safeInitChart('wave{{ $status }}Chart', {
+            @foreach(['Tamu' => 'tamu', 'Formulir' => 'formulir', 'Lulus' => 'lulus', 'Daftar' => 'daftar'] as $idSuffix => $status)
+            safeInitChart('wave{{ $idSuffix }}Chart', {
                 type: 'bar',
                 data: {
                     labels: waveNames,

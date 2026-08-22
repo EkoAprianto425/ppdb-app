@@ -11,7 +11,6 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         $query = \App\Models\User::where('role', \App\Models\User::ROLE_SISWA)
-            ->whereHas('registration')
             ->with(['registration.payments', 'educationalLevel']);
 
         if (!$user->isSuperAdmin()) {
@@ -46,8 +45,8 @@ class DashboardController extends Controller
             foreach ($levelStudents as $student) {
                 $status = $this->calculateStatus($student, $fees);
                 if ($status === 'tamu') { $tamu++; $globalTamu++; }
-                elseif ($status === 'Formulir') { $formulir++; $globalFormulir++; }
-                elseif ($status === 'Lulus') { $lulus++; $globalLulus++; }
+                elseif ($status === 'formulir') { $formulir++; $globalFormulir++; }
+                elseif ($status === 'lulus') { $lulus++; $globalLulus++; }
                 elseif ($status === 'daftar') { $daftar++; $globalDaftar++; }
             }
 
@@ -66,10 +65,10 @@ class DashboardController extends Controller
         $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
         $waves = \App\Models\RegistrationWave::where('academic_year_id', $activeYear?->id)->get();
         $detailedWaveStats = [
-            'Tamu' => [],
-            'Formulir' => [],
-            'Lulus' => [],
-            'Daftar' => []
+            'tamu' => [],
+            'formulir' => [],
+            'lulus' => [],
+            'daftar' => []
         ];
 
         foreach ($waves as $wave) {
@@ -90,15 +89,15 @@ class DashboardController extends Controller
                 foreach ($levelWaveStudents as $student) {
                     $status = $this->calculateStatus($student, $fees);
                     if ($status === 'tamu') $tamu++;
-                    elseif ($status === 'Formulir') $formulir++;
-                    elseif ($status === 'Lulus') $lulus++;
+                    elseif ($status === 'formulir') $formulir++;
+                    elseif ($status === 'lulus') $lulus++;
                     elseif ($status === 'daftar') $daftar++;
                 }
 
-                $detailedWaveStats['Tamu'][$wave->name][$level->name] = $tamu;
-                $detailedWaveStats['Formulir'][$wave->name][$level->name] = $formulir;
-                $detailedWaveStats['Lulus'][$wave->name][$level->name] = $lulus;
-                $detailedWaveStats['Daftar'][$wave->name][$level->name] = $daftar;
+                $detailedWaveStats['tamu'][$wave->name][$level->name] = $tamu;
+                $detailedWaveStats['formulir'][$wave->name][$level->name] = $formulir;
+                $detailedWaveStats['lulus'][$wave->name][$level->name] = $lulus;
+                $detailedWaveStats['daftar'][$wave->name][$level->name] = $daftar;
             }
         }
 
@@ -135,11 +134,11 @@ class DashboardController extends Controller
         }
 
         if ($reg->status === 'lulus') {
-            return 'Lulus';
+            return 'lulus';
         }
 
         if ($formulirFeeName && $successPayments->where('fee_type', $formulirFeeName)->isNotEmpty()) {
-            return 'Formulir';
+            return 'formulir';
         }
 
         return 'tamu';
