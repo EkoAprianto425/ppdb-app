@@ -87,7 +87,7 @@ class StudentManagementController extends Controller
         ];
 
         $columns = [
-            'No', 'Tgl Daftar Akun', 'Nama Lengkap', 'Nama Panggilan', 'Email', 'No. WhatsApp', 
+            'No', 'Tgl Daftar Akun', 'Nama Pembuat Akun', 'Nama Lengkap', 'Nama Panggilan', 'Email', 'No. WhatsApp', 
             'Asal Sekolah', 'Alasan Memilih', 'Sumber Informasi', 'Jenjang Tujuan', 'Tahun Ajaran', 'Gelombang', 
             'Status PPDB', 'Status Kelulusan', 'Deadline Daftar Ulang', 'Tempat Lahir', 'Tanggal Lahir', 
             'Jenis Kelamin', 'Agama', 'Alamat', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Kebutuhan Khusus',
@@ -112,6 +112,7 @@ class StudentManagementController extends Controller
                 echo "<tr>";
                 echo "<td>" . ($key + 1) . "</td>";
                 echo "<td>" . $student->created_at->format('d/m/Y H:i') . "</td>";
+                echo "<td>" . ($student->name ?? '-') . "</td>";
                 echo "<td>" . ($student->full_name ?? $student->name) . "</td>";
                 echo "<td>" . ($reg->nama_panggilan ?? '-') . "</td>";
                 echo "<td>" . $student->email . "</td>";
