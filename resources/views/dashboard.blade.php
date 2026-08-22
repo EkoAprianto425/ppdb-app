@@ -160,8 +160,8 @@
                 <p class="text-sm font-bold themed-text">{{ $registration->examSchedule->name }}</p>
                 <p class="text-[10px] themed-text-muted uppercase mt-1">{{ date('d M Y', strtotime($registration->examSchedule->date)) }} · {{ substr($registration->examSchedule->time_start, 0, 5) }} WIB</p>
             </div>
-            <a href="{{ route('pendaftaran.exam-card') }}" target="_blank" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all text-[10px] font-bold uppercase">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Unduh Kartu Ujian</a>
+            <a href="{{ route('pendaftaran.exam-counsel') }}" target="_blank" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all text-[10px] font-bold uppercase">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Unduh Kisi - kisi Ujian</a>
         @elseif($status1 !== 'success')
             <p class="text-xs themed-text-muted mb-3">Selesaikan pembayaran formulir untuk memilih jadwal.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Belum Tersedia</span>

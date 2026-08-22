@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/exam', [\App\Http\Controllers\Siswa\ExamController::class, 'index'])->name('pendaftaran.exam');
         Route::post('/exam/select', [\App\Http\Controllers\Siswa\ExamController::class, 'select'])->name('pendaftaran.exam.select');
         Route::get('/exam/card', [\App\Http\Controllers\Siswa\ExamController::class, 'downloadCard'])->name('pendaftaran.exam-card');
+        Route::get('/exam/counsel', [\App\Http\Controllers\Siswa\ExamController::class, 'downloadCounsel'])->name('pendaftaran.exam-counsel');
         
         // Pengumuman / Announcement
         Route::get('/pengumuman', [\App\Http\Controllers\Siswa\AnnouncementController::class, 'index'])->name('pendaftaran.announcement');

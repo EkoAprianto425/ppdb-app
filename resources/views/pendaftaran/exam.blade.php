@@ -24,7 +24,7 @@
             </div>
             
             <h2 class="text-3xl font-black themed-text mb-2">Jadwal Ujian Terkonfirmasi!</h2>
-            <p class="text-sm themed-text-muted mb-10 max-w-lg">Anda telah memilih jadwal ujian. Silakan unduh kartu ujian Anda dan bawa fotokopi serta lampiran lainnya saat pelaksanaan ujian.</p>
+            <p class="text-sm themed-text-muted mb-10 max-w-lg">Jadwal seleksi telah berhasil dipilih. Kartu Ujian disimpan sebagai referensi, tidak perlu dicetak atau dibawa saat pelaksanaan tes.</p>
             
             <div class="w-full bg-white/5 border border-white/10 rounded-2xl p-6 mb-10 text-left grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -38,10 +38,17 @@
                 </div>
             </div>
             
-            <a href="{{ route('pendaftaran.exam-card') }}" target="_blank" class="px-8 py-4 rounded-full bg-gradient-to-r from-primary to-indigo-600 text-white font-black text-sm uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-1 hover:shadow-primary/40 transition-all flex items-center gap-3 active:scale-95">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                Unduh PDF Kartu Ujian
-            </a>
+            <div class="w-full bg-white/5 border border-white/10 rounded-2xl p-6 mb-10 text-left grid grid-cols-1 md:grid-cols-2 gap-6">
+                <a href="{{ route('pendaftaran.exam-card') }}" target="_blank" class="px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-black text-sm uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-1 hover:shadow-primary/40 transition-all flex items-center gap-3 active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Unduh PDF Kartu Ujian
+                </a>
+
+                <a href="{{ route('pendaftaran.exam-counsel') }}" target="_blank" class="px-8 py-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-700 text-white font-black text-sm uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:-translate-y-1 hover:shadow-primary/40 transition-all flex items-center gap-3 active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Unduh Kisi - kisi Ujian
+                </a>
+            </div>
         </div>
     </div>
 @else

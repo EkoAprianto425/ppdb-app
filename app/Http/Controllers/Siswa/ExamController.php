@@ -54,4 +54,34 @@ class ExamController extends Controller
         
         return $pdf->stream('Kartu_Ujian_' . $user->name . '.pdf');
     }
+
+    public function downloadCounsel(){
+        $registration = Auth::user()->registration;
+
+        if (!$registration || $registration->payment_status !== 'success' || !$registration->exam_schedule_id) {
+            return back()->with('error', 'Anda belum memenuhi syarat untuk mengunduh Kartu Ujian. Pastikan pembayaran sudah diverifikasi dan jadwal ujian telah dipilih.');
+        }
+
+        $unit = Auth::user()->educationalLevel->parent_unit;
+        if ($unit == 'SMP') {
+            $pdf = \App\Models\InformationPdf::where('type', 'kisi_kisi_ujian_smp')->get();
+        }else if ($unit == 'SMA') {
+            $pdf = \App\Models\InformationPdf::where('type', 'kisi_kisi_ujian_sma')->get();
+        }else {
+            $pdf = \App\Models\InformationPdf::where('type', 'kisi_kisi_ujian_smk')->get();
+        }
+
+        if ($pdf->isEmpty()) {
+            return back()->with('error', 'Kisi-kisi ujian belum tersedia.');
+        }
+
+        $pdfLocation = $pdf->first()->file_path;
+        $filePath = storage_path('app/public/' . $pdfLocation);
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'Kisi-kisi ujian tidak ditemukan.');
+        }
+
+        return response()->download($filePath);
+    }
 }
