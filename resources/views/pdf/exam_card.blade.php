@@ -96,17 +96,17 @@
 <body>
     <div class="card">
         <div class="header">
-            <h1>KARTU UJIAN PPDB</h1>
-            <p>Tahun Ajaran {{ $schedule->academicYear?->year ?? '2024/2025' }}</p>
+            <h1>{{ \App\Models\Setting::get('app_name', 'PPDB Online') }}</h1>
+            <p>Tahun Ajaran {{ $user->registration->academicYear->name }}</p>
         </div>
 
         <table style="width: 100%;">
             <tr>
-                <td style="width: 140px; vertical-align: top;">
+                <!-- <td style="width: 140px; vertical-align: top;">
                     <div class="photo-container">
                         Pas Foto 3x4
                     </div>
-                </td>
+                </td> -->
                 <td style="vertical-align: top;">
                     <table class="details-table">
                         <tr>
@@ -147,7 +147,7 @@
         </div>
 
         <div class="footer">
-            <p>Kartu ini wajib dibawa saat pelaksanaan ujian seleksi.</p>
+            <!-- <p>Kartu ini wajib dibawa saat pelaksanaan ujian seleksi.</p> -->
             <p>Dicetak pada: {{ now()->format('d/m/Y H:i:s') }}</p>
         </div>
     </div>
