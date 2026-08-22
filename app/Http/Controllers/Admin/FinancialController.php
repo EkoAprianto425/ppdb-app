@@ -54,9 +54,18 @@ class FinancialController extends Controller
     public function indexPayments(Request $request)
     {
         $status = $request->get('status', 'pending');
+
         $query = \App\Models\Payment::with('registration.user')
-            ->whereHas('registration')
-            ->where('status', $status);
+            ->whereHas('registration');
+
+        if ($status === 'belum_lunas') {
+            // Pembayaran yang sudah ada paid_amount tapi belum full
+            $query->whereColumn('paid_amount', '<', 'amount')
+                  ->where('paid_amount', '>', 1)
+                  ->where('status', 'success');
+        } else {
+            $query->where('status', $status);
+        }
 
         $user = auth()->user();
         if (!$user) {
@@ -191,5 +200,20 @@ class FinancialController extends Controller
         } catch (\Throwable $e) {
             return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
+    }
+
+    public function updatePaidAmount(Request $request, \App\Models\Payment $payment)
+    {
+        $request->validate([
+            'paid_amount' => 'required|numeric|min:1',
+        ]);
+
+        $payment->update([
+            'paid_amount'  => $request->paid_amount,
+            'verified_by'  => auth()->id(),
+            'verified_at'  => now(),
+        ]);
+
+        return back()->with('status', "Nominal pembayaran berhasil diperbarui.");
     }
 }
