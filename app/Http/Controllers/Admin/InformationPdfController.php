@@ -19,6 +19,9 @@ class InformationPdfController extends Controller
             'info_biaya_smp' => 'Info Biaya SMP',
             'info_biaya_sma' => 'Info Biaya SMA',
             'info_biaya_smk' => 'Info Biaya SMK',
+            'kisi_kisi_ujian_smp' => 'Kisi-kisi Ujian SMP',
+            'kisi_kisi_ujian_sma' => 'Kisi-kisi Ujian SMA',
+            'kisi_kisi_ujian_smk' => 'Kisi-kisi Ujian SMK',
         ];
 
         return view('admin.super.information_pdfs.index', compact('pdfs', 'types'));
@@ -28,7 +31,7 @@ class InformationPdfController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|in:brosur_smp,brosur_sma,brosur_smk,info_biaya_smp,info_biaya_sma,info_biaya_smk',
+            'type' => 'required|in:brosur_smp,brosur_sma,brosur_smk,info_biaya_smp,info_biaya_sma,info_biaya_smk,kisi_kisi_ujian_smp,kisi_kisi_ujian_sma,kisi_kisi_ujian_smk',
             'file' => 'required|file|mimes:pdf|max:51200', // max 50MB
         ]);
 
