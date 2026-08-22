@@ -118,9 +118,7 @@
                     Ajukan Keringanan
                 </button>
                 @include('pendaftaran.partials.discount-modal')
-
-            {{-- Belum ada pembayaran selain formulir: hanya tampilkan info teks, tanpa tombol --}}
-            @else
+            @endif
         </div>
     </div>
 @endif
