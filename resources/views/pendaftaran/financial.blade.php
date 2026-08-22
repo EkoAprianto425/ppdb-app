@@ -101,7 +101,7 @@
 @endphp
 
 {{-- Blok keringanan: selalu tampil jika siswa lulus --}}
-<!-- @if($isPassed) -->
+
     <div class="mb-8 card-glass rounded-3xl p-6 border-l-4 border-purple-500 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
         <div>
             <h3 class="text-sm font-bold themed-text uppercase tracking-widest mb-1">Informasi Administrasi</h3>
@@ -121,7 +121,7 @@
             @endif
         </div>
     </div>
-<!-- @endif -->
+
 
 {{-- ═══════════════ POP-UP KERINGANAN OTOMATIS ═══════════════ --}}
 @if($showKeringanPopup)
