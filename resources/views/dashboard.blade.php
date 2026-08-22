@@ -192,7 +192,7 @@
             </div>
             @endif
             
-            <a href="{{ route('pendaftaran.announcement') }}" class="flex items-center justify-center w-full py-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-bold uppercase mb-2">Lihat SKL</a>
+            <a href="{{ route('pendaftaran.announcement') }}" class="flex items-center justify-center w-full py-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-bold uppercase mb-2">Lihat Pengumuman</a>
             
             @php
                 $activeDiscountApp = $registration->discountApplications()->latest()->first();
