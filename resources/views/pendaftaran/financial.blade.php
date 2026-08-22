@@ -104,8 +104,8 @@
         </div>
     </div>
 
-{{-- Blok ajukan keringanan: hanya tampil jika belum ada pengajuan DAN biaya belum lunas --}}
-@elseif($isPassed && !$activeDiscountApp && $status2 !== 'success')
+{{-- Blok ajukan keringanan: hanya tampil jika belum ada pengajuan DAN biaya sudah lunas --}}
+@elseif($isPassed && !$activeDiscountApp && $status2 === 'success')
     <div class="mb-8 card-glass rounded-3xl p-6 border-l-4 border-purple-500 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
         <div>
             <h3 class="text-sm font-bold themed-text uppercase tracking-widest mb-1">Pengajuan Keringanan Biaya</h3>
@@ -148,17 +148,22 @@
                             <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $fee->name }}</p>
                         </td>
                         <td class="px-8 py-6 text-sm themed-text text-right font-bold">
-                            @if(isset($fee->discount_amount) && $fee->discount_amount > 0)
-                                <div class="flex flex-col items-end gap-1">
+                            <div class="flex flex-col items-end gap-1">
+                                @if(isset($fee->discount_amount) && $fee->discount_amount > 0)
                                     <span class="text-[10px] text-gray-400 line-through">Rp {{ number_format($fee->original_amount, 0, ',', '.') }}</span>
                                     <span class="text-[10px] text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                                         {{ $fee->discount_name }} (-Rp {{ number_format($fee->discount_amount, 0, ',', '.') }})
                                     </span>
                                     <span class="text-sm">Rp {{ number_format($fee->amount, 0, ',', '.') }}</span>
-                                </div>
-                            @else
-                                Rp {{ number_format($fee->amount, 0, ',', '.') }}
-                            @endif
+                                @else
+                                    <span class="text-sm">Rp {{ number_format($fee->amount, 0, ',', '.') }}</span>
+                                @endif
+                                @if(($fee->paid_amount ?? 0) > 0)
+                                    <span class="text-[10px] text-emerald-400 font-semibold">
+                                        Terbayar: Rp {{ number_format($fee->paid_amount, 0, ',', '.') }}
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-8 py-6 text-right">
                             @if($fee->status === 'pending' && $fee->payment)
@@ -179,9 +184,28 @@
                             @endif
                         </td>
                         <td class="px-8 py-6 text-center">
-                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border {{ $statusColors[$fee->status] }}">
-                                {{ $statusLabels[$fee->status] }}
-                            </span>
+                            <div class="flex flex-col items-center gap-1.5">
+                                @php
+                                    $isBelumLunas = $fee->status === 'success' && ($fee->paid_amount ?? 0) < $fee->amount;
+                                @endphp
+                                @if($isBelumLunas)
+                                    <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">
+                                        Belum Lunas
+                                    </span>
+                                    <span class="text-[9px] text-amber-400 font-semibold">
+                                        Sisa: Rp {{ number_format($fee->amount - $fee->paid_amount, 0, ',', '.') }}
+                                    </span>
+                                @else
+                                    <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border {{ $statusColors[$fee->status] }}">
+                                        {{ $statusLabels[$fee->status] }}
+                                    </span>
+                                    @if(($fee->paid_amount ?? 0) > 0 && $fee->amount > $fee->paid_amount)
+                                        <span class="text-[9px] text-amber-400 font-semibold">
+                                            Sisa: Rp {{ number_format($fee->amount - $fee->paid_amount, 0, ',', '.') }}
+                                        </span>
+                                    @endif
+                                @endif
+                            </div>
                         </td>
                         <td class="px-8 py-6 text-right">
                             @if($fee->status === 'none' || $fee->status === 'failed')

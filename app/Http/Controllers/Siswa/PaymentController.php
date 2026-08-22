@@ -49,6 +49,7 @@ class PaymentController extends Controller
                 'id'              => $fee->id,
                 'name'            => $fee->name,
                 'amount'          => $finalAmount,
+                'paid_amount'     => $payment->paid_amount ?? 0,
                 'original_amount' => $originalAmount,
                 'discount_amount' => $discountAmount,
                 'discount_name'   => $discountName,

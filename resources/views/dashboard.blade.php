@@ -197,7 +197,7 @@
             @php
                 $activeDiscountApp = $registration->discountApplications()->latest()->first();
             @endphp
-            @if($status2 !== 'success')
+            @if($status2 === 'success')
                 @if($activeDiscountApp)
                     <div class="mt-4 p-4 rounded-2xl border {{ $activeDiscountApp->status === 'approved' ? 'bg-emerald-500/10 border-emerald-500/20' : ($activeDiscountApp->status === 'rejected' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-amber-500/10 border-amber-500/20') }}">
                         <p class="text-[9px] font-black uppercase tracking-widest {{ $activeDiscountApp->status === 'approved' ? 'text-emerald-400' : ($activeDiscountApp->status === 'rejected' ? 'text-rose-400' : 'text-amber-400') }} mb-2">Status Keringanan</p>
