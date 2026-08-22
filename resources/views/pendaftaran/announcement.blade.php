@@ -57,19 +57,19 @@
                 <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 mb-4 tracking-tight">SELAMAT!</h2>
                 
                 <p class="text-lg md:text-xl themed-text max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-                    Ananda <span class="font-bold">{{ $registration->user->full_name }}</span> dinyatakan <span class="font-bold text-emerald-400">LULUS</span> seleksi Penerimaan Peserta Didik Baru (PPDB) untuk unit <span class="font-bold">{{ $registration->user->educationalLevel?->name }}</span> Tahun Ajaran {{ $registration->academicYear->name }}.
+                    Ananda <span class="font-bold">{{ ucwords(strtolower($registration->user->full_name)) }}</span> dinyatakan <span class="font-bold text-emerald-400">LULUS</span> seleksi {{ \App\Models\Setting::get('app_name', 'PPDB Online') }} untuk unit <span class="font-bold">{{ $registration->user->educationalLevel?->name }}</span> Tahun Ajaran {{ Auth::user()->registration->academicYear->name }}.
                 </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-10 text-left">
-                    <div class="p-6 rounded-2xl bg-white/5 border border-white/10">
+                <div class="mb-10 text-center">
+                    <!-- <div class="p-6 rounded-2xl bg-white/5 border border-white/10">
                         <p class="text-[10px] themed-text-muted font-bold uppercase tracking-widest mb-2">1. Tahap Selanjutnya</p>
                         <p class="text-sm themed-text leading-relaxed">
                             Silakan unduh Surat Keterangan Lulus (SKL) di bawah ini sebagai bukti kelulusan seleksi yang sah.
                         </p>
-                    </div>
+                    </div> -->
                     <div class="p-6 rounded-2xl border border-rose-500/30 bg-rose-500/5 relative overflow-hidden">
                         <div class="absolute inset-0 bg-rose-500/10 w-1 rounded-l-2xl"></div>
-                        <p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">2. Daftar Ulang</p>
+                        <p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">Daftar Ulang</p>
                         <p class="text-sm themed-text leading-relaxed mb-3">
                             Lakukan pelunasan biaya Daftar Ulang (Tabel Administrasi) selambat-lambatnya:
                         </p>
@@ -93,7 +93,7 @@
                     $activeDiscountApp = $registration->discountApplications()->latest()->first();
                 @endphp
                 
-                @if($status2 !== 'success')
+                <!-- @if($status2 !== 'success')
                 <div class="max-w-2xl mx-auto mb-10 text-left">
                     <div class="p-6 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-in">
                         <div>
@@ -112,7 +112,7 @@
                         </div>
                     </div>
                 </div>
-                @endif
+                @endif -->
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <a href="{{ route('pendaftaran.announcement.skl') }}" target="_blank" class="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-sm uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] hover:-translate-y-1 hover:shadow-emerald-500/40 transition-all flex items-center justify-center gap-3 active:scale-95">
