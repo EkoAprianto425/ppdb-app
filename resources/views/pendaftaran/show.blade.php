@@ -16,16 +16,21 @@
             </div>
             <div>
                 <p class="themed-text font-bold">Data Berhasil Disimpan</p>
-                <p class="themed-text-muted text-xs">Anda dapat mengubah data ini kapan saja sebelum batas waktu pendaftaran berakhir.</p>
+                @php
+                    $unit = auth()->user()->educationalLevel?->parent_unit;
+                    $adminRole = 'admin_' . strtolower($unit);
+                    $adminWa = \App\Models\User::where('role', $adminRole)->whereNotNull('whatsapp_number')->first()?->whatsapp_number ?? '-';
+                @endphp
+                <p class="themed-text-muted text-xs">Jika anda ingin merubah data formulir ini, harap hubungi Admin <b>{{ $unit }}</b> di nomor berikut <b><a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $adminWa) }}" target="_blank" class="text-emerald-500 hover:underline">{{ $adminWa }}</a></b></p>
             </div>
         </div>
-        <a href="{{ route('pendaftaran.edit') }}" 
+        <!-- <a href="{{ route('pendaftaran.edit') }}" 
            class="px-5 py-2 rounded-xl transition-all flex items-center gap-2 btn-soft-primary text-sm font-semibold">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
             </svg>
             Edit Data
-        </a>
+        </a> -->
     </div>
 
     {{-- Info Grid --}}
