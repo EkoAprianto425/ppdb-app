@@ -16,7 +16,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $adminWaNumbers = \App\Models\User::whereIn('role', [
+            \App\Models\User::ROLE_ADMIN_SMP,
+            \App\Models\User::ROLE_ADMIN_SMA,
+            \App\Models\User::ROLE_ADMIN_SMK,
+            \App\Models\User::ROLE_ADMIN_ADM
+        ])->whereNotNull('whatsapp_number')->where('whatsapp_number', '!=', '')->orderBy('role', 'asc')->get();
+
+        return view('auth.login', compact('adminWaNumbers'));
     }
 
     /**

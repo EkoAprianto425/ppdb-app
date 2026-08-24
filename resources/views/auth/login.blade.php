@@ -56,7 +56,7 @@
                     <div class="flex items-center justify-between mb-1.5">
                         <label for="password" class="text-xs font-medium text-amber-900">Password</label>
                         @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="text-xs text-amber-700 hover:text-amber-600 transition-colors">Lupa password?</a>
+                            <a href="#" onclick="document.getElementById('forgotPasswordModal').classList.remove('hidden'); return false;" class="text-xs text-amber-700 hover:text-amber-600 transition-colors">Lupa password?</a>
                         @endif
                     </div>
                     <div class="relative">
@@ -100,4 +100,55 @@
         </p>
     </div>
 </div>
+
+    {{-- Forgot Password Modal --}}
+    <div id="forgotPasswordModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-amber-950/40 backdrop-blur-sm transition-opacity" style="margin:0;">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all border border-amber-900/10">
+            <div class="px-6 py-5 border-b border-amber-900/10 flex items-center justify-between bg-amber-50/50">
+                <h3 class="text-lg font-semibold text-amber-950">Lupa Password</h3>
+                <button type="button" onclick="document.getElementById('forgotPasswordModal').classList.add('hidden')" class="text-amber-900/50 hover:text-amber-900 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="px-6 py-6">
+                <div class="mb-5 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 text-sm flex items-start gap-3">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>Untuk mereset password Anda, harap hubungi Admin sekolah melalui WhatsApp di bawah ini:</p>
+                </div>
+                
+                <div class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    @forelse($adminWaNumbers as $admin)
+                        @php
+                            $waNumber = preg_replace('/[^0-9]/', '', $admin->whatsapp_number);
+                            if (str_starts_with($waNumber, '0')) {
+                                $waNumber = '62' . substr($waNumber, 1);
+                            }
+                            $roleName = ucwords(str_replace('_', ' ', $admin->role));
+                            $roleName = str_replace(['Smp', 'Sma', 'Smk', 'Adm'], ['SMP', 'SMA', 'SMK', 'Administrasi'], $roleName);
+                        @endphp
+                        <a href="https://wa.me/{{ $waNumber }}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl border border-amber-900/10 hover:bg-amber-50 hover:border-amber-900/30 transition-all group">
+                            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.745.448 3.39 1.226 4.832L2 22l5.342-1.189A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zM9.54 8.784c.15-.333.308-.34.45-.346.136-.006.291-.006.446-.006.155 0 .408-.058.621.408.214.466.738 1.808.806 1.944.068.136.116.292.039.447-.078.155-.117.253-.233.389-.117.136-.253.311-.35.408-.117.117-.243.243-.107.477.136.233.602 1.002 1.293 1.621.886.793 1.63 1.04 1.864 1.157.233.117.37.097.505-.058.136-.155.583-.68.738-.914.155-.233.31-.194.524-.117.214.078 1.36.642 1.593.758.233.117.389.175.447.272.058.097.058.564-.175 1.108-.233.544-1.36 1.069-1.884 1.088-.524.02-1.04-.155-2.914-.894-2.253-.894-3.71-3.187-3.827-3.342-.117-.155-.913-1.224-.913-2.332s.583-1.652.797-1.885c.214-.233.466-.291.622-.291z" clip-rule="evenodd"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-amber-950 group-hover:text-amber-700 transition-colors">{{ $admin->name }}</h4>
+                                <p class="text-xs text-amber-800/70">{{ $roleName }} - {{ $admin->whatsapp_number }}</p>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="text-center py-6 text-amber-900/50 text-sm">
+                            Belum ada kontak Admin yang tersedia.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-amber-900/10 bg-amber-50/30 flex justify-end">
+                <button type="button" onclick="document.getElementById('forgotPasswordModal').classList.add('hidden')" class="px-4 py-2 bg-white border border-amber-900/20 text-amber-900 text-sm font-medium rounded-xl hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-700/30 transition-all">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
 @endsection
