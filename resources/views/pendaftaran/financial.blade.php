@@ -37,6 +37,16 @@
 @endif
 
 {{-- Financial Summary Cards --}}
+@php
+    $realTotalFees = 0;
+    $realTotalPaid = 0;
+    foreach($feeData as $fee) {
+        $realTotalFees += $fee->amount;
+        $realTotalPaid += ($fee->paid_amount ?? 0);
+    }
+    $realRemaining = $realTotalFees - $realTotalPaid;
+@endphp
+
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
     <div class="flex-1 space-y-2">
         <h2 class="text-xl font-bold themed-text">Ringkasan Keuangan</h2>
@@ -53,7 +63,7 @@
             </div>
             <div>
                 <p class="text-[10px] font-bold themed-text-muted uppercase tracking-widest leading-none mb-1.5">Total Kewajiban</p>
-                <p class="text-xl font-black themed-text tracking-tight">Rp {{ number_format($totalFees, 0, ',', '.') }}</p>
+                <p class="text-xl font-black themed-text tracking-tight">Rp {{ number_format($realTotalFees, 0, ',', '.') }}</p>
             </div>
         </div>
     </div>
@@ -66,7 +76,7 @@
             </div>
             <div>
                 <p class="text-[10px] font-bold themed-text-muted uppercase tracking-widest leading-none mb-1.5">Total Terbayar</p>
-                <p class="text-xl font-black text-emerald-400 tracking-tight">Rp {{ number_format($totalPaid, 0, ',', '.') }}</p>
+                <p class="text-xl font-black text-emerald-400 tracking-tight">Rp {{ number_format($realTotalPaid, 0, ',', '.') }}</p>
             </div>
         </div>
     </div>
@@ -79,7 +89,7 @@
             </div>
             <div>
                 <p class="text-[10px] font-bold themed-text-muted uppercase tracking-widest leading-none mb-1.5">Sisa Tagihan</p>
-                <p class="text-xl font-black text-amber-400 tracking-tight">Rp {{ number_format($remaining, 0, ',', '.') }}</p>
+                <p class="text-xl font-black text-amber-400 tracking-tight">Rp {{ number_format($realRemaining, 0, ',', '.') }}</p>
             </div>
         </div>
     </div>
@@ -91,9 +101,9 @@
     $isPassed = $registration && $registration->status === 'lulus';
     $activeDiscountApp = $registration ? $registration->discountApplications()->latest()->first() : null;
 
-    // Cek apakah ada pembayaran (pending/success) untuk fee sort_order > 1
+    // Cek apakah ada pembayaran (termasuk cicilan) untuk fee sort_order > 1
     $hasPaidFee2 = $feeData->where('sort_order', '>', 1)->filter(function($f) {
-        return in_array($f->status, ['pending', 'success']);
+        return ($f->paid_amount ?? 0) > 0 || $f->status === 'success';
     })->isNotEmpty();
 
     // Pop-up keringanan tampil jika: lulus, sudah bayar fee > 1, belum pernah mengajukan keringanan
@@ -117,7 +127,6 @@
                 <button @click="$dispatch('open-discount-modal')" class="px-6 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-[10px] font-bold uppercase shadow-lg shadow-purple-500/20 transition-all active:scale-95 whitespace-nowrap">
                     Ajukan Keringanan
                 </button>
-                @include('pendaftaran.partials.discount-modal')
             @endif
         </div>
     </div>
@@ -231,9 +240,10 @@
         </div>
     </div>
 </template>
+@endif
+
 @if(!$activeDiscountApp)
     @include('pendaftaran.partials.discount-modal')
-@endif
 @endif
 
 {{-- Fee List --}}
@@ -403,6 +413,9 @@
                                 @php $canPayNext = false; @endphp
 
                             @else
+                                @if(isset($isBelumLunas) && $isBelumLunas)
+                                    @php $canPayNext = false; @endphp
+                                @endif
                                 <div class="flex justify-end">
                                     <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 border border-emerald-500/30">
                                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
