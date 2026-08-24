@@ -44,10 +44,11 @@ class DashboardController extends Controller
 
             foreach ($levelStudents as $student) {
                 $status = $this->calculateStatus($student, $fees);
-                if ($status === 'tamu') { $tamu++; $globalTamu++; }
-                elseif ($status === 'formulir') { $formulir++; $globalFormulir++; }
-                elseif ($status === 'lulus') { $lulus++; $globalLulus++; }
-                elseif ($status === 'daftar') { $daftar++; $globalDaftar++; }
+                
+                $tamu++; $globalTamu++;
+                if (in_array($status, ['formulir', 'lulus', 'daftar'])) { $formulir++; $globalFormulir++; }
+                if (in_array($status, ['lulus', 'daftar'])) { $lulus++; $globalLulus++; }
+                if ($status === 'daftar') { $daftar++; $globalDaftar++; }
             }
 
             $statsByLevel[] = [
@@ -88,10 +89,11 @@ class DashboardController extends Controller
                 $tamu = 0; $formulir = 0; $lulus = 0; $daftar = 0;
                 foreach ($levelWaveStudents as $student) {
                     $status = $this->calculateStatus($student, $fees);
-                    if ($status === 'tamu') $tamu++;
-                    elseif ($status === 'formulir') $formulir++;
-                    elseif ($status === 'lulus') $lulus++;
-                    elseif ($status === 'daftar') $daftar++;
+                    
+                    $tamu++;
+                    if (in_array($status, ['formulir', 'lulus', 'daftar'])) $formulir++;
+                    if (in_array($status, ['lulus', 'daftar'])) $lulus++;
+                    if ($status === 'daftar') $daftar++;
                 }
 
                 $detailedWaveStats['tamu'][$wave->name][$level->name] = $tamu;
