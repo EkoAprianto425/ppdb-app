@@ -250,6 +250,21 @@ class StudentManagementController extends Controller
         return redirect()->route('admin.students.index')->with('status', 'Siswa berhasil dipindahkan ke jenjang ' . $request->unit);
     }
 
+    public function resetPassword(Request $request, Registration $registration)
+    {
+        $this->authorizeAccess($registration);
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $registration->user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return back()->with('status', 'Password siswa berhasil direset.');
+    }
+
     public function graduationIndex(Request $request)
     {
         $user = auth()->user();

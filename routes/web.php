@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/students/{registration}/edit', [\App\Http\Controllers\Admin\StudentManagementController::class, 'edit'])->name('students.edit');
             Route::put('/students/{registration}', [\App\Http\Controllers\Admin\StudentManagementController::class, 'update'])->name('students.update');
             Route::post('/students/{registration}/transfer', [\App\Http\Controllers\Admin\StudentManagementController::class, 'transfer'])->name('students.transfer');
+            Route::post('/students/{registration}/reset-password', [\App\Http\Controllers\Admin\StudentManagementController::class, 'resetPassword'])->name('students.reset-password');
             Route::post('/students/{registration}/status', [\App\Http\Controllers\Admin\StudentManagementController::class, 'updateStatus'])->name('students.update-status');
             
             Route::get('/graduation', [\App\Http\Controllers\Admin\StudentManagementController::class, 'graduationIndex'])->name('graduation.index');

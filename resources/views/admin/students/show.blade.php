@@ -213,6 +213,8 @@
         <div class="space-y-3">
             <a href="{{ route('admin.students.edit', $registration) }}" class="w-full py-3 rounded-xl btn-soft-primary text-xs font-bold uppercase tracking-widest block text-center">Edit Biodata</a>
             
+            <button x-data @click="$dispatch('open-modal', 'modal-reset-password')" class="w-full py-3 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all text-xs font-bold uppercase tracking-widest block text-center">Reset Password</button>
+
             @if(auth()->user()->role !== \App\Models\User::ROLE_ADMIN_SMP)
             <button x-data @click="$dispatch('open-modal', 'modal-transfer')" class="w-full py-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all text-xs font-bold uppercase tracking-widest">Pindah Jenjang</button>
             @endif
@@ -244,4 +246,42 @@
         </form>
     </div>
 </div>
+{{-- Modal Reset Password --}}
+<div x-data="{ open: false }" @open-modal.window="if($event.detail === 'modal-reset-password') open = true" x-show="open" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div @click.away="open = false" class="card-glass rounded-3xl p-8 w-full max-w-md shadow-2xl scale-in-center">
+        <h3 class="text-xl font-bold themed-text mb-4">Reset Password</h3>
+        <p class="text-sm themed-text-muted mb-6">Masukkan password baru untuk akun siswa ini. Minimal 8 karakter.</p>
+        
+        <form action="{{ route('admin.students.reset-password', $registration) }}" method="POST" class="space-y-6" x-data="{ showPassword: false }">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold themed-text-muted uppercase tracking-widest mb-2">Password Baru</label>
+                <div class="relative">
+                    <input :type="showPassword ? 'text' : 'password'" name="password" required minlength="8" class="w-full themed-input rounded-xl px-4 py-3 text-sm transition-all pr-10" placeholder="••••••••">
+                    <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-themed-text-muted hover:text-themed-text transition-colors">
+                        <svg x-show="!showPassword" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg x-show="showPassword" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.978 9.978 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold themed-text-muted uppercase tracking-widest mb-2">Konfirmasi Password</label>
+                <div class="relative">
+                    <input :type="showPassword ? 'text' : 'password'" name="password_confirmation" required minlength="8" class="w-full themed-input rounded-xl px-4 py-3 text-sm transition-all pr-10" placeholder="••••••••">
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <button type="button" @click="open = false" class="flex-1 py-3 rounded-xl btn-soft-secondary font-bold text-xs uppercase tracking-widest">Batal</button>
+                <button type="submit" class="flex-1 py-3 rounded-xl bg-amber-500 text-white font-bold text-xs uppercase tracking-widest shadow-lg shadow-amber-500/50">Simpan Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
