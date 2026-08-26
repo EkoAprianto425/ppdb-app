@@ -103,13 +103,14 @@
     $activeFee = null;
     foreach ($allFees as $f) {
         $p = $registration ? $registration->payments()->where('fee_type', $f->name)->latest()->first() : null;
-        if (!$p || $p->status !== 'success') { 
+        if (!$p || $p->status !== 'success' || ($p->paid_amount ?? 0) < $f->amount) { 
             $activeFee = (object)[
                 'id'             => $f->id,
                 'name'           => $f->name,
                 'amount'         => $f->amount,
                 'sort_order'     => $f->sort_order,
                 'payment'        => $p,
+                'paid_amount'    => $p ? ($p->paid_amount ?? 0) : 0,
                 'status'         => $p ? $p->status : 'none'
             ]; 
             break; 
@@ -132,14 +133,22 @@
             <p class="text-xs themed-text-muted mb-3">Silakan isi formulir pendaftaran terlebih dahulu.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Menunggu Formulir</span>
         @elseif($activeFee)
-            <p class="text-xs themed-text-muted mb-1">Tagihan yang harus dibayar:</p>
+            <p class="text-xs themed-text-muted mb-1">Tagihan yang sedang berjalan:</p>
             <p class="text-lg font-black themed-text mb-1">{{ $activeFee->name }}</p>
-            <p class="text-xl font-black text-purple-400 mb-3">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
-            @if($activeFee->status === 'pending')
-                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-amber-500/15 text-amber-400 border-amber-500/20">Menunggu Verifikasi</span>
+            <p class="text-xl font-black text-purple-400 mb-1">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
+            
+            @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
+                <p class="text-xs font-bold text-amber-500 mb-3">Sisa: Rp {{ number_format($activeFee->amount - $activeFee->paid_amount, 0, ',', '.') }}</p>
+                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20 mb-4 inline-block">Belum Lunas</span>
+            @elseif($activeFee->status === 'pending')
+                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20 mb-4 inline-block">Menunggu Verifikasi</span>
+            @elseif($activeFee->status === 'failed')
+                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-500/15 text-rose-400 border-rose-500/20 mb-4 inline-block">Gagal / Ditolak</span>
             @else
-                <button @click="$dispatch('open-modal', 'modal-pay-{{ $activeFee->id }}')" class="w-full py-2.5 rounded-xl {{ $activeFee->status === 'failed' ? 'bg-rose-500' : 'bg-purple-500 shadow-purple-500/20' }} text-white text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">{{ $activeFee->status === 'failed' ? 'Upload Ulang' : 'Bayar Sekarang' }}</button>
+                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-orange-700/50 text-white-400 border-orange-700 mb-4 inline-block">Belum Bayar</span>
             @endif
+
+            <a href="{{ route('pendaftaran.financial') }}" class="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 shadow-purple-500/20 text-white text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all text-center block">Buka Menu Administrasi</a>
         @else
             <p class="text-xs text-emerald-400 font-bold mb-2">Semua pembayaran lunas ✅</p>
             <a href="{{ route('pendaftaran.financial') }}" class="text-[10px] text-primary font-bold uppercase hover:underline">Lihat Riwayat →</a>
