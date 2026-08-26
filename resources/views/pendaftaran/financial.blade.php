@@ -101,9 +101,9 @@
     $isPassed = $registration && $registration->status === 'lulus';
     $activeDiscountApp = $registration ? $registration->discountApplications()->latest()->first() : null;
 
-    // Cek apakah ada pembayaran (termasuk cicilan) untuk fee sort_order > 1
-    $hasPaidFee2 = $feeData->where('sort_order', '>', 1)->filter(function($f) {
-        return ($f->paid_amount ?? 0) > 0 || $f->status === 'success';
+    // Cek apakah pembayaran administrasi (sort_order 2) sudah lunas
+    $hasPaidFee2 = $feeData->where('sort_order', 2)->filter(function($f) {
+        return $f->status === 'success' && ($f->paid_amount ?? 0) === $f->amount;
     })->isNotEmpty();
 
     // Pop-up keringanan tampil jika: lulus, sudah bayar fee > 1, belum pernah mengajukan keringanan
@@ -292,7 +292,7 @@
                             </div>
                         </td>
                         <td class="px-8 py-6 text-right">
-                            @if($fee->status === 'pending' && $fee->payment)
+                            @if(($fee->status === 'pending' || ($fee->status === 'success' && ($fee->paid_amount ?? 0) < $fee->amount)) && $fee->payment)
                                 @php
                                     $vaBank = $fee->payment->va_bank ?? 'btn';
                                     $isBcaVaCell = $vaBank === 'bca';
@@ -415,12 +415,18 @@
                             @else
                                 @if(isset($isBelumLunas) && $isBelumLunas)
                                     @php $canPayNext = false; @endphp
-                                @endif
-                                <div class="flex justify-end">
-                                    <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 border border-emerald-500/30">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <div class="flex justify-end">
+                                        <div class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 border border-amber-500/30" title="Belum Lunas">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <div class="flex justify-end">
+                                        <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 border border-emerald-500/30" title="Lunas">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                        </div>
+                                    </div>
+                                @endif
                             @endif
                         </td>
                     </tr>

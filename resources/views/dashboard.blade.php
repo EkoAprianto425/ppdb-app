@@ -137,6 +137,13 @@
             <p class="text-lg font-black themed-text mb-1">{{ $activeFee->name }}</p>
             <p class="text-xl font-black text-purple-400 mb-1">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
             
+            @if($activeFee->payment && ($activeFee->status === 'pending' || ($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)))
+                <div class="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex flex-col gap-1">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-purple-400">Nomor VA {{ strtoupper($activeFee->payment->va_bank ?? 'BTN') }}</p>
+                    <p class="text-lg font-mono font-bold themed-text tracking-wider">{{ $activeFee->payment->va_number }}</p>
+                </div>
+            @endif
+
             @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
                 <p class="text-xs font-bold text-amber-500 mb-3">Sisa: Rp {{ number_format($activeFee->amount - $activeFee->paid_amount, 0, ',', '.') }}</p>
                 <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20 mb-4 inline-block">Belum Lunas</span>
