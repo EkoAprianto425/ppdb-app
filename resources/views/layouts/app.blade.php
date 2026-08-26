@@ -403,7 +403,7 @@
                         {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->name, 0, 1)) }}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold themed-text truncate">{{ auth()->user()->full_name ?? auth()->user()->name }}</p>
+                        <p class="text-sm font-bold themed-text truncate">{{ ucwords(strtolower(auth()->user()->full_name)) }}</p>
                         <p class="text-[10px] themed-text-muted truncate">{{ auth()->user()->email }}</p>
                     </div>
                 </div>

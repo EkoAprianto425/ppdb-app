@@ -31,7 +31,7 @@
                 
                 <h2 class="text-3xl font-black themed-text mb-4">Pengumuman Belum Tersedia</h2>
                 <p class="text-base themed-text-muted max-w-lg mb-8 leading-relaxed">
-                    Halo <span class="font-bold themed-text">{{ $registration->user->nama_panggilan ?? $registration->user->name }}</span>, saat ini data pendaftaran dan hasil tes ujian Anda masih dalam tahap seleksi dan evaluasi oleh panitia PPDB. 
+                    Halo <span class="font-bold themed-text">{{ ucwords(strtolower(Auth::user()->full_name)) }}</span>, saat ini data pendaftaran dan hasil tes ujian Anda masih dalam tahap seleksi dan evaluasi oleh panitia PPDB. 
                 </p>
                 
                 <div class="px-6 py-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 inline-flex items-center gap-3">
