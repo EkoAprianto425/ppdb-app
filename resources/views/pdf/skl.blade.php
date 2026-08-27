@@ -175,7 +175,7 @@ $academicYear = \App\Models\AcademicYear::where('is_active', 1)->first();
             
             {{-- Header --}}
             <div class="header">
-                <img src="{{ \App\Models\Setting::get('app_logo', asset('logo/logo.png')) }}" alt="Logo" style="width: 100px;">
+                <img src="{{ Storage::url(\App\Models\Setting::get('app_logo')) }}" alt="Logo" style="width: 100px;">
                 <h1>PANITIA PENERIMAAN MURID BARU</h1>
                 <p>{{ \App\Models\Setting::get('app_name', 'Sistem Penerimaan Murid Baru (SPMB)') }}</p>
                 <p style="font-size: 12px; margin-top: 5px;">Tahun Ajaran {{ $academicYear->name ?? '-' }}</p>
