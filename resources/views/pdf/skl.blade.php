@@ -239,7 +239,7 @@ $academicYear = \App\Models\AcademicYear::where('is_active', 1)->first();
                         <!-- Space for Stamp/Signature -->
                     </div>
                     
-                    <p class="signature-name">Super Admin SPMB</p>
+                    <p class="signature-name">Admin SPMB {{ $user->educationalLevel?->parent_unit }}</p>
                 </div>
             </div>
 
