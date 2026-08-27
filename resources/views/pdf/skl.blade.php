@@ -167,15 +167,18 @@
     </style>
 </head>
 <body>
-
+@php
+$academicYear = \App\Models\AcademicYear::where('is_active', 1)->first();
+@endphp
     <div class="wrapper">
         <div class="inner-wrapper">
             
             {{-- Header --}}
             <div class="header">
-                <h1>PANITIA PENERIMAAN PESERTA DIDIK BARU</h1>
-                <p>Sistem Informasi Akademik Terpadu (PPDB APP)</p>
-                <p style="font-size: 12px; margin-top: 5px;">Tahun Ajaran {{ $registration->academicYear->name }}</p>
+                <img src="{{ \App\Models\Setting::get('app_logo', asset('logo/logo.png')) }}" alt="Logo" style="width: 100px;">
+                <h1>PANITIA PENERIMAAN MURID BARU</h1>
+                <p>{{ \App\Models\Setting::get('app_name', 'Sistem Penerimaan Murid Baru (SPMB)') }}</p>
+                <p style="font-size: 12px; margin-top: 5px;">Tahun Ajaran {{ $academicYear->name ?? '-' }}</p>
             </div>
 
             {{-- Title --}}
@@ -186,7 +189,7 @@
 
             {{-- Opening Declaration --}}
             <div class="declaration">
-                Berdasarkan hasil seleksi dan evaluasi yang telah dilakukan oleh Panitia Penerimaan Peserta Didik Baru (PPDB), maka dengan ini kami menerangkan bahwa pendaftar di bawah ini:
+                Berdasarkan hasil seleksi dan evaluasi yang telah dilakukan oleh Panitia Penerimaan Murid Baru (SPMB), maka dengan ini kami menerangkan bahwa pendaftar di bawah ini:
             </div>
 
             {{-- Student Details --}}
@@ -221,29 +224,28 @@
             {{-- Outcome Declaration --}}
             <div class="declaration">
                 Dinyatakan <span class="highlight">LULUS</span>
-                sebagai Peserta Didik Baru Unit <strong>{{ $user->educationalLevel?->name }}</strong> Tahun Ajaran {{ $registration->academicYear->name }}.<br><br>
+                sebagai Murid Baru Unit <strong>{{ $user->educationalLevel?->name }}</strong> Tahun Ajaran {{ $academicYear->name }}.<br><br>
                 Selanjutnya, peserta didik wajib melakukan proses <strong>Daftar Ulang</strong> sesuai dengan batas waktu yang telah ditetapkan. Kelalaian dalam melakukan daftar ulang dapat berakibat pada pembatalan status kelulusan.
             </div>
 
             {{-- Signatures --}}
             <div class="footer">
                 <div class="signature-box">
-                    <p>Ditetapkan di: Kota Pendidikan</p>
+                    <p>Ditetapkan di: Kota Depok</p>
                     <p>Tanggal: {{ date('d F Y') }}</p>
-                    <p class="mt-4">Ketua Panitia PPDB,</p>
+                    <p class="mt-4">Ketua Panitia SPMB,</p>
                     
                     <div class="signature-space">
                         <!-- Space for Stamp/Signature -->
                     </div>
                     
-                    <p class="signature-name">Super Admin PPDB</p>
-                    <p style="font-size: 12px; margin-top: 5px;">NIDN. 19890101 201404 1 001</p>
+                    <p class="signature-name">Super Admin SPMB</p>
                 </div>
             </div>
 
             {{-- Auto-generated notes --}}
             <div class="notes">
-                * Dokumen ini dibuat dan divalidasi secara elektronik oleh Sistem PPDB.<br>
+                * Dokumen ini dibuat dan divalidasi secara elektronik oleh Sistem SPMB.<br>
                 * Dokumen ini sah dan dapat dipertanggungjawabkan tanpa tanda tangan basah.<br>
                 * Batas Pelunasan Daftar Ulang: {{ $registration->reregistration_deadline ? \Carbon\Carbon::parse($registration->reregistration_deadline)->translatedFormat('d F Y') : 'Sesuai dengan ketentuan yang berlaku.' }}
             </div>
