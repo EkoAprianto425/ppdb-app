@@ -133,26 +133,53 @@
             <p class="text-xs themed-text-muted mb-3">Silakan isi formulir pendaftaran terlebih dahulu.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Menunggu Formulir</span>
         @elseif($activeFee)
-            <p class="text-xs themed-text-muted mb-1">Tagihan yang sedang berjalan:</p>
-            <p class="text-lg font-black themed-text mb-1">{{ $activeFee->name }}</p>
-            <p class="text-xl font-black text-purple-400 mb-1">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
-            
+            {{-- Baris 1: Nama tagihan (kiri) & Nominal (kanan) --}}
+            <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                    <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Tagihan</p>
+                    <p class="text-sm font-black themed-text leading-tight">{{ $activeFee->name }}</p>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Nominal</p>
+                    <p class="text-sm font-black text-purple-400">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
+                </div>
+            </div>
+
+            {{-- Baris 2: Sudah Dibayar + Status --}}
+            <div class="flex items-center justify-between gap-2 mb-1">
+                <div>
+                    <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Sudah Dibayar</p>
+                    <p class="text-sm font-bold themed-text">Rp {{ number_format($activeFee->paid_amount, 0, ',', '.') }}</p>
+                </div>
+                <div class="shrink-0">
+                    @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">Belum Lunas</span>
+                    @elseif($activeFee->status === 'pending')
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">Menunggu Verifikasi</span>
+                    @elseif($activeFee->status === 'failed')
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-500/15 text-rose-400 border-rose-500/20">Gagal / Ditolak</span>
+                    @else
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-orange-700/50 text-white border-orange-700">Belum Bayar</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Baris 3: Sisa (tampilkan jika ada sisa) --}}
+            @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
+                <div class="mb-3">
+                    <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Sisa</p>
+                    <p class="text-sm font-black text-rose-400">Rp {{ number_format($activeFee->amount - $activeFee->paid_amount, 0, ',', '.') }}</p>
+                </div>
+            @else
+                <div class="mb-3"></div>
+            @endif
+
+            {{-- Card VA --}}
             @if($activeFee->payment && ($activeFee->status === 'pending' || ($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)))
                 <div class="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex flex-col gap-1">
                     <p class="text-[9px] font-black uppercase tracking-widest text-purple-400">Nomor VA {{ strtoupper($activeFee->payment->va_bank ?? 'BTN') }}</p>
-                    <p class="text-lg font-mono font-bold themed-text tracking-wider">{{ $activeFee->payment->va_number }}</p>
+                    <p class="text-base font-mono font-bold themed-text tracking-wider">{{ $activeFee->payment->va_number }}</p>
                 </div>
-            @endif
-
-            @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
-                <p class="text-xs font-bold text-amber-500 mb-3">Sisa: Rp {{ number_format($activeFee->amount - $activeFee->paid_amount, 0, ',', '.') }}</p>
-                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20 mb-4 inline-block">Belum Lunas</span>
-            @elseif($activeFee->status === 'pending')
-                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20 mb-4 inline-block">Menunggu Verifikasi</span>
-            @elseif($activeFee->status === 'failed')
-                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-500/15 text-rose-400 border-rose-500/20 mb-4 inline-block">Gagal / Ditolak</span>
-            @else
-                <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-orange-700/50 text-white-400 border-orange-700 mb-4 inline-block">Belum Bayar</span>
             @endif
 
             <a href="{{ route('pendaftaran.financial') }}" class="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 shadow-purple-500/20 text-white text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all text-center block">Buka Menu Administrasi</a>
@@ -219,11 +246,6 @@
                         <p class="text-[9px] font-black uppercase tracking-widest {{ $activeDiscountApp->status === 'approved' ? 'text-emerald-400' : ($activeDiscountApp->status === 'rejected' ? 'text-rose-400' : 'text-amber-400') }} mb-2">Status Keringanan</p>
                         @include('pendaftaran.partials.discount-info')
                     </div>
-                @else
-                    <button @click="$dispatch('open-discount-modal')" class="w-full py-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all text-[10px] font-bold uppercase">
-                        Ajukan Keringanan
-                    </button>
-                    @include('pendaftaran.partials.discount-modal')
                 @endif
             @endif
         @elseif($isNotPassed)
