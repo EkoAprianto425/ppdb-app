@@ -364,44 +364,93 @@
 
 {{-- 3. Modal Select Exam --}}
 @if($hasRegistration)
-<div x-data="{ open: false }" @open-modal.window="if($event.detail === 'modal-select-exam') open = true" x-show="open" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div @click.away="open = false" class="card-glass rounded-3xl p-8 w-full max-w-2xl shadow-2xl scale-in-center">
-        <h3 class="text-xl font-bold themed-text mb-2">Pilih Jadwal Ujian</h3>
-        <p class="text-xs themed-text-muted mb-8 italic">Silakan pilih salah satu sesi ujian yang tersedia. Pastikan Anda bisa hadir pada waktu tersebut.</p>
+<template x-teleport="body">
+    <div x-data="{ open: false }" 
+         @open-modal.window="if($event.detail === 'modal-select-exam') open = true" 
+         x-show="open" 
+         x-cloak 
+         style="display:none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
         
-        <form action="{{ route('pendaftaran.exam.select') }}" method="POST" class="space-y-4">
-            @csrf
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                @forelse($schedules as $schedule)
-                <label class="relative group cursor-pointer">
-                    <input type="radio" name="exam_schedule_id" value="{{ $schedule->id }}" 
-                           {{ $registration->exam_schedule_id == $schedule->id ? 'checked' : '' }}
-                           class="sr-only peer">
-                    <div class="p-5 rounded-2xl border border-white/5 bg-white/5 transition-all group-hover:bg-primary/5 peer-checked:bg-primary peer-checked:border-primary shadow-lg shadow-black/20">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl bg-black/20 flex flex-col items-center justify-center text-white border border-white/10">
-                                <span class="text-[9px] font-black uppercase tracking-tighter">{{ date('M', strtotime($schedule->date)) }}</span>
-                                <span class="text-lg font-black leading-none">{{ date('d', strtotime($schedule->date)) }}</span>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs font-black text-white mb-1 uppercase tracking-tight">{{ $schedule->name }}</p>
-                                <p class="text-[9px] text-white/70 uppercase tracking-widest font-bold">Jam {{ substr($schedule->time_start, 0, 5) }} WIB</p>
-                            </div>
-                        </div>
-                    </div>
-                </label>
-                @empty
-                    <div class="col-span-2 py-10 text-center themed-text-muted italic text-xs">Belum ada jadwal tersedia untuk unit {{ $user->educationalLevel?->name }}.</div>
-                @endforelse
-            </div>
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>    
 
-            <div class="flex gap-4 mt-8 pt-6 border-t border-white/5">
-                <button type="button" @click="open = false" class="flex-1 py-4 rounded-xl btn-soft-secondary font-bold text-xs uppercase">Batal</button>
-                <button type="submit" class="flex-1 py-4 rounded-xl bg-primary text-white font-bold text-xs uppercase shadow-lg shadow-primary/20 transition-all active:scale-95">Simpan Pilihan</button>
+        {{-- Modal Container --}}
+        <div class="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border"
+             @click.away="open = false"
+             :style="'background: var(--surface-color); border-color: var(--border-color)'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            
+            {{-- HEADER --}}
+            <div class="shrink-0 px-6 py-5 border-b flex items-center justify-between"
+                 :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                <div>
+                    <h3 class="text-lg font-extrabold themed-text">Pilih Jadwal Ujian</h3>
+                    <p class="text-xs themed-text-muted mt-0.5">Silakan pilih salah satu sesi ujian yang tersedia. Pastikan Anda bisa hadir pada waktu tersebut.</p>
+                </div>
+                <button @click="open = false"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center themed-text-muted hover:text-red-400 transition-colors border"
+                        :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-        </form>
+            
+            {{-- BODY --}}
+            <div class="flex-1 overflow-y-auto p-6">
+                <form action="{{ route('pendaftaran.exam.select') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @forelse($schedules as $schedule)
+                        <label class="relative group cursor-pointer">
+                            <input type="radio" name="exam_schedule_id" value="{{ $schedule->id }}" 
+                                   {{ $registration->exam_schedule_id == $schedule->id ? 'checked' : '' }}
+                                   class="sr-only peer">
+                            <div class="card-glass p-5 rounded-2xl flex flex-col transition-all hover:border-primary/30 peer-checked:border-primary peer-checked:shadow-lg peer-checked:shadow-primary/10">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-black/10 dark:bg-white/10 flex flex-col items-center justify-center themed-text border"
+                                         :style="'border-color: var(--border-color);'">
+                                        <span class="text-[9px] font-black uppercase tracking-tighter">{{ date('M', strtotime($schedule->date)) }}</span>
+                                        <span class="text-lg font-black leading-none">{{ date('d', strtotime($schedule->date)) }}</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black themed-text mb-1 uppercase tracking-tight">{{ $schedule->name }}</p>
+                                        <p class="text-[9px] themed-text-muted uppercase tracking-widest font-bold">Jam {{ substr($schedule->time_start, 0, 5) }} WIB</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        @empty
+                            <div class="col-span-full card-glass rounded-xl p-10 text-center">
+                                <div class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center themed-text-muted mb-3"
+                                     :style="'background: var(--card-bg)'">
+                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <p class="text-sm themed-text-muted">Belum ada jadwal tersedia untuk unit {{ $user->educationalLevel?->name }}.</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    {{-- Footer Actions --}}
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t" :style="'border-color: var(--border-color)'">
+                        <button type="button" @click="open = false" 
+                                class="btn-soft-secondary rounded-xl px-5 py-2.5 text-xs font-bold">
+                            Batal
+                        </button>
+                        <button type="submit" 
+                                class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-md transition-all active:scale-95">
+                            Simpan Pilihan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-</div>
+</template>
 @endif
 
 @endsection

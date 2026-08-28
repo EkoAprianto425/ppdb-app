@@ -265,95 +265,119 @@
 
         {{-- Modal: Input Pembayaran Cash --}}
         @if($payment->status === 'pending' && $payment->va_number)
-        <div x-data="{ open: false }" @open-modal.window="if($event.detail === 'cash-{{ $payment->id }}') open = true" x-show="open" x-cloak
-             class="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl text-left">
-            <div @click.away="open = false"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 class="card-glass rounded-[2rem] border-2 border-white/10 p-1 w-full max-w-lg shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden">
+        <template x-teleport="body">
+            <div x-data="{ open: false }" 
+                 @open-modal.window="if($event.detail === 'cash-{{ $payment->id }}') open = true" 
+                 x-show="open" 
+                 x-cloak 
+                 style="display:none;"
+                 class="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+                
+                {{-- Backdrop --}}
+                <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
 
-                <div class="p-8">
-                    {{-- Header --}}
-                    <div class="flex items-start justify-between mb-8">
+                {{-- Modal Container --}}
+                <div class="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border"
+                     @click.away="open = false"
+                     :style="'background: var(--surface-color); border-color: var(--border-color)'"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95">
+                    
+                    {{-- HEADER --}}
+                    <div class="shrink-0 px-6 py-5 border-b flex items-center justify-between"
+                         :style="'border-color: var(--border-color); background: var(--card-bg)'">
                         <div>
-                            <div class="flex items-center gap-3 mb-2">
+                            <div class="flex items-center gap-3 mb-1">
                                 <div class="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-black themed-text uppercase tracking-widest">Input Pembayaran Cash</h3>
+                                <h3 class="text-lg font-extrabold themed-text">Input Pembayaran Cash</h3>
                             </div>
-                            <p class="text-[10px] themed-text-muted">Catat pembayaran tunai yang diterima di sekolah</p>
+                            <p class="text-xs themed-text-muted mt-0.5">Catat pembayaran tunai yang diterima di sekolah</p>
                         </div>
-                        <button @click="open = false" class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-rose-500/20 text-white/40 hover:text-rose-400 transition-all border border-white/5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <button @click="open = false"
+                                class="w-9 h-9 rounded-xl flex items-center justify-center themed-text-muted hover:text-red-400 transition-colors border"
+                                :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
 
-                    {{-- Info Siswa --}}
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="col-span-2 p-4 rounded-2xl bg-white/5 border border-white/5">
-                            <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Siswa</p>
-                            <p class="text-sm font-black themed-text">{{ $payment->registration->user->full_name ?? $payment->registration->user->name }}</p>
-                            <p class="text-[10px] themed-text-muted">{{ $payment->registration->user->educationalLevel->name ?? '-' }}</p>
-                        </div>
-                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
-                            <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Tipe Biaya</p>
-                            <p class="text-xs font-black text-indigo-400 uppercase">{{ $payment->fee_type }}</p>
-                        </div>
-                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
-                            <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Tagihan</p>
-                            <p class="text-sm font-black text-primary">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="col-span-2 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20">
-                            <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Nomor Virtual Account</p>
-                            <p class="text-sm font-mono font-black text-blue-300 tracking-widest">{{ $payment->va_number }}</p>
-                        </div>
-                    </div>
-
-                    {{-- Form Input Cash --}}
-                    <form action="{{ route('admin.financial.record-cash', $payment) }}" method="POST" class="space-y-5">
-                        @csrf
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-3">
-                                Nominal Diterima <span class="text-rose-400">*</span>
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold themed-text-muted">Rp</span>
-                                <input type="number"
-                                    name="paid_amount"
-                                    id="paid_amount_{{ $payment->id }}"
-                                    min="1"
-                                    step="1"
-                                    value="{{ (int) $payment->amount }}"
-                                    required
-                                    class="w-full bg-black/20 border-2 border-white/5 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold themed-text focus:border-emerald-500/50 focus:ring-0 transition-all"
-                                    placeholder="{{ number_format($payment->amount, 0, ',', '.') }}">
+                    {{-- BODY --}}
+                    <div class="flex-1 overflow-y-auto p-6">
+                        {{-- Info Siswa --}}
+                        <div class="grid grid-cols-2 gap-3 mb-6">
+                            <div class="col-span-2 p-4 rounded-2xl bg-white/5 border border-white/5">
+                                <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Siswa</p>
+                                <p class="text-sm font-black themed-text">{{ $payment->registration->user->full_name ?? $payment->registration->user->name }}</p>
+                                <p class="text-[10px] themed-text-muted">{{ $payment->registration->user->educationalLevel->name ?? '-' }}</p>
                             </div>
-                            <p class="text-[9px] themed-text-muted mt-2 px-1">Nominal tagihan: <strong>Rp {{ number_format($payment->amount, 0, ',', '.') }}</strong></p>
+                            <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                                <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Tipe Biaya</p>
+                                <p class="text-xs font-black text-indigo-400 uppercase">{{ $payment->fee_type }}</p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                                <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Tagihan</p>
+                                <p class="text-sm font-black text-primary">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="col-span-2 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20">
+                                <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Nomor Virtual Account</p>
+                                <p class="text-sm font-mono font-black text-blue-300 tracking-widest">{{ $payment->va_number }}</p>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-3">Catatan (Opsional)</label>
-                            <textarea name="admin_note"
-                                rows="2"
-                                class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-emerald-500/50 focus:ring-0 transition-all placeholder:text-white/10"
-                                placeholder="Contoh: Dibayar tunai oleh orang tua siswa..."></textarea>
-                        </div>
+                        {{-- Form Input Cash --}}
+                        <form action="{{ route('admin.financial.record-cash', $payment) }}" method="POST" class="space-y-5">
+                            @csrf
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-3">
+                                    Nominal Diterima <span class="text-rose-400">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold themed-text-muted">Rp</span>
+                                    <input type="number"
+                                        name="paid_amount"
+                                        id="paid_amount_{{ $payment->id }}"
+                                        min="1"
+                                        step="1"
+                                        value="{{ (int) $payment->amount }}"
+                                        required
+                                        class="w-full bg-black/20 border-2 border-white/5 rounded-2xl pl-12 pr-5 py-4 text-sm font-bold themed-text focus:border-emerald-500/50 focus:ring-0 transition-all"
+                                        placeholder="{{ number_format($payment->amount, 0, ',', '.') }}">
+                                </div>
+                                <p class="text-[9px] themed-text-muted mt-2 px-1">Nominal tagihan: <strong>Rp {{ number_format($payment->amount, 0, ',', '.') }}</strong></p>
+                            </div>
 
-                        <button type="submit"
-                            class="w-full py-4 rounded-2xl bg-emerald-500 text-white font-black uppercase tracking-[0.2em] text-xs shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] hover:bg-emerald-400 hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-3">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span>Konfirmasi Pembayaran Cash</span>
-                        </button>
-                    </form>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-3">Catatan (Opsional)</label>
+                                <textarea name="admin_note"
+                                    rows="2"
+                                    class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-emerald-500/50 focus:ring-0 transition-all placeholder:text-white/10"
+                                    placeholder="Contoh: Dibayar tunai oleh orang tua siswa..."></textarea>
+                            </div>
+
+                            {{-- Footer Actions --}}
+                            <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t" :style="'border-color: var(--border-color)'">
+                                <button type="button" @click="open = false" 
+                                        class="btn-soft-secondary rounded-xl px-5 py-2.5 text-xs font-bold">
+                                    Batal
+                                </button>
+                                <button type="submit" 
+                                        class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md transition-all active:scale-95 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                    Konfirmasi Pembayaran
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
         @endif
 
         {{-- Modal: Verifikasi Manual (non-VA, pending) --}}

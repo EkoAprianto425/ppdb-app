@@ -127,233 +127,301 @@
 </div>
 
 {{-- Create Modal --}}
-<div id="createModal" class="fixed inset-0 z-50 hidden" x-data="{ category: 'alumni' }">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeCreateModal()"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <div class="card-glass rounded-[2rem] p-8 border border-white/10 shadow-2xl">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
+<template x-teleport="body">
+    <div id="createModal" x-data="{ open: false, category: 'alumni' }" 
+         x-show="open" 
+         x-cloak 
+         style="display:none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+        
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
+
+        {{-- Modal Container --}}
+        <div class="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border"
+             @click.away="open = false"
+             :style="'background: var(--surface-color); border-color: var(--border-color)'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+            
+            {{-- HEADER --}}
+            <div class="shrink-0 px-6 py-5 border-b flex items-center justify-between"
+                 :style="'border-color: var(--border-color); background: var(--card-bg)'">
                 <div>
-                    <h3 class="text-xl font-black themed-text leading-none">Tambah Kebijakan</h3>
-                    <p class="text-[10px] themed-text-muted uppercase tracking-widest mt-1">Buat kebijakan potongan baru</p>
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-extrabold themed-text">Tambah Kebijakan</h3>
+                    </div>
+                    <p class="text-xs themed-text-muted mt-0.5">Buat kebijakan potongan baru</p>
                 </div>
+                <button @click="open = false"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center themed-text-muted hover:text-red-400 transition-colors border"
+                        :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
-            <form action="{{ route('admin.discounts.store') }}" method="POST" class="space-y-5">
-                @csrf
-                
-                {{-- Kategori --}}
-                <div>
-                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kategori Potongan</label>
-                    <select name="category" x-model="category" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                        <option value="alumni">Alumni</option>
-                        <option value="umum">Umum</option>
-                        <option value="anak_pegawai">Anak Pegawai</option>
-                    </select>
-                </div>
-
-                {{-- Fields for Alumni & Umum --}}
-                <template x-if="category === 'alumni' || category === 'umum'">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kriteria</label>
-                            <input type="text" name="name" required placeholder="Contoh: Prestasi Akademik"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan (Rp)</label>
-                            <input type="text" name="amount" required placeholder="0"
-                                   onkeyup="formatRupiah(this)"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kuota (Qty)</label>
-                            <input type="number" name="qty" required placeholder="Contoh: 10"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Untuk Siapa</label>
-                            <select name="apply_to" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                                <option value="alumni">Alumni</option>
-                                <option value="umum">Umum</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-3 px-1">
-                            <input type="checkbox" name="require_document" id="req_doc" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
-                            <label for="req_doc" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Upload Dokumen?</label>
-                        </div>
-                    </div>
-                </template>
-
-                {{-- Fields for Anak Pegawai --}}
-                <template x-if="category === 'anak_pegawai'">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Status Kepegawaian Orang Tua</label>
-                            <input type="text" name="name" required placeholder="Contoh: Guru Tetap, Guru Tidak Tetap, Staff, dll"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan / Biaya Masuk (Rp)</label>
-                            <input type="text" name="amount" required placeholder="0"
-                                   onkeyup="formatRupiah(this)"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
-                            <input type="text" name="spp_amount" placeholder="0"
-                                   onkeyup="formatRupiah(this)"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
-                        </div>
-                        {{-- Info: Gelombang & Jenjang tidak diperlukan untuk Anak Pegawai --}}
-                        <div class="rounded-xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3 flex items-start gap-2.5">
-                            <svg class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <p class="text-[10px] text-indigo-400 font-bold leading-relaxed">Keringanan Anak Pegawai berlaku lintas gelombang dan semua jenjang — tidak perlu memilih gelombang & jenjang.</p>
-                        </div>
-                    </div>
-                </template>
-
-                {{-- Common Fields: Jenjang hanya untuk Alumni & Umum --}}
-                <template x-if="category !== 'anak_pegawai'">
+            {{-- BODY --}}
+            <div class="flex-1 overflow-y-auto p-6">
+                <form action="{{ route('admin.discounts.store') }}" method="POST" class="space-y-5">
+                    @csrf
+                    
+                    {{-- Kategori --}}
                     <div>
-                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
-                        <select name="level_parent_unit" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                            @foreach($levelsByParent as $parentName => $repLevel)
-                                <option value="{{ $parentName }}">{{ $parentName }}</option>
-                            @endforeach
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kategori Potongan</label>
+                        <select name="category" x-model="category" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            <option value="alumni">Alumni</option>
+                            <option value="umum">Umum</option>
+                            <option value="anak_pegawai">Anak Pegawai</option>
                         </select>
                     </div>
-                </template>
-                
-                <div>
-                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
-                    <textarea name="description" rows="3" placeholder="Keterangan tambahan..."
-                              class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10 resize-none"></textarea>
-                </div>
 
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="closeCreateModal()" class="flex-1 py-4 rounded-2xl bg-white/5 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all">Batal</button>
-                    <button type="submit" class="flex-1 py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">Simpan Kebijakan</button>
-                </div>
-            </form>
+                    {{-- Fields for Alumni & Umum --}}
+                    <template x-if="category === 'alumni' || category === 'umum'">
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kriteria</label>
+                                <input type="text" name="name" required placeholder="Contoh: Prestasi Akademik"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan (Rp)</label>
+                                <input type="text" name="amount" required placeholder="0"
+                                       onkeyup="formatRupiah(this)"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kuota (Qty)</label>
+                                <input type="number" name="qty" required placeholder="Contoh: 10"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Untuk Siapa</label>
+                                <select name="apply_to" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                                    <option value="alumni">Alumni</option>
+                                    <option value="umum">Umum</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-3 px-1">
+                                <input type="checkbox" name="require_document" id="req_doc" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                                <label for="req_doc" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Upload Dokumen?</label>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Fields for Anak Pegawai --}}
+                    <template x-if="category === 'anak_pegawai'">
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Status Kepegawaian Orang Tua</label>
+                                <input type="text" name="name" required placeholder="Contoh: Guru Tetap, Guru Tidak Tetap, Staff, dll"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan / Biaya Masuk (Rp)</label>
+                                <input type="text" name="amount" required placeholder="0"
+                                       onkeyup="formatRupiah(this)"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
+                                <input type="text" name="spp_amount" placeholder="0"
+                                       onkeyup="formatRupiah(this)"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                            </div>
+                            {{-- Info: Gelombang & Jenjang tidak diperlukan --}}
+                            <div class="rounded-xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3 flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-[10px] text-indigo-400 font-bold leading-relaxed">Keringanan Anak Pegawai berlaku lintas gelombang dan semua jenjang — tidak perlu memilih gelombang & jenjang.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Common Fields: Jenjang --}}
+                    <template x-if="category !== 'anak_pegawai'">
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
+                            <select name="level_parent_unit" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                                @foreach($levelsByParent as $parentName => $repLevel)
+                                    <option value="{{ $parentName }}">{{ $parentName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </template>
+                    
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
+                        <textarea name="description" rows="3" placeholder="Keterangan tambahan..."
+                                  class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10 resize-none"></textarea>
+                    </div>
+
+                    {{-- Footer Actions --}}
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t" :style="'border-color: var(--border-color)'">
+                        <button type="button" @click="open = false" class="btn-soft-secondary rounded-xl px-5 py-2.5 text-xs font-bold">Batal</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-md transition-all active:scale-95">Simpan Kebijakan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</template>
 
 {{-- Edit Modal --}}
-<div id="editModal" class="fixed inset-0 z-50 hidden" x-data="{ category: 'alumni' }">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <div class="card-glass rounded-[2rem] p-8 border border-white/10 shadow-2xl">
-            <h3 class="text-xl font-black themed-text mb-6">Edit Kebijakan Potongan</h3>
+<template x-teleport="body">
+    <div id="editModal" x-data="{ open: false, category: 'alumni' }" 
+         x-show="open" 
+         x-cloak 
+         style="display:none;"
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+        
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
+
+        {{-- Modal Container --}}
+        <div class="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border"
+             @click.away="open = false"
+             :style="'background: var(--surface-color); border-color: var(--border-color)'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
             
-            <form id="editForm" method="POST" class="space-y-5">
-                @csrf
-                @method('PUT')
-                
+            {{-- HEADER --}}
+            <div class="shrink-0 px-6 py-5 border-b flex items-center justify-between"
+                 :style="'border-color: var(--border-color); background: var(--card-bg)'">
                 <div>
-                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kategori Potongan</label>
-                    <select id="edit_category" name="category" x-model="category" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                        <option value="alumni">Alumni</option>
-                        <option value="umum">Umum</option>
-                        <option value="anak_pegawai">Anak Pegawai</option>
-                    </select>
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-lg font-extrabold themed-text">Edit Kebijakan Potongan</h3>
+                    </div>
+                    <p class="text-xs themed-text-muted mt-0.5">Perbarui kebijakan potongan</p>
                 </div>
-
-                {{-- Fields for Alumni & Umum --}}
-                <template x-if="category === 'alumni' || category === 'umum'">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kriteria</label>
-                            <input type="text" id="edit_name" name="name" required
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan (Rp)</label>
-                            <input type="text" id="edit_amount" name="amount" required
-                                   onkeyup="formatRupiah(this)"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kuota (Qty)</label>
-                            <input type="number" id="edit_qty" name="qty" required
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Untuk Siapa</label>
-                            <select id="edit_apply_to" name="apply_to" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none">
-                                <option value="alumni">Alumni</option>
-                                <option value="umum">Umum</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-3 px-1">
-                            <input type="checkbox" id="edit_require_document" name="require_document" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
-                            <label for="edit_require_document" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Upload Dokumen?</label>
-                        </div>
-                    </div>
-                </template>
-
-                {{-- Fields for Anak Pegawai --}}
-                <template x-if="category === 'anak_pegawai'">
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Status Kepegawaian Orang Tua</label>
-                            <input type="text" id="edit_name_pegawai" name="name" required
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan / Biaya Masuk (Rp)</label>
-                            <input type="text" id="edit_amount_pegawai" name="amount" required
-                                   onkeyup="formatRupiah(this)"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
-                            <input type="text" id="edit_spp_amount" name="spp_amount"
-                                   onkeyup="formatRupiah(this)"
-                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
-                        </div>
-                        {{-- Info: Gelombang & Jenjang tidak diperlukan untuk Anak Pegawai --}}
-                        <div class="rounded-xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3 flex items-start gap-2.5">
-                            <svg class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <p class="text-[10px] text-indigo-400 font-bold leading-relaxed">Keringanan Anak Pegawai berlaku lintas gelombang dan semua jenjang — tidak perlu memilih gelombang & jenjang.</p>
-                        </div>
-                    </div>
-                </template>
-
-                {{-- Jenjang hanya untuk Alumni & Umum --}}
-                <template x-if="category !== 'anak_pegawai'">
+                <button @click="open = false"
+                        class="w-9 h-9 rounded-xl flex items-center justify-center themed-text-muted hover:text-red-400 transition-colors border"
+                        :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            {{-- BODY --}}
+            <div class="flex-1 overflow-y-auto p-6">
+                <form id="editForm" method="POST" class="space-y-5">
+                    @csrf
+                    @method('PUT')
+                    
                     <div>
-                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
-                        <select id="edit_level_parent_unit" name="level_parent_unit" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
-                            @foreach($levelsByParent as $parentName => $repLevel)
-                                <option value="{{ $parentName }}">{{ $parentName }}</option>
-                            @endforeach
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kategori Potongan</label>
+                        <select id="edit_category" name="category" x-model="category" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                            <option value="alumni">Alumni</option>
+                            <option value="umum">Umum</option>
+                            <option value="anak_pegawai">Anak Pegawai</option>
                         </select>
                     </div>
-                </template>
-                
-                <div>
-                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
-                    <textarea id="edit_description" name="description" rows="3"
-                              class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10 resize-none"></textarea>
-                </div>
 
-                <div class="flex items-center gap-3 px-1">
-                    <input type="checkbox" id="edit_is_active" name="is_active" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
-                    <label for="edit_is_active" class="text-xs font-black themed-text-muted uppercase tracking-widest">Status Aktif</label>
-                </div>
+                    {{-- Fields for Alumni & Umum --}}
+                    <template x-if="category === 'alumni' || category === 'umum'">
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kriteria</label>
+                                <input type="text" id="edit_name" name="name" required
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan (Rp)</label>
+                                <input type="text" id="edit_amount" name="amount" required
+                                       onkeyup="formatRupiah(this)"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Kuota (Qty)</label>
+                                <input type="number" id="edit_qty" name="qty" required
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Untuk Siapa</label>
+                                <select id="edit_apply_to" name="apply_to" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none">
+                                    <option value="alumni">Alumni</option>
+                                    <option value="umum">Umum</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-3 px-1">
+                                <input type="checkbox" id="edit_require_document" name="require_document" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                                <label for="edit_require_document" class="text-xs font-black themed-text-muted uppercase tracking-widest">Wajib Upload Dokumen?</label>
+                            </div>
+                        </div>
+                    </template>
 
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="closeEditModal()" class="flex-1 py-4 rounded-2xl bg-white/5 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all">Batal</button>
-                    <button type="submit" class="flex-1 py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">Simpan Perubahan</button>
-                </div>
-            </form>
+                    {{-- Fields for Anak Pegawai --}}
+                    <template x-if="category === 'anak_pegawai'">
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Status Kepegawaian Orang Tua</label>
+                                <input type="text" id="edit_name_pegawai" name="name" required
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Besar Potongan / Biaya Masuk (Rp)</label>
+                                <input type="text" id="edit_amount_pegawai" name="amount" required
+                                       onkeyup="formatRupiah(this)"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Biaya SPP (Rp)</label>
+                                <input type="text" id="edit_spp_amount" name="spp_amount"
+                                       onkeyup="formatRupiah(this)"
+                                       class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                            </div>
+                            {{-- Info: Gelombang & Jenjang tidak diperlukan --}}
+                            <div class="rounded-xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3 flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-[10px] text-indigo-400 font-bold leading-relaxed">Keringanan Anak Pegawai berlaku lintas gelombang dan semua jenjang — tidak perlu memilih gelombang & jenjang.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Jenjang --}}
+                    <template x-if="category !== 'anak_pegawai'">
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jenjang</label>
+                            <select id="edit_level_parent_unit" name="level_parent_unit" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                                @foreach($levelsByParent as $parentName => $repLevel)
+                                    <option value="{{ $parentName }}">{{ $parentName }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </template>
+                    
+                    <div>
+                        <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Deskripsi</label>
+                        <textarea id="edit_description" name="description" rows="3"
+                                  class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10 resize-none"></textarea>
+                    </div>
+
+                    <div class="flex items-center gap-3 px-1">
+                        <input type="checkbox" id="edit_is_active" name="is_active" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                        <label for="edit_is_active" class="text-xs font-black themed-text-muted uppercase tracking-widest">Status Aktif</label>
+                    </div>
+
+                    {{-- Footer Actions --}}
+                    <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t" :style="'border-color: var(--border-color)'">
+                        <button type="button" @click="open = false" class="btn-soft-secondary rounded-xl px-5 py-2.5 text-xs font-bold">Batal</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-md transition-all active:scale-95">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</template>
 
 @section('scripts')
 <script>
@@ -363,28 +431,25 @@
     }
 
     function openCreateModal() {
-        document.getElementById('createModal').classList.remove('hidden');
-    }
-
-    function closeCreateModal() {
-        document.getElementById('createModal').classList.add('hidden');
+        const modal = document.getElementById('createModal');
+        Alpine.$data(modal).open = true;
     }
 
     function openEditModal(discount) {
         const modal = document.getElementById('editModal');
         const form = document.getElementById('editForm');
         
-        // Use Alpine's scope to set category
+        // Use Alpine's scope to set category & open
         const alpineData = Alpine.$data(modal);
         alpineData.category = discount.category;
 
         form.action = `/admin/discounts/${discount.id}`;
         
-        // Common fields (Jenjang hanya ada untuk non anak_pegawai)
+        // Common fields
         document.getElementById('edit_description').value = discount.description || '';
         document.getElementById('edit_is_active').checked = discount.is_active;
 
-        // Category specific fields — tunggu Alpine render konten kondisional
+        // Category specific fields
         setTimeout(() => {
             if (discount.category === 'anak_pegawai') {
                 const namePegawai = document.getElementById('edit_name_pegawai');
@@ -394,7 +459,6 @@
                 if (amtPegawai)  amtPegawai.value  = formatNumber(discount.amount);
                 if (sppEl)       sppEl.value        = formatNumber(discount.spp_amount);
             } else {
-                // Populate parent_unit (SMP / SMA / SMK) dari relasi educational_level
                 const levelEl = document.getElementById('edit_level_parent_unit');
                 if (levelEl) levelEl.value = discount.educational_level?.parent_unit ?? '';
                 document.getElementById('edit_name').value    = discount.name || '';
@@ -405,15 +469,11 @@
             }
         }, 80);
 
-        modal.classList.remove('hidden');
+        alpineData.open = true;
     }
 
     function formatNumber(num) {
         return num.toString().split('.')[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
     }
 </script>
 @endsection

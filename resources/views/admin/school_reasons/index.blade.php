@@ -5,7 +5,7 @@
 @section('page-subtitle', 'Kelola daftar pilihan alasan dari mana siswa memilih sekolah ini')
 
 @section('content')
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div x-data="{ showEditModal: false, editData: { id: '', name: '', is_active: false } }" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     {{-- Form Tambah Alasan --}}
     <div class="card-glass rounded-3xl p-8 h-fit lg:sticky lg:top-8 border border-white/5 shadow-2xl">
         <div class="flex items-center gap-3 mb-8">
@@ -69,7 +69,7 @@
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     {{-- Edit Trigger --}}
-                                    <button onclick="openEditModal({{ $reason->id }}, {{ json_encode($reason->name) }}, {{ $reason->is_active ? 1 : 0 }})" 
+                                    <button @click="editData = { id: {{ $reason->id }}, name: {{ json_encode($reason->name) }}, is_active: {{ $reason->is_active ? 'true' : 'false' }} }; showEditModal = true" 
                                             class="p-2 rounded-lg btn-action-edit">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -104,57 +104,72 @@
             @endif
         </div>
     </div>
-</div>
 
-{{-- Edit Modal --}}
-<div id="editModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEditModal()"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-6">
-        <div class="card-glass rounded-[2rem] p-8 border border-white/10 shadow-2xl">
-            <h3 class="text-xl font-black themed-text mb-6">Edit Alasan Memilih Sekolah</h3>
+    {{-- Edit Modal --}}
+    <template x-teleport="body">
+        <div x-show="showEditModal" 
+             class="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto" 
+             x-cloak 
+             style="display: none;">
             
-            <form id="editForm" method="POST" class="space-y-6">
-                @csrf
-                @method('PUT')
+            {{-- Backdrop --}}
+            <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="showEditModal = false"></div>
+
+            {{-- Modal Container --}}
+            <div class="relative w-full max-w-lg max-h-[90vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden border"
+                 @click.away="showEditModal = false"
+                 :style="'background: var(--surface-color); border-color: var(--border-color)'"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95">
                 
-                <div>
-                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Nama Alasan</label>
-                    <input type="text" id="edit_name" name="name" required
-                           class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all">
+                {{-- HEADER --}}
+                <div class="shrink-0 px-6 py-5 border-b flex items-center justify-between"
+                     :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <div class="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </div>
+                            <h3 class="text-lg font-extrabold themed-text">Edit Alasan Sekolah</h3>
+                        </div>
+                    </div>
+                    <button @click="showEditModal = false"
+                            class="w-9 h-9 rounded-xl flex items-center justify-center themed-text-muted hover:text-red-400 transition-colors border"
+                            :style="'border-color: var(--border-color); background: var(--card-bg)'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" id="edit_is_active" name="is_active" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
-                    <label for="edit_is_active" class="text-xs font-black themed-text-muted uppercase tracking-widest">Aktifkan Alasan</label>
-                </div>
+                {{-- BODY --}}
+                <div class="flex-1 overflow-y-auto p-6">
+                    <form :action="`/admin/school-reasons/${editData.id}`" method="POST" class="space-y-6">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div>
+                            <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Nama Alasan</label>
+                            <input type="text" name="name" x-model="editData.name" required
+                                   class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all placeholder:text-white/10">
+                        </div>
 
-                <div class="flex gap-4">
-                    <button type="button" onclick="closeEditModal()" class="flex-1 py-4 rounded-2xl bg-white/5 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all">Batal</button>
-                    <button type="submit" class="flex-1 py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all">Simpan Perubahan</button>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="edit_is_active" name="is_active" x-model="editData.is_active" value="1" class="w-5 h-5 rounded-lg bg-black/20 border-2 border-white/5 text-primary focus:ring-0 transition-all">
+                            <label for="edit_is_active" class="text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] pt-0.5">Aktifkan Alasan</label>
+                        </div>
+
+                        {{-- Footer Actions --}}
+                        <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t" :style="'border-color: var(--border-color)'">
+                            <button type="button" @click="showEditModal = false" class="btn-soft-secondary rounded-xl px-5 py-2.5 text-xs font-bold">Batal</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold shadow-md transition-all active:scale-95">Simpan Perubahan</button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+    </template>
 </div>
-
-@section('scripts')
-<script>
-    function openEditModal(id, name, isActive) {
-        const modal = document.getElementById('editModal');
-        const form = document.getElementById('editForm');
-        const nameInput = document.getElementById('edit_name');
-        const activeInput = document.getElementById('edit_is_active');
-        
-        form.action = `/admin/school-reasons/${id}`;
-        nameInput.value = name;
-        activeInput.checked = isActive;
-        
-        modal.classList.remove('hidden');
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-    }
-</script>
-@endsection
 @endsection
