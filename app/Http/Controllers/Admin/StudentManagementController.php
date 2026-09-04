@@ -301,7 +301,7 @@ class StudentManagementController extends Controller
         $this->authorizeAccess($registration);
 
         $rules = [
-            'status' => 'required|in:lulus,tidak_lulus,proses'
+            'status' => 'required|in:lulus,tidak_lulus,proses,mundur'
         ];
 
         if ($request->status === 'lulus') {

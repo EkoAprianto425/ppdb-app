@@ -27,6 +27,7 @@
                 <option value="proses" {{ request('status') == 'proses' ? 'selected' : '' }} class="text-slate-900">Proses</option>
                 <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }} class="text-slate-900">Lulus</option>
                 <option value="tidak_lulus" {{ request('status') == 'tidak_lulus' ? 'selected' : '' }} class="text-slate-900">Gagal (Tidak Lulus)</option>
+                <option value="mundur" {{ request('status') == 'mundur' ? 'selected' : '' }} class="text-slate-900">Mundur</option>
             </select>
         </div>
         
@@ -85,6 +86,8 @@
                             <div class="mt-1 text-[9px] themed-text-muted">Jatuh Tempo: {{ $reg->reregistration_deadline ? date('d M Y', strtotime($reg->reregistration_deadline)) : '-' }}</div>
                         @elseif($reg->status === 'tidak_lulus')
                             <span class="px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20">Tidak Lulus</span>
+                        @elseif($reg->status === 'mundur')
+                            <span class="px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest bg-slate-500/10 text-slate-500 border border-slate-500/20">Mundur</span>
                         @else
                             <span class="px-2 py-1 rounded text-[9px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">Proses</span>
                         @endif
@@ -103,6 +106,8 @@
                                             class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-emerald-500 hover:bg-emerald-500/10 {{ $reg->status === 'lulus' ? 'bg-emerald-500/20' : '' }}">Lulus</button>
                                         <button type="submit" name="status" value="tidak_lulus"
                                             class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-rose-500 hover:bg-rose-500/10 {{ $reg->status === 'tidak_lulus' ? 'bg-rose-500/20' : '' }}">Gagal</button>
+                                        <button type="submit" name="status" value="mundur"
+                                            class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-slate-500 hover:bg-slate-500/10 {{ $reg->status === 'mundur' ? 'bg-slate-500/20' : '' }}">Mundur</button>
                                         <button type="submit" name="status" value="proses"
                                             class="px-3 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest transition-all text-amber-500 hover:bg-amber-500/10 {{ $reg->status === 'proses' ? 'bg-amber-500/20' : '' }}">Reset</button>
                                     </div>
