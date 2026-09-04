@@ -46,11 +46,13 @@
 
 <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
     <div class="overflow-x-auto">
-        <table class="w-full text-left datatable" id="students-table">
+        <table class="w-full datatable" id="students-table">
             <thead>
                 <tr class="border-b" :style="'border-color: var(--border-color)'">
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Lengkap / Email</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Asal Sekolah</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tujuan</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">No. WA</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Wave</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status PPDB</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jadwal Ujian</th>
@@ -73,7 +75,17 @@
                     </td>
                     <td class="px-8 py-5 text-center">
                         <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
+                            {{ $student->asal_sekolah ?? '-' }}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
                             {{ $student->educationalLevel?->name ?? '-' }}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
+                            <b><a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $student->whatsapp_number) }}" target="_blank" class="text-emerald-500 hover:underline">{{ $student->whatsapp_number }}</a></b>
                         </span>
                     </td>
                     <td class="px-8 py-5 text-center">
