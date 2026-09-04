@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use ZipArchive;
 use App\Models\AcademicYear;
 use App\Models\Payment;
+use App\Models\Registration;
 use Exception;
 
 class BackupController extends Controller
@@ -84,12 +85,11 @@ class BackupController extends Controller
             return back()->with('error', 'Tidak ada Tahun Ajaran aktif.');
         }
 
-        // Ambil semua payment dari pendaftar tahun ajaran aktif yang memiliki file bukti bayar
-        $payments = Payment::whereHas('registration', function($query) use ($activeYear) {
-            $query->where('academic_year_id', $activeYear->id);
-        })->whereNotNull('payment_proof')->get();
+        // Ambil semua registrasi tahun ajaran aktif yang memiliki file bukti bayar
+        $registrations = Registration::where('academic_year_id', $activeYear->id)
+            ->whereNotNull('payment_proof')->get();
 
-        if ($payments->isEmpty()) {
+        if ($registrations->isEmpty()) {
             return back()->with('error', 'Tidak ada bukti pembayaran untuk didownload pada tahun ajaran aktif ini.');
         }
 
@@ -102,11 +102,11 @@ class BackupController extends Controller
 
         $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
-            foreach ($payments as $payment) {
+            foreach ($registrations as $registration) {
                 // Asumsi field payment_proof menyimpan 'payments/namafile.jpg'
                 // Di RegistrationController disimpan di storage_path('app/public/payments') -> tidak lewat path public storage di controller?
-                // Tunggu, kalau nama filenya cuma nama filenya saja, mari kita asumsikan 'payments/'.$payment->payment_proof
-                $proofPath = storage_path('app/public/' . $payment->payment_proof);
+                // Tunggu, kalau nama filenya cuma nama filenya saja, mari kita asumsikan 'payments/'.$registration->payment_proof
+                $proofPath = storage_path('app/public/' . $registration->payment_proof);
                 
                 // Jika file exist
                 if (file_exists($proofPath)) {
@@ -114,7 +114,7 @@ class BackupController extends Controller
                     $zip->addFile($proofPath, $relativeNameInZip);
                 } else {
                     // Cek jika field hanya menyimpan filename atau folder/filename
-                    $altProofPath = storage_path('app/public/payments/' . basename($payment->payment_proof));
+                    $altProofPath = storage_path('app/public/payments/' . basename($registration->payment_proof));
                     if (file_exists($altProofPath)) {
                         $zip->addFile($altProofPath, basename($altProofPath));
                     }
