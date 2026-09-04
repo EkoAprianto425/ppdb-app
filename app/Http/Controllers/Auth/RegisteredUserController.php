@@ -16,8 +16,8 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         $levels = \App\Models\EducationalLevel::orderBy('sort_order')->get();
-        $sources = \App\Models\InformationSource::where('is_active', true)->get();
-        $reasons = \App\Models\SchoolReason::where('is_active', true)->get();
+        $sources = \App\Models\InformationSource::where('is_active', true)->orderBy('name')->get();
+        $reasons = \App\Models\SchoolReason::where('is_active', true)->orderBy('name')->get();
         return view('auth.register', compact('levels', 'sources', 'reasons'));
     }
 
