@@ -84,4 +84,14 @@
         </div>
         <span class="font-medium">Verifikasi Pembayaran</span>
     </a>
+    
+    <a href="{{ route('admin.sidigs.index') }}"
+       class="sidebar-link group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-300 {{ request()->routeIs('admin.sidigs.*') ? 'active' : 'themed-text-muted' }}">
+        <div class="p-2 rounded-lg group-hover:bg-primary/10 transition-colors" :style="'background: var(--border-color)'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+            </svg>
+        </div>
+        <span class="font-medium">Integrasi SIDIGS</span>
+    </a>
 @endif

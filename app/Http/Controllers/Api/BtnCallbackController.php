@@ -76,6 +76,9 @@ class BtnCallbackController extends Controller
 
         if ($fee && $fee->sort_order == 1) {
             $payment->registration->update(['payment_status' => 'success']);
+        } else {
+            // Post to SIDIGS for payments other than Formulir
+            \App\Services\SidigsService::postStudent($payment->registration);
         }
 
         return response()->json([
