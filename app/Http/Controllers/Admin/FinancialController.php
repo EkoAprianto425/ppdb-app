@@ -140,8 +140,16 @@ class FinancialController extends Controller
             'verified_at'     => now(),
         ]);
 
-        // Update status registrasi
-        $payment->registration->update(['payment_status' => 'success']);
+        // Update status registrasi & post ke SIDIGS (sama seperti flow VA)
+        $fee = \App\Models\AdministrativeFee::where('name', $payment->fee_type)
+            ->where('educational_level_id', $payment->registration->user->educational_level_id)
+            ->first();
+
+        if ($fee && $fee->sort_order == 1) {
+            $payment->registration->update(['payment_status' => 'success']);
+        } else {
+            \App\Services\SidigsService::postStudent($payment->registration);
+        }
 
         return back()->with('status', "Pembayaran cash untuk {$payment->fee_type} atas nama {$payment->registration->user->full_name} berhasil dicatat.");
     }
