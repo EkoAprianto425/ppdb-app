@@ -52,7 +52,7 @@ class SidigsService
             'nickname'   => $registration->nama_panggilan ?? null,
             'gender'     => $gender,
             'birthplace' => $registration->tempat_lahir ?? null,
-            'birthdate'  => $registration->tanggal_lahir?->format('Y-m-d') ?? ($registration->tanggal_lahir ?? null),
+            'birthdate'  => $registration->tanggal_lahir,
             'religion'   => $registration->agama ?? null,
             'address'    => $registration->alamat ?? null,
             'phone'      => $registration->user->whatsapp_number ?? null,
