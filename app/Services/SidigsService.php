@@ -9,50 +9,110 @@ use Illuminate\Support\Facades\Log;
 
 class SidigsService
 {
+    // ponytail: hardcoded keys — move to config/env when multi-tenant needed
+    private const SCHOOL_MAP = [
+        'SMP' => ['client_key' => 'SGS256', 'secret_key' => '2ReFRvOtBmWbnFXFAkl2kjRqgxPMfPESXetq4cgV'],
+        'SMA' => ['client_key' => 'SGS257', 'secret_key' => 'EfLaRZNumnkdi3bebfU6OGpKN50oJZpkZ4lKISoe'],
+        'SMK' => ['client_key' => 'SGS258', 'secret_key' => '4vFqW0qH3w2OvM6FMRGERXw2QEWiYnMjYPApENmn'],
+    ];
+
+    private const API_BASE = 'https://sidigs.com/api/v1';
+
     public static function postStudent(Registration $registration)
     {
-        $level = $registration->user->educationalLevel->name ?? '';
-        
-        // Map keys based on level
-        $clientKey = '';
-        $secretKey = '';
-        
-        if (str_contains(strtoupper($level), 'SMP')) {
-            $clientKey = 'SGS256';
-            $secretKey = '2ReFRvOtBmWbnFXFAkl2kjRqgxPMfPESXetq4cgV';
-        } elseif (str_contains(strtoupper($level), 'SMA')) {
-            $clientKey = 'SGS257';
-            $secretKey = 'EfLaRZNumnkdi3bebfU6OGpKN50oJZpkZ4lKISoe';
-        } elseif (str_contains(strtoupper($level), 'SMK')) {
-            $clientKey = 'SGS258';
-            $secretKey = '4vFqW0qH3w2OvM6FMRGERXw2QEWiYnMjYPApENmn';
-        } else {
+        $level = $registration->user->educationalLevel->parent_unit ?? '';
+        $school = self::SCHOOL_MAP[strtoupper($level)] ?? null;
+
+        if (!$school) {
             return false;
         }
 
+        // Derive grade from parent_unit: SMP = 7, SMA/SMK = 10
+        $grade = strtoupper($level) === 'SMP' ? '7' : '10';
+
+        // For SMK, extract class_name from educational level name (e.g. "SMK Akuntansi" → "Akuntansi")
+        $className = null;
+        $levelName = $registration->user->educationalLevel->name ?? '';
+        if (strtoupper($level) === 'SMK' && $levelName !== 'SMK') {
+            $className = trim(str_ireplace('SMK', '', $levelName));
+        }
+
+        // Map gender: database stores full string, API expects L/P
+        $genderRaw = $registration->jenis_kelamin ?? '';
+        $gender = match (true) {
+            str_contains(strtoupper($genderRaw), 'LAKI') => 'L',
+            str_contains(strtoupper($genderRaw), 'PEREM') => 'P',
+            in_array(strtoupper($genderRaw), ['L', 'P']) => strtoupper($genderRaw),
+            default => $genderRaw,
+        };
+
+        $body = array_filter([
+            'name'       => $registration->user->full_name,
+            'nisn'       => $registration->nisn ?? "-",
+            'nickname'   => $registration->nama_panggilan ?? null,
+            'gender'     => $gender,
+            'birthplace' => $registration->tempat_lahir ?? null,
+            'birthdate'  => $registration->tanggal_lahir?->format('Y-m-d') ?? ($registration->tanggal_lahir ?? null),
+            'religion'   => $registration->agama ?? null,
+            'address'    => $registration->alamat ?? null,
+            'phone'      => $registration->user->whatsapp_number ?? null,
+            'grade'      => $grade,
+            'class_name' => $className,
+            'wali'       => [
+                'name'  => $registration->nama_ayah ?? $registration->nama_ibu ?? 'Wali',
+                'phone' => $registration->user->whatsapp_number ?? null,
+            ],
+        ], fn ($v) => $v !== null && $v !== '');
+
+        // Wali is required even if mostly empty — ensure it stays
+        if (!isset($body['wali'])) {
+            $body['wali'] = ['name' => $registration->nama_ayah ?? $registration->nama_ibu ?? 'Wali'];
+        }
+
+        $path = '/api/v1/students';
+        $method = 'POST';
+        $timestamp = (string) time();
+        $rawBody = json_encode($body);
+        $payload = $method . $path . $rawBody . $timestamp;
+        $signature = hash_hmac('sha256', $payload, $school['secret_key']);
+
         try {
             $response = Http::withHeaders([
-                'X-Client-Key' => $clientKey,
-                'X-Secret-Key' => $secretKey,
-                'Accept' => 'application/json'
-            ])->post('https://sidigs.com/api/students', [
-                'name' => $registration->nama_lengkap,
-                'nisn' => $registration->nisn,
-                'email' => $registration->user->email ?? '',
-                'phone' => $registration->no_hp ?? '',
-                'gender' => $registration->jenis_kelamin ?? '',
-                'address' => $registration->alamat_lengkap ?? '',
-                'birth_place' => $registration->tempat_lahir ?? '',
-                'birth_date' => $registration->tanggal_lahir ?? '',
-            ]);
+                'Content-Type'  => 'application/json',
+                'X-CLIENT-KEY'  => $school['client_key'],
+                'X-TIMESTAMP'   => $timestamp,
+                'X-SIGNATURE'   => $signature,
+                'Accept'        => 'application/json',
+            ])->withBody($rawBody, 'application/json')
+              ->post(self::API_BASE . '/students');
+
+            $responseData = $response->json();
+            $responseCode = $responseData['responseCode'] ?? null;
+            $isSuccess = $responseCode === '000200';
 
             SidigsRecord::create([
                 'registration_id' => $registration->id,
-                'status' => $response->successful() ? 'success' : 'failed',
-                'response_payload' => $response->json() ?? ['body' => $response->body()],
+                'status' => $isSuccess ? 'success' : 'failed',
+                'response_payload' => $responseData ?? ['body' => $response->body()],
             ]);
 
-            return $response->successful();
+            if ($isSuccess) {
+                Log::info('SIDIGS: Siswa berhasil didaftarkan', [
+                    'registration_id' => $registration->id,
+                    'student_id'      => $responseData['data']['student_id'] ?? null,
+                    'class_name'      => $responseData['data']['class_name'] ?? null,
+                    'student_username' => $responseData['data']['student_account']['username'] ?? null,
+                    'wali_username'    => $responseData['data']['wali_account']['username'] ?? null,
+                ]);
+            } else {
+                Log::warning('SIDIGS: Gagal mendaftarkan siswa', [
+                    'registration_id' => $registration->id,
+                    'responseCode'    => $responseCode,
+                    'responseMessage' => $responseData['responseMessage'] ?? $response->body(),
+                ]);
+            }
+
+            return $isSuccess;
         } catch (\Exception $e) {
             Log::error('SIDIGS Post Error: ' . $e->getMessage());
             SidigsRecord::create([
