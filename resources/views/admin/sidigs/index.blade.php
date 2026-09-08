@@ -24,10 +24,10 @@
                     <td class="px-8 py-5">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                {{ strtoupper(substr($record->registration->nama_lengkap ?? 'S', 0, 1)) }}
+                                {{ strtoupper(substr($record->registration->user->full_name ?? 'S', 0, 1)) }}
                             </div>
                             <div>
-                                <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $record->registration->nama_lengkap ?? 'N/A' }}</p>
+                                <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $record->registration->user->full_name ?? 'N/A' }}</p>
                                 <p class="text-[10px] themed-text-muted">{{ $record->registration->user->email ?? '-' }}</p>
                             </div>
                         </div>
