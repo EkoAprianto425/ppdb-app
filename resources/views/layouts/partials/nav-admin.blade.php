@@ -12,7 +12,7 @@
     <span class="font-medium">Admin Dashboard</span>
 </a>
 
-@if(in_array(auth()->user()->role, [\App\Models\User::ROLE_ADMIN_SMP, \App\Models\User::ROLE_ADMIN_SMA, \App\Models\User::ROLE_ADMIN_SMK, \App\Models\User::ROLE_SUPER_ADMIN]))
+@if(in_array(auth()->user()->role, [\App\Models\User::ROLE_ADMIN_SMP, \App\Models\User::ROLE_ADMIN_SMA, \App\Models\User::ROLE_ADMIN_SMK, \App\Models\User::ROLE_SUPER_ADMIN, 'admin_administrasi']))
     <a href="{{ route('admin.students.index') }}"
        class="sidebar-link group flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-300 {{ request()->routeIs('admin.students.*') ? 'active' : 'themed-text-muted' }}">
         <div class="p-2 rounded-lg group-hover:bg-primary/10 transition-colors" :style="'background: var(--border-color)'">
