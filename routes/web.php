@@ -98,7 +98,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/schedules', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'index'])->name('schedules.index');
             Route::post('/schedules', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'store'])->name('schedules.store');
             Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ExamScheduleController::class, 'destroy'])->name('schedules.destroy');
+        });
 
+        // Master Potongan & Validasi Keringanan - Unit Admin, Super Admin & Admin Administrasi
+        Route::middleware(['role:admin_smp,admin_sma,admin_smk,super_admin,admin_administrasi'])->group(function () {
             Route::resource('discounts', \App\Http\Controllers\Admin\DiscountController::class);
             Route::get('/discount-applications', [\App\Http\Controllers\Admin\DiscountApplicationController::class, 'index'])->name('discount-applications.index');
             Route::put('/discount-applications/{application}', [\App\Http\Controllers\Admin\DiscountApplicationController::class, 'update'])->name('discount-applications.update');
