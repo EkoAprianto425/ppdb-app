@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('information_pdfs', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->string('type'); // brosur_smp, brosur_sma, brosur_smk, info_biaya_smp, info_biaya_sma, info_biaya_smk
-            $table->string('file_path');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('information_pdfs')) {
+            Schema::create('information_pdfs', function (Blueprint $table) {
+                $table->id();
+                $table->string('title');
+                $table->string('type'); // brosur_smp, brosur_sma, brosur_smk, info_biaya_smp, info_biaya_sma, info_biaya_smk
+                $table->string('file_path');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

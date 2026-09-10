@@ -12,6 +12,11 @@ class EducationalLevel extends Model
         'parent_unit',
         'contact_whatsapp',
         'sort_order',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function fees(): HasMany

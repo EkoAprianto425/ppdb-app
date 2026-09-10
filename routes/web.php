@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
             Route::resource('year', \App\Http\Controllers\Admin\AcademicYearController::class);
             Route::resource('wave', \App\Http\Controllers\Admin\RegistrationWaveController::class);
             Route::resource('levels', \App\Http\Controllers\Admin\LevelController::class);
+            Route::patch('levels/{level}/toggle-active', [\App\Http\Controllers\Admin\LevelController::class, 'toggleActive'])->name('levels.toggle-active');
             Route::resource('users', \App\Http\Controllers\Admin\AdminManagementController::class);
             Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
             Route::put('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');

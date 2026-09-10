@@ -23,6 +23,7 @@
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">No. Urut</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Jenjang</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Induk Unit</th>
+                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Status Pendaftaran</th>
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right" data-dt-order="disable">Aksi</th>
                     </tr>
                 </thead>
@@ -37,6 +38,24 @@
                         </td>
                         <td class="px-8 py-5">
                             <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase">{{ $level->parent_unit }}</span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <form action="{{ route('admin.levels.toggle-active', $level) }}" method="POST" class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="group/toggle flex items-center gap-2 transition-all">
+                                    @if($level->is_active)
+                                        <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-emerald-500 transition-colors">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6 shadow-md"></span>
+                                        </span>
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase">Dibuka</span>
+                                    @else
+                                        <span class="relative inline-flex h-6 w-11 items-center rounded-full bg-red-500/30 transition-colors">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white/70 transition-transform translate-x-1 shadow-md"></span>
+                                        </span>
+                                        <span class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 text-[10px] font-bold uppercase">Ditutup</span>
+                                    @endif
+                                </button>
+                            </form>
                         </td>
                         <td class="px-8 py-5 text-right">
                             <div class="flex justify-end gap-2">

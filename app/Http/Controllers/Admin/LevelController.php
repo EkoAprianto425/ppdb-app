@@ -59,4 +59,12 @@ class LevelController extends Controller
         $level->delete();
         return back()->with('status', 'Jenjang berhasil dihapus.');
     }
+
+    public function toggleActive(EducationalLevel $level)
+    {
+        $level->update(['is_active' => !$level->is_active]);
+
+        $status = $level->is_active ? 'dibuka' : 'ditutup';
+        return back()->with('status', "Pendaftaran jenjang {$level->name} berhasil {$status}.");
+    }
 }

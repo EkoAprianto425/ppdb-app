@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class RegisterStudentRequest extends FormRequest
@@ -22,7 +23,7 @@ class RegisterStudentRequest extends FormRequest
             'whatsapp_number'  => ['required', 'string', 'max:20'],
             'password'         => ['required', 'confirmed', Rules\Password::defaults()],
             'asal_sekolah'     => ['required', 'string', 'max:255'],
-            'educational_level_id' => ['required', 'exists:educational_levels,id'],
+            'educational_level_id' => ['required', Rule::exists('educational_levels', 'id')->where('is_active', true)],
             'alasan_memilih'   => ['required', 'string', 'max:1000'],
             'sumber_informasi' => ['required', 'string', 'max:255'],
             'sumber_informasi_tambahan' => ['nullable', 'string', 'max:255'],
