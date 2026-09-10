@@ -318,12 +318,48 @@ class StudentManagementController extends Controller
         return back()->with('status', 'Status kelulusan siswa berhasil diperbarui menjadi: ' . strtoupper($request->status));
     }
 
+    public function showByUser(User $user)
+    {
+        $this->authorizeUserAccess($user);
+        $registration = $user->registration;
+        if ($registration) {
+            return redirect()->route('admin.students.show', $registration);
+        }
+        return view('admin.students.show-guest', compact('user'));
+    }
+
+    public function resetPasswordByUser(Request $request, User $user)
+    {
+        $this->authorizeUserAccess($user);
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return back()->with('status', 'Password siswa berhasil direset.');
+    }
+
     private function authorizeAccess(Registration $registration)
     {
         $user = auth()->user();
         if (!$user->isSuperAdmin()) {
             $levelIds = $user->getManagedLevelIds();
             if ($registration->user && !in_array($registration->user->educational_level_id, $levelIds)) {
+                abort(403, 'Anda tidak memiliki akses ke data siswa unit lain.');
+            }
+        }
+    }
+
+    private function authorizeUserAccess(User $user)
+    {
+        $authUser = auth()->user();
+        if (!$authUser->isSuperAdmin()) {
+            $levelIds = $authUser->getManagedLevelIds();
+            if (!in_array($user->educational_level_id, $levelIds)) {
                 abort(403, 'Anda tidak memiliki akses ke data siswa unit lain.');
             }
         }
