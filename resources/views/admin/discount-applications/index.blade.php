@@ -11,6 +11,7 @@
             <thead>
                 <tr class="border-b" :style="'border-color: var(--border-color)'">
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama / Email</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Tujuan</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Kategori</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Program Diskon</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Status Kepegawaian</th>
@@ -30,6 +31,13 @@
                             <div>
                                 <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $app->registration->user->full_name ?? $app->registration->user->name }}</p>
                                 <p class="text-[10px] themed-text-muted">{{ $app->registration->user->email }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $app->registration->user->educationalLevel?->name }}</p>
                             </div>
                         </div>
                     </td>
