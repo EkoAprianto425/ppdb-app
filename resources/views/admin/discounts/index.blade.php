@@ -49,47 +49,47 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse datatable">
                 <thead>
-                    <tr class="bg-black/20 border-b border-white/5">
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Kebijakan & Jenjang</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Kategori</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Besaran</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Status</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted text-right">Aksi</th>
+                    <tr class="border-b" :style="'border-color: var(--border-color)'">
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest themed-text-muted">Kebijakan & Jenjang</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest themed-text-muted">Kategori</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest themed-text-muted">Besaran</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest themed-text-muted">Status</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest themed-text-muted text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody>
                     @foreach($discounts as $discount)
-                    <tr class="hover:bg-primary/5 transition-all group">
-                        <td class="px-6 py-4">
-                            <p class="text-xs font-black themed-text group-hover:text-primary transition-colors mb-1">{{ $discount->name }}</p>
-                            <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-black themed-text-muted uppercase tracking-widest">
+                    <tr class="hover:bg-primary/5 transition-colors group border-b" :style="'border-color: var(--border-color)'">
+                        <td class="px-8 py-5">
+                            <p class="text-xs font-bold themed-text group-hover:text-primary transition-colors mb-1">{{ $discount->name }}</p>
+                            <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-bold themed-text-muted uppercase tracking-widest">
                                 {{ $discount->educationalLevel?->parent_unit ?? 'Semua Jenjang' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
-                            <span class="text-[10px] font-bold themed-text-muted uppercase tracking-wider">
+                        <td class="px-8 py-5">
+                            <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border uppercase tracking-widest" :style="'border-color: var(--border-color)'">
                                 {{ str_replace('_', ' ', $discount->category) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-8 py-5">
                             <div class="flex flex-col gap-1">
                                 @if($discount->category === 'anak_pegawai')
-                                    <span class="text-[11px] font-black themed-text text-primary">Biaya Pendaftaran: Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
+                                    <span class="text-[11px] font-bold themed-text text-primary">Biaya Pendaftaran: Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
                                     <span class="text-[9px] themed-text-muted font-bold italic">Biaya SPP: Rp {{ number_format($discount->spp_amount, 0, ',', '.') }}</span>
                                 @else
-                                    <span class="text-[11px] font-black themed-text text-primary">Potongan: Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
+                                    <span class="text-[11px] font-bold themed-text text-primary">Potongan: Rp {{ number_format($discount->amount, 0, ',', '.') }}</span>
                                     <span class="text-[9px] themed-text-muted font-bold italic">Sisa Kuota: {{ $discount->qty }}</span>
                                 @endif
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-8 py-5">
                             @if($discount->is_active)
-                                <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest text-emerald-500">Aktif</span>
+                                <span class="px-3 py-1 rounded-md border bg-emerald-500/10 border-emerald-500/20 text-[9px] font-black uppercase tracking-widest text-emerald-500">Aktif</span>
                             @else
-                                <span class="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest text-rose-500">Non-Aktif</span>
+                                <span class="px-3 py-1 rounded-md border bg-rose-500/10 border-rose-500/20 text-[9px] font-black uppercase tracking-widest text-rose-500">Non-Aktif</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-8 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <button onclick="openEditModal({{ json_encode($discount) }})" 
                                         class="p-2 rounded-lg btn-action-edit">
