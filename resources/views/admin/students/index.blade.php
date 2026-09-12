@@ -49,7 +49,8 @@
         <table class="w-full datatable" id="students-table">
             <thead>
                 <tr class="border-b" :style="'border-color: var(--border-color)'">
-                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Lengkap / Email</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Pembuat Akun / Email</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Nama Lengkap Siswa</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Asal Sekolah</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tujuan</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">No. WA</th>
@@ -68,9 +69,14 @@
                                 {{ strtoupper(substr($student->name ?? 'S', 0, 1)) }}
                             </div>
                             <div>
-                                <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $student->full_name ?? $student->name }}</p>
+                                <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $student->name }}</p>
                                 <p class="text-[10px] themed-text-muted">{{ $student->email }}</p>
                             </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-4">
+                            <p class="text-sm font-bold themed-text group-hover:text-primary transition-colors">{{ $student->full_name }}</p>
                         </div>
                     </td>
                     <td class="px-8 py-5 text-center">
