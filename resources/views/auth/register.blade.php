@@ -278,7 +278,7 @@
             .then(data => {
                 provinsiSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
                 data.forEach(item => {
-                    provinsiSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                    provinsiSelect.innerHTML += `<option value="${item.kode_prop}">${item.propinsi}</option>`;
                 });
             })
             .catch(error => console.error('Error fetching provinsi:', error));
@@ -299,7 +299,7 @@
                     .then(data => {
                         kabupatenSelect.innerHTML = '<option value="">-- Pilih Kabupaten --</option>';
                         data.forEach(item => {
-                            kabupatenSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                            kabupatenSelect.innerHTML += `<option value="${item.kode_kab_kota}">${item.kabupaten_kota}</option>`;
                         });
                         kabupatenSelect.disabled = false;
                     });
@@ -322,7 +322,7 @@
                     .then(data => {
                         kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
                         data.forEach(item => {
-                            kecamatanSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                            kecamatanSelect.innerHTML += `<option value="${item.kode_kec}">${item.kecamatan}</option>`;
                         });
                         kecamatanSelect.disabled = false;
                     });
@@ -343,7 +343,7 @@
                     .then(data => {
                         sekolahSelect.innerHTML = '<option value="">-- Pilih Sekolah --</option>';
                         data.forEach(item => {
-                            sekolahSelect.innerHTML += `<option value="${item}">${item}</option>`;
+                            sekolahSelect.innerHTML += `<option value="${item.sekolah}">${item.sekolah}</option>`;
                         });
                         sekolahSelect.innerHTML += `<option value="lainnya" class="font-bold text-amber-700">++ LAINNYA (Ketik Manual) ++</option>`;
                         sekolahSelect.disabled = false;

@@ -9,11 +9,11 @@ class RegionController extends Controller
 {
     public function getProvinsi()
     {
-        $provinsi = Sekolah::select('propinsi')
+        $provinsi = Sekolah::select('propinsi', 'kode_prop')
             ->whereNotNull('propinsi')
             ->distinct()
             ->orderBy('propinsi')
-            ->pluck('propinsi');
+            ->get();
             
         return response()->json($provinsi);
     }
@@ -22,12 +22,12 @@ class RegionController extends Controller
     {
         $provinsi = $request->query('propinsi');
         
-        $kabupaten = Sekolah::where('propinsi', $provinsi)
+        $kabupaten = Sekolah::where('kode_prop', $provinsi)
             ->whereNotNull('kabupaten_kota')
-            ->select('kabupaten_kota')
+            ->select('kabupaten_kota', 'kode_kab_kota')
             ->distinct()
             ->orderBy('kabupaten_kota')
-            ->pluck('kabupaten_kota');
+            ->get();
             
         return response()->json($kabupaten);
     }
@@ -36,12 +36,12 @@ class RegionController extends Controller
     {
         $kabupaten = $request->query('kabupaten');
         
-        $kecamatan = Sekolah::where('kabupaten_kota', $kabupaten)
+        $kecamatan = Sekolah::where('kode_kab_kota', $kabupaten)
             ->whereNotNull('kecamatan')
-            ->select('kecamatan')
+            ->select('kecamatan', 'kode_kec')
             ->distinct()
             ->orderBy('kecamatan')
-            ->pluck('kecamatan');
+            ->get();
             
         return response()->json($kecamatan);
     }
@@ -50,13 +50,13 @@ class RegionController extends Controller
     {
         $kecamatan = $request->query('kecamatan');
         
-        $sekolah = Sekolah::where('kecamatan', $kecamatan)
+        $sekolah = Sekolah::where('kode_kec', $kecamatan)
             ->whereNotNull('sekolah')
             ->whereIn('bentuk', ['SD', 'SMP', 'SDLB', 'SLB', 'SMPLB'])
-            ->select('sekolah', 'propinsi')
+            ->select('sekolah', 'propinsi', 'kabupaten_kota', 'kecamatan')
             ->distinct()
             ->orderBy('sekolah')
-            ->pluck('sekolah');
+            ->get();
             
         return response()->json($sekolah);
     }
