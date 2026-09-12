@@ -53,7 +53,7 @@ class RegionController extends Controller
         $sekolah = Sekolah::where('kecamatan', $kecamatan)
             ->whereNotNull('sekolah')
             ->whereIn('bentuk', ['SD', 'SMP', 'SDLB', 'SLB', 'SMPLB'])
-            ->select('sekolah')
+            ->select('sekolah, propinsi')
             ->distinct()
             ->orderBy('sekolah')
             ->pluck('sekolah');
