@@ -122,9 +122,14 @@
                                 ];
                                 $m = $methodLabels[$payment->payment_method] ?? ['label' => $payment->payment_method ?? '-', 'class' => 'bg-white/5 text-white/40 border-white/10'];
                             @endphp
-                            <span class="px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-widest {{ $m['class'] }}">
-                                {{ $m['label'] }}
-                            </span>
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-widest {{ $m['class'] }}">
+                                    {{ $m['label'] }}
+                                </span>
+                                @if($payment->va_number)
+                                    <span class="text-[9px] font-mono text-white/40 tracking-wider">{{ $payment->va_number }}</span>
+                                @endif
+                            </div>
                         </td>
                         {{-- Aksi --}}
                         <td class="px-8 py-5 text-right">
@@ -410,6 +415,12 @@
                             <p class="text-[9px] themed-text-muted font-bold uppercase mb-1">Tagihan</p>
                             <p class="text-lg font-black text-primary">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
                         </div>
+                        @if($payment->va_number)
+                        <div class="col-span-2 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20">
+                            <p class="text-[9px] text-blue-400 font-bold uppercase mb-1">Nomor Virtual Account</p>
+                            <p class="text-sm font-mono font-black text-blue-300 tracking-widest">{{ $payment->va_number }}</p>
+                        </div>
+                        @endif
                     </div>
 
                     <form action="{{ route('admin.financial.verify', $payment) }}" method="POST" class="space-y-6">
