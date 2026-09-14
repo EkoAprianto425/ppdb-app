@@ -14,6 +14,42 @@
         @csrf
         @method('PUT')
 
+        {{-- Registrasi Awal --}}
+        <div class="space-y-6">
+            <h3 class="text-sky-400 text-xs font-bold uppercase tracking-widest border-l-2 border-sky-500 pl-3">Registrasi Awal</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Asal Sekolah</label>
+                    <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah', $registration->user->asal_sekolah) }}" required
+                           class="w-full themed-input rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">No. WhatsApp</label>
+                    <input type="text" name="whatsapp_number" value="{{ old('whatsapp_number', $registration->user->whatsapp_number) }}" required
+                           class="w-full themed-input rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Alasan Memilih</label>
+                    <textarea name="alasan_memilih" rows="3" required
+                              class="w-full themed-input rounded-xl px-4 py-3 resize-none">{{ old('alasan_memilih', $registration->user->alasan_memilih) }}</textarea>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Sumber Informasi</label>
+                        <input type="text" name="sumber_informasi" value="{{ old('sumber_informasi', $registration->user->sumber_informasi) }}" required
+                               class="w-full themed-input rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Sumber Informasi (Tambahan)</label>
+                        <input type="text" name="sumber_informasi_tambahan" value="{{ old('sumber_informasi_tambahan', $registration->user->sumber_informasi_tambahan) }}"
+                               class="w-full themed-input rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-px transition-colors duration-500" :style="'background: var(--border-color)'"></div>
+
         {{-- Row 1: Identitas --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-6">

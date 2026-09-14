@@ -211,6 +211,13 @@ class StudentManagementController extends Controller
         $this->authorizeAccess($registration);
 
         $validated = $request->validate([
+            // Registrasi Awal (User)
+            'asal_sekolah'              => 'required|string|max:255',
+            'whatsapp_number'           => 'required|string|max:20',
+            'alasan_memilih'            => 'required|string',
+            'sumber_informasi'          => 'required|string|max:255',
+            'sumber_informasi_tambahan' => 'nullable|string|max:255',
+            // Biodata (Registration)
             'nama_panggilan'   => 'required|string|max:50',
             'anak_ke'          => 'required|integer|min:1',
             'dari_saudara'     => 'required|integer|min:1',
@@ -237,10 +244,23 @@ class StudentManagementController extends Controller
         $validated['penghasilan_ayah'] = (int) preg_replace('/[^0-9]/', '', $validated['penghasilan_ayah']);
         $validated['penghasilan_ibu'] = (int) preg_replace('/[^0-9]/', '', $validated['penghasilan_ibu']);
 
-        $registration->update($validated);
+        // Update User (Registrasi Awal)
+        $registration->user->update([
+            'asal_sekolah'              => $validated['asal_sekolah'],
+            'whatsapp_number'           => $validated['whatsapp_number'],
+            'alasan_memilih'            => $validated['alasan_memilih'],
+            'sumber_informasi'          => $validated['sumber_informasi'],
+            'sumber_informasi_tambahan' => $validated['sumber_informasi_tambahan'],
+        ]);
+
+        // Update Registration (Biodata)
+        $registration->update(\Illuminate\Support\Arr::except($validated, [
+            'asal_sekolah', 'whatsapp_number', 'alasan_memilih', 'sumber_informasi', 'sumber_informasi_tambahan',
+        ]));
 
         return redirect()->route('admin.students.show', $registration)->with('status', 'Biodata siswa berhasil diperbarui.');
     }
+
 
     public function transfer(Request $request, Registration $registration)
     {
