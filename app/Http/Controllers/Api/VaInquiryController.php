@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiBankLog;
 use App\Models\Payment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class VaInquiryController extends Controller
 {
@@ -24,9 +24,8 @@ class VaInquiryController extends Controller
      */
     public function inquiry(Request $request)
     {
-        Log::info('VA Inquiry: HIT', [
+        ApiBankLog::write(ApiBankLog::SOURCE_INQUIRY, ApiBankLog::LEVEL_INFO, 'HIT', [
             'ip'      => $request->ip(),
-            'method'  => $request->method(),
             'payload' => $request->all(),
         ]);
 
@@ -35,8 +34,9 @@ class VaInquiryController extends Controller
             ?? $request->input('virtualAccountNumber');
 
         if (empty($vaNumber)) {
-            Log::warning('VA Inquiry: Bad Request - VA number missing', [
+            ApiBankLog::write(ApiBankLog::SOURCE_INQUIRY, ApiBankLog::LEVEL_WARNING, 'BAD_REQUEST', [
                 'ip'      => $request->ip(),
+                'message' => 'VA number missing',
                 'payload' => $request->all(),
             ]);
 
@@ -63,7 +63,7 @@ class VaInquiryController extends Controller
             ->first();
 
         if (!$payment) {
-            Log::warning('VA Inquiry: Bill not found', [
+            ApiBankLog::write(ApiBankLog::SOURCE_INQUIRY, ApiBankLog::LEVEL_WARNING, 'BILL_NOT_FOUND', [
                 'va_number' => $vaNumber,
                 'ip'        => request()->ip(),
             ]);
@@ -82,13 +82,11 @@ class VaInquiryController extends Controller
             ?: ($user?->name
                 ?: ($payment->registration?->nama_panggilan ?: 'N/A'));
 
-        Log::info('VA Inquiry: SUCCESS', [
-            'va_number'  => $vaNumber,
-            'nama_siswa' => $namaSiswa,
-            'fee_type'   => $payment->fee_type,
-            'amount'     => (float) $payment->amount,
-            'status'     => $payment->status,
-            'ip'         => request()->ip(),
+        ApiBankLog::write(ApiBankLog::SOURCE_INQUIRY, ApiBankLog::LEVEL_INFO, 'SUCCESS', [
+            'va_number' => $vaNumber,
+            'ip'        => request()->ip(),
+            'amount'    => (float) $payment->amount,
+            'message'   => "Inquiry sukses: {$namaSiswa} / {$payment->fee_type}",
         ]);
 
         return response()->json([

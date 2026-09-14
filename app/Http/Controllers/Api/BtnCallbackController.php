@@ -3,24 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiBankLog;
 use App\Models\Payment;
 use App\Models\Registration;
 use App\Models\AdministrativeFee;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class BtnCallbackController extends Controller
 {
     public function handle(Request $request)
     {
         $payload = $request->all();
-        Log::info('BTN VA Callback: HIT', [
+
+        ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_INFO, 'HIT', [
             'ip'      => $request->ip(),
             'payload' => $payload,
         ]);
 
         if (empty($payload)) {
-            Log::warning('BTN VA Callback: Empty payload', ['ip' => $request->ip()]);
+            ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_WARNING, 'EMPTY_PAYLOAD', [
+                'ip' => $request->ip(),
+            ]);
 
             return response()->json([
                 'rsp' => '001',
@@ -29,10 +32,13 @@ class BtnCallbackController extends Controller
         }
 
         $vaNumber = $payload['va'] ?? null;
-        $ref = $payload['ref'] ?? null;
+        $ref      = $payload['ref'] ?? null;
 
         if (!$vaNumber) {
-            Log::warning('BTN VA Callback: VA number missing', ['payload' => $payload, 'ip' => $request->ip()]);
+            ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_WARNING, 'VA_NUMBER_MISSING', [
+                'ip'      => $request->ip(),
+                'payload' => $payload,
+            ]);
 
             return response()->json([
                 'rsp' => '001',
@@ -53,7 +59,11 @@ class BtnCallbackController extends Controller
                 ->exists();
 
             if ($alreadyPaid) {
-                Log::info('BTN VA Callback: Already paid', ['va_number' => $vaNumber, 'ref' => $ref]);
+                ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_INFO, 'ALREADY_PAID', [
+                    'va_number' => $vaNumber,
+                    'ref'       => $ref,
+                    'ip'        => $request->ip(),
+                ]);
 
                 return response()->json([
                     'rsp' => '000',
@@ -61,7 +71,7 @@ class BtnCallbackController extends Controller
                 ]);
             }
 
-            Log::warning('BTN VA Callback: Payment record not found', [
+            ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_WARNING, 'BILL_NOT_FOUND', [
                 'va_number' => $vaNumber,
                 'ref'       => $ref,
                 'ip'        => $request->ip(),
@@ -96,12 +106,11 @@ class BtnCallbackController extends Controller
             \App\Services\SidigsService::postStudent($payment->registration);
         }
 
-        Log::info('BTN VA Callback: SUCCESS', [
-            'va_number'  => $vaNumber,
-            'ref'        => $ref,
-            'terbayar'   => $terbayar,
-            'fee_type'   => $payment->fee_type,
-            'payment_id' => $payment->id,
+        ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_INFO, 'SUCCESS', [
+            'va_number' => $vaNumber,
+            'ref'       => $ref,
+            'amount'    => (float) $terbayar,
+            'message'   => "BTN callback sukses: fee_type={$payment->fee_type}",
         ]);
 
         return response()->json([

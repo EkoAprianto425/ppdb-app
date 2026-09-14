@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiBankLog;
 use App\Models\Payment;
 use App\Models\AdministrativeFee;
 use Illuminate\Http\Request;
@@ -33,6 +34,11 @@ class VaPaymentNotifyController extends Controller
      */
     public function handle(Request $request)
     {
+        ApiBankLog::write(ApiBankLog::SOURCE_NOTIFY, ApiBankLog::LEVEL_INFO, 'HIT', [
+            'ip'      => $request->ip(),
+            'payload' => $request->all(),
+        ]);
+
         // --- 1. Validasi input ---
         $validator = Validator::make($request->all(), [
             'va_number' => ['required', 'string', 'max:30'],
@@ -50,10 +56,10 @@ class VaPaymentNotifyController extends Controller
         ]);
 
         if ($validator->fails()) {
-            Log::warning('VA Payment Notify: Validation failed', [
-                'errors'    => $validator->errors()->toArray(),
-                'ip'        => $request->ip(),
-                'payload'   => $request->except([]),
+            ApiBankLog::write(ApiBankLog::SOURCE_NOTIFY, ApiBankLog::LEVEL_WARNING, 'VALIDATION_FAILED', [
+                'ip'      => $request->ip(),
+                'message' => json_encode($validator->errors()->toArray()),
+                'payload' => $request->all(),
             ]);
 
             return response()->json([
@@ -85,7 +91,10 @@ class VaPaymentNotifyController extends Controller
                 ->exists();
 
             if ($alreadyPaid) {
-                Log::info('VA Payment Notify: Already paid', ['va_number' => $vaNumber]);
+                ApiBankLog::write(ApiBankLog::SOURCE_NOTIFY, ApiBankLog::LEVEL_INFO, 'ALREADY_PAID', [
+                    'va_number' => $vaNumber,
+                    'ip'        => $request->ip(),
+                ]);
 
                 return response()->json([
                     'status'          => true,
@@ -96,7 +105,10 @@ class VaPaymentNotifyController extends Controller
                 ], 200);
             }
 
-            Log::warning('VA Payment Notify: VA not found', ['va_number' => $vaNumber]);
+            ApiBankLog::write(ApiBankLog::SOURCE_NOTIFY, ApiBankLog::LEVEL_WARNING, 'BILL_NOT_FOUND', [
+                'va_number' => $vaNumber,
+                'ip'        => $request->ip(),
+            ]);
 
             return response()->json([
                 'status'          => false,
@@ -110,10 +122,11 @@ class VaPaymentNotifyController extends Controller
         // --- 3. Validasi kesesuaian nominal (toleransi ±1 rupiah untuk pembulatan) ---
         $expectedAmount = (float) $payment->amount;
         if (abs($amount - $expectedAmount) > 1) {
-            Log::warning('VA Payment Notify: Amount mismatch', [
+            ApiBankLog::write(ApiBankLog::SOURCE_NOTIFY, ApiBankLog::LEVEL_WARNING, 'AMOUNT_MISMATCH', [
                 'va_number' => $vaNumber,
-                'expected'  => $expectedAmount,
-                'received'  => $amount,
+                'ip'        => $request->ip(),
+                'amount'    => $amount,
+                'message'   => "Expected: {$expectedAmount}, Received: {$amount}",
             ]);
 
             return response()->json([
@@ -151,12 +164,12 @@ class VaPaymentNotifyController extends Controller
             ?: ($user?->name
                 ?: ($payment->registration?->nama_panggilan ?? 'N/A'));
 
-        Log::info('VA Payment Notify: SUCCESS', [
-            'va_number'  => $vaNumber,
-            'amount'     => $amount,
-            'paid_at'    => $paidAt,
-            'payment_id' => $payment->id,
-            'siswa'      => $namaSiswa,
+        ApiBankLog::write(ApiBankLog::SOURCE_NOTIFY, ApiBankLog::LEVEL_INFO, 'SUCCESS', [
+            'va_number' => $vaNumber,
+            'ip'        => $request->ip(),
+            'amount'    => $amount,
+            'ref'       => $vaRef,
+            'message'   => "Bayar sukses: {$namaSiswa} / {$payment->fee_type} / paid_at={$paidAt}",
         ]);
 
         return response()->json([
