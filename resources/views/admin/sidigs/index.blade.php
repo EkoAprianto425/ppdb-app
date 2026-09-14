@@ -5,6 +5,18 @@
 @section('page-subtitle', 'Riwayat sinkronisasi data siswa pendaftar ke SIDIGS API')
 
 @section('content')
+
+@if(session('success'))
+<div class="mb-4 px-5 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm font-semibold">
+    {{ session('success') }}
+</div>
+@endif
+@if(session('error'))
+<div class="mb-4 px-5 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-semibold">
+    {{ session('error') }}
+</div>
+@endif
+
 <div class="card-glass rounded-3xl overflow-hidden shadow-2xl">
     <div class="overflow-x-auto">
         <table class="w-full datatable" id="sidigs-table">
@@ -15,7 +27,7 @@
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jenjang</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Waktu Sinkron</th>
-                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center" data-dt-order="disable">Response</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center" data-dt-order="disable">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,12 +70,26 @@
                         <p class="text-[9px] themed-text-muted">{{ $record->created_at->format('H:i') }}</p>
                     </td>
                     <td class="px-8 py-5 text-center">
-                        <button onclick="document.getElementById('detail-{{ $record->id }}').classList.toggle('hidden')" class="p-2 rounded-lg btn-action-view" title="Lihat Response">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                        </button>
+                        <div class="flex items-center justify-center gap-2">
+                            {{-- Tombol lihat response --}}
+                            <button onclick="document.getElementById('detail-{{ $record->id }}').classList.toggle('hidden')" class="p-2 rounded-lg btn-action-view" title="Lihat Response">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                            {{-- Tombol repost (hanya jika gagal) --}}
+                            @if($record->status !== 'success')
+                            <form method="POST" action="{{ route('sidigs.repost', $record) }}" onsubmit="return confirm('Kirim ulang data siswa ini ke SIDIGS?')">
+                                @csrf
+                                <button type="submit" class="p-2 rounded-lg btn-action-edit" title="Kirim Ulang ke SIDIGS">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            @endif
+                        </div>
                         <div id="detail-{{ $record->id }}" class="hidden mt-2 text-left">
                             <pre class="text-[9px] themed-text-muted bg-card-bg p-3 rounded-xl border overflow-x-auto max-w-xs" :style="'border-color: var(--border-color)'">{{ json_encode($record->response_payload, JSON_PRETTY_PRINT) }}</pre>
                         </div>
@@ -75,3 +101,4 @@
     </div>
 </div>
 @endsection
+

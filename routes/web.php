@@ -127,6 +127,7 @@ Route::middleware('auth')->group(function () {
 
             // SIDIGS
             Route::get('/sidigs', [\App\Http\Controllers\SidigsRecordController::class, 'index'])->name('sidigs.index');
+            Route::post('/sidigs/{record}/repost', [\App\Http\Controllers\SidigsRecordController::class, 'repost'])->name('sidigs.repost');
         });
     });
 });

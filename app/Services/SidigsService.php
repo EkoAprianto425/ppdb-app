@@ -20,6 +20,12 @@ class SidigsService
 
     public static function postStudent(Registration $registration)
     {
+        // Guard: skip jika sudah pernah berhasil dikirim ke SIDIGS
+        if (SidigsRecord::where('registration_id', $registration->id)->where('status', 'success')->exists()) {
+            Log::info('SIDIGS: Skip, sudah berhasil dikirim sebelumnya', ['registration_id' => $registration->id]);
+            return true;
+        }
+
         $level = $registration->user->educationalLevel->parent_unit ?? '';
         $school = self::SCHOOL_MAP[strtoupper($level)] ?? null;
 
