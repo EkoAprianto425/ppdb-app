@@ -19,6 +19,11 @@
             <h3 class="text-sky-400 text-xs font-bold uppercase tracking-widest border-l-2 border-sky-500 pl-3">Registrasi Awal</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
+                    <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Nama Lengkap</label>
+                    <input type="text" name="full_name" value="{{ old('full_name', $registration->user->full_name) }}" required
+                           class="w-full themed-input rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
+                </div>
+                <div>
                     <label class="block text-xs font-medium themed-text-muted mb-2 uppercase tracking-wide">Asal Sekolah</label>
                     <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah', $registration->user->asal_sekolah) }}" required
                            class="w-full themed-input rounded-xl px-4 py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all">
