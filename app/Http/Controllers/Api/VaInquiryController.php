@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class VaInquiryController extends Controller
 {
@@ -23,11 +24,22 @@ class VaInquiryController extends Controller
      */
     public function inquiry(Request $request)
     {
+        Log::info('VA Inquiry: HIT', [
+            'ip'      => $request->ip(),
+            'method'  => $request->method(),
+            'payload' => $request->all(),
+        ]);
+
         $vaNumber = $request->input('va')
             ?? $request->input('va_number')
             ?? $request->input('virtualAccountNumber');
 
         if (empty($vaNumber)) {
+            Log::warning('VA Inquiry: Bad Request - VA number missing', [
+                'ip'      => $request->ip(),
+                'payload' => $request->all(),
+            ]);
+
             return response()->json([
                 'status' => false,
                 'responseCode' => '4002500',
@@ -51,6 +63,11 @@ class VaInquiryController extends Controller
             ->first();
 
         if (!$payment) {
+            Log::warning('VA Inquiry: Bill not found', [
+                'va_number' => $vaNumber,
+                'ip'        => request()->ip(),
+            ]);
+
             return response()->json([
                 'status' => false,
                 'responseCode' => '4042512',
@@ -64,6 +81,15 @@ class VaInquiryController extends Controller
         $namaSiswa = $user?->full_name
             ?: ($user?->name
                 ?: ($payment->registration?->nama_panggilan ?: 'N/A'));
+
+        Log::info('VA Inquiry: SUCCESS', [
+            'va_number'  => $vaNumber,
+            'nama_siswa' => $namaSiswa,
+            'fee_type'   => $payment->fee_type,
+            'amount'     => (float) $payment->amount,
+            'status'     => $payment->status,
+            'ip'         => request()->ip(),
+        ]);
 
         return response()->json([
             'status' => true,

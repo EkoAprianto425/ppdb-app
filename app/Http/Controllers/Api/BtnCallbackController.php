@@ -14,9 +14,14 @@ class BtnCallbackController extends Controller
     public function handle(Request $request)
     {
         $payload = $request->all();
-        Log::info('BTN VA Callback Received:', $payload);
+        Log::info('BTN VA Callback: HIT', [
+            'ip'      => $request->ip(),
+            'payload' => $payload,
+        ]);
 
         if (empty($payload)) {
+            Log::warning('BTN VA Callback: Empty payload', ['ip' => $request->ip()]);
+
             return response()->json([
                 'rsp' => '001',
                 'rspdesc' => 'Transaction Failed'
@@ -27,6 +32,8 @@ class BtnCallbackController extends Controller
         $ref = $payload['ref'] ?? null;
 
         if (!$vaNumber) {
+            Log::warning('BTN VA Callback: VA number missing', ['payload' => $payload, 'ip' => $request->ip()]);
+
             return response()->json([
                 'rsp' => '001',
                 'rspdesc' => 'VA Number Missing'
@@ -46,11 +53,19 @@ class BtnCallbackController extends Controller
                 ->exists();
 
             if ($alreadyPaid) {
+                Log::info('BTN VA Callback: Already paid', ['va_number' => $vaNumber, 'ref' => $ref]);
+
                 return response()->json([
                     'rsp' => '000',
                     'rspdesc' => 'Transaction Already Processed'
                 ]);
             }
+
+            Log::warning('BTN VA Callback: Payment record not found', [
+                'va_number' => $vaNumber,
+                'ref'       => $ref,
+                'ip'        => $request->ip(),
+            ]);
 
             return response()->json([
                 'rsp' => '001',
@@ -80,6 +95,14 @@ class BtnCallbackController extends Controller
             // Post to SIDIGS for payments other than Formulir
             \App\Services\SidigsService::postStudent($payment->registration);
         }
+
+        Log::info('BTN VA Callback: SUCCESS', [
+            'va_number'  => $vaNumber,
+            'ref'        => $ref,
+            'terbayar'   => $terbayar,
+            'fee_type'   => $payment->fee_type,
+            'payment_id' => $payment->id,
+        ]);
 
         return response()->json([
             'rsp' => '000',
