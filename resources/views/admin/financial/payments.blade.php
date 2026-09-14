@@ -127,7 +127,7 @@
                                     {{ $m['label'] }}
                                 </span>
                                 @if($payment->va_number)
-                                    <span class="text-[9px] font-mono text-white/40 tracking-wider">{{ $payment->va_number }}</span>
+                                    <span class="text-[10px] font-bold themed-text">{{ $payment->va_number }}</span>
                                 @endif
                             </div>
                         </td>
