@@ -326,7 +326,7 @@
                 provinsiSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
                 data.forEach(item => {
                     const selected = item === oldProvinsi ? 'selected' : '';
-                    provinsiSelect.innerHTML += `<option value="${item}" ${selected} class="text-slate-900">${item}</option>`;
+                    provinsiSelect.innerHTML += `<option value="${item.kode_prop}" ${selected} class="text-slate-900">${item.propinsi}</option>`;
                 });
                 
                 if (oldProvinsi) {
@@ -351,7 +351,7 @@
                         data.forEach(item => {
                             // Cek jika sedang load awal dan ada nilai old
                             const selected = (isFirstLoadProvinsi && item === oldKabupaten && val === oldProvinsi) ? 'selected' : '';
-                            kabupatenSelect.innerHTML += `<option value="${item}" ${selected} class="text-slate-900">${item}</option>`;
+                            kabupatenSelect.innerHTML += `<option value="${item.kode_kab_kota}" ${selected} class="text-slate-900">${item.kabupaten_kota}</option>`;
                         });
                         kabupatenSelect.disabled = false;
                         
@@ -379,7 +379,7 @@
                         kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
                         data.forEach(item => {
                             const selected = (isFirstLoadKabupaten && item === oldKecamatan && val === oldKabupaten) ? 'selected' : '';
-                            kecamatanSelect.innerHTML += `<option value="${item}" ${selected} class="text-slate-900">${item}</option>`;
+                            kecamatanSelect.innerHTML += `<option value="${item.kode_kec}" ${selected} class="text-slate-900">${item.kecamatan}</option>`;
                         });
                         kecamatanSelect.disabled = false;
                         isFirstLoadKabupaten = false;
