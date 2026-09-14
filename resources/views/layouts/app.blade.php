@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ \App\Models\Setting::get('meta_description', 'PPDB Online - Pendaftaran Peserta Didik Baru') }}">
     <title>@yield('title', \App\Models\Setting::get('app_name', 'PPDB Online')) - {{ \App\Models\Setting::get('app_name', 'PPDB Online') }}</title>
+    @if(\App\Models\Setting::get('app_logo'))
+    <link rel="icon" type="image/png" href="{{ Storage::url(\App\Models\Setting::get('app_logo')) }}">
+    @else
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    @endif
 
     <!-- jQuery + DataTables -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
