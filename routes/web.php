@@ -95,6 +95,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/students/user/{user}', [\App\Http\Controllers\Admin\StudentManagementController::class, 'showByUser'])->name('students.show-by-user');
             Route::post('/students/user/{user}/reset-password', [\App\Http\Controllers\Admin\StudentManagementController::class, 'resetPasswordByUser'])->name('students.reset-password-by-user');
             Route::post('/students/{registration}/status', [\App\Http\Controllers\Admin\StudentManagementController::class, 'updateStatus'])->name('students.update-status');
+            Route::delete('/students/user/{user}', [\App\Http\Controllers\Admin\StudentManagementController::class, 'destroy'])->name('students.destroy');
             
             Route::get('/graduation', [\App\Http\Controllers\Admin\StudentManagementController::class, 'graduationIndex'])->name('graduation.index');
             

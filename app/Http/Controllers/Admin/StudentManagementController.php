@@ -398,4 +398,19 @@ class StudentManagementController extends Controller
             }
         }
     }
+
+    public function destroy(User $user)
+    {
+        // Hanya super admin yang boleh hapus siswa
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus data siswa.');
+        }
+
+        $name = $user->full_name ?? $user->name;
+        $user->delete(); // cascade ke registration via FK on delete cascade
+
+        return redirect()->route('admin.students.index')
+            ->with('status', "Data siswa \"{$name}\" berhasil dihapus.");
+    }
 }
+

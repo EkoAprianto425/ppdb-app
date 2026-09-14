@@ -135,6 +135,15 @@
                                 </svg>
                             </a>
                             @endif
+                            @if(auth()->user()->isSuperAdmin())
+                            <button type="button"
+                                onclick="confirmDelete('{{ $student->id }}', '{{ addslashes($student->full_name ?? $student->name) }}')"
+                                class="p-2 rounded-lg btn-action-delete" title="Hapus Siswa">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                            @endif
                         </div>
                     </td>
                 </tr>
@@ -143,4 +152,60 @@
         </table>
     </div>
 </div>
+
+{{-- Modal Konfirmasi Hapus --}}
+@if(auth()->user()->isSuperAdmin())
+<div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="card-glass rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold themed-text">Hapus Data Siswa</h3>
+                <p class="text-xs themed-text-muted">Tindakan ini tidak dapat dibatalkan</p>
+            </div>
+        </div>
+        <p class="text-sm themed-text mb-6">
+            Anda yakin ingin menghapus data siswa <span id="delete-student-name" class="font-bold text-red-400"></span>?
+            Seluruh data termasuk biodata, registrasi, dan riwayat pembayaran akan dihapus permanen.
+        </p>
+        <form id="delete-form" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="flex gap-3 justify-end">
+                <button type="button" onclick="closeDeleteModal()"
+                    class="px-6 py-2.5 btn-soft-secondary rounded-xl text-xs font-bold uppercase tracking-widest">
+                    Batal
+                </button>
+                <button type="submit"
+                    class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-lg shadow-red-500/20">
+                    Ya, Hapus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function confirmDelete(userId, studentName) {
+    document.getElementById('delete-student-name').textContent = studentName;
+    document.getElementById('delete-form').action = '/admin/students/user/' + userId;
+    const modal = document.getElementById('delete-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeDeleteModal() {
+    const modal = document.getElementById('delete-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+document.getElementById('delete-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+</script>
+@endif
 @endsection
+
