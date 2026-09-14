@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Registration;
+use App\Models\Sekolah;
 use Illuminate\Http\Request;
 
 class StudentManagementController extends Controller
@@ -185,7 +186,18 @@ class StudentManagementController extends Controller
     public function show(Registration $registration)
     {
         $this->authorizeAccess($registration);
-        return view('admin.students.show', compact('registration'));
+
+        $namaProvinsi  = $registration->provinsi
+            ? Sekolah::where('kode_prop', $registration->provinsi)->value('propinsi')
+            : null;
+        $namaKabupaten = $registration->kabupaten
+            ? Sekolah::where('kode_kab_kota', $registration->kabupaten)->value('kabupaten_kota')
+            : null;
+        $namaKecamatan = $registration->kecamatan
+            ? Sekolah::where('kode_kec', $registration->kecamatan)->value('kecamatan')
+            : null;
+
+        return view('admin.students.show', compact('registration', 'namaProvinsi', 'namaKabupaten', 'namaKecamatan'));
     }
 
     public function edit(Registration $registration)
