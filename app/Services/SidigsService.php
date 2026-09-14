@@ -91,9 +91,13 @@ class SidigsService
             $isSuccess = $responseCode === '000200';
 
             SidigsRecord::create([
-                'registration_id' => $registration->id,
-                'status' => $isSuccess ? 'success' : 'failed',
+                'registration_id'  => $registration->id,
+                'status'           => $isSuccess ? 'success' : 'failed',
                 'response_payload' => $responseData ?? ['body' => $response->body()],
+                'student_username' => $responseData['data']['student_account']['username'] ?? null,
+                'student_password' => $responseData['data']['student_account']['password'] ?? null,
+                'wali_username'    => $responseData['data']['wali_account']['username'] ?? null,
+                'wali_password'    => $responseData['data']['wali_account']['password'] ?? null,
             ]);
 
             if ($isSuccess) {
