@@ -367,7 +367,13 @@ class PaymentController extends Controller
     private function doCreateVaBca($registration, $fee)
     {
         $kodeInstansi  = '15822';                                            // 5 digit
-        $kodeAplikasi  = '024';                                              // 3 digit
+        $parentUnit    = $registration->user->educationalLevel?->parent_unit ?? '';
+        $kodeAplikasi  = match ($parentUnit) {
+            'SMP'   => '224',
+            'SMA'   => '524',
+            'SMK'   => '824',
+            default => '024',
+        };                                                                   // 3 digit
         $tahun         = date('y');                                          // 2 digit
         $bulan         = date('m');                                          // 2 digit
         $tanggal       = date('d');                                          // 2 digit
