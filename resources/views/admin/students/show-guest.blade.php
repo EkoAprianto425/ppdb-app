@@ -83,6 +83,7 @@
 
         {{-- Aksi --}}
         <div class="space-y-3">
+            <a href="{{ route('admin.students.edit-guest', $user) }}" class="w-full py-3 rounded-xl bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all text-xs font-bold uppercase tracking-widest block text-center">Edit Data</a>
             <button x-data @click="$dispatch('open-modal', 'modal-reset-password')" class="w-full py-3 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all text-xs font-bold uppercase tracking-widest block text-center">Reset Password</button>
         </div>
     </div>

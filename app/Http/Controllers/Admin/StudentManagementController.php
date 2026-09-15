@@ -399,6 +399,34 @@ class StudentManagementController extends Controller
         }
     }
 
+    public function editGuest(User $user)
+    {
+        $this->authorizeUserAccess($user);
+        if ($user->registration) {
+            return redirect()->route('admin.students.edit', $user->registration);
+        }
+        return view('admin.students.edit-guest', compact('user'));
+    }
+
+    public function updateGuest(Request $request, User $user)
+    {
+        $this->authorizeUserAccess($user);
+
+        $validated = $request->validate([
+            'full_name'                 => 'required|string|max:255',
+            'asal_sekolah'              => 'required|string|max:255',
+            'whatsapp_number'           => 'required|string|max:20',
+            'alasan_memilih'            => 'required|string',
+            'sumber_informasi'          => 'required|string|max:255',
+            'sumber_informasi_tambahan' => 'nullable|string|max:255',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('admin.students.show-by-user', $user)
+            ->with('status', 'Data siswa berhasil diperbarui.');
+    }
+
     public function destroy(User $user)
     {
         // Hanya super admin yang boleh hapus siswa
