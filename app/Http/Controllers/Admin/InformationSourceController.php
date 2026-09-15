@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\InformationSource;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class InformationSourceController extends Controller
@@ -25,6 +26,7 @@ class InformationSourceController extends Controller
             'is_active' => true,
             'requires_manual_input' => $request->has('requires_manual_input'),
         ]);
+        AppCache::forgetInformationSources();
 
         return redirect()->back()->with('success', 'Sumber informasi berhasil ditambahkan.');
     }
@@ -40,6 +42,7 @@ class InformationSourceController extends Controller
             'is_active' => $request->has('is_active'),
             'requires_manual_input' => $request->has('requires_manual_input'),
         ]);
+        AppCache::forgetInformationSources();
 
         return redirect()->back()->with('success', 'Sumber informasi berhasil diperbarui.');
     }
@@ -49,6 +52,7 @@ class InformationSourceController extends Controller
         // Check if source is used in any user record to prevent accidental deletion if needed
         // For now, simple delete
         $information_source->delete();
+        AppCache::forgetInformationSources();
 
         return redirect()->back()->with('success', 'Sumber informasi berhasil dihapus.');
     }

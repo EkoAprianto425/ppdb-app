@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -19,8 +20,8 @@ class DashboardController extends Controller
         }
 
         $students = $query->latest()->get();
-        $fees = \App\Models\AdministrativeFee::all()->groupBy('educational_level_id');
-        $levels = \App\Models\EducationalLevel::all();
+        $fees   = AppCache::administrativeFeesGrouped();
+        $levels = AppCache::educationalLevels();
 
         $globalTamu = 0;
         $globalFormulir = 0;
@@ -63,7 +64,7 @@ class DashboardController extends Controller
         }
 
         // 4. Wave Stats (Detailed)
-        $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
+        $activeYear = AppCache::activeAcademicYear();
         $waves = \App\Models\RegistrationWave::where('academic_year_id', $activeYear?->id)->get();
         $detailedWaveStats = [
             'tamu' => [],

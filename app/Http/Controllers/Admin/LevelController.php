@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EducationalLevel;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class LevelController extends Controller
@@ -28,6 +29,7 @@ class LevelController extends Controller
         }
 
         EducationalLevel::create($validated);
+        AppCache::forgetEducationalLevels();
 
         return back()->with('status', 'Jenjang berhasil ditambahkan.');
     }
@@ -46,6 +48,7 @@ class LevelController extends Controller
         }
 
         $level->update($validated);
+        AppCache::forgetEducationalLevels();
 
         return back()->with('status', 'Jenjang berhasil diperbarui.');
     }
@@ -57,12 +60,14 @@ class LevelController extends Controller
         }
         
         $level->delete();
+        AppCache::forgetEducationalLevels();
         return back()->with('status', 'Jenjang berhasil dihapus.');
     }
 
     public function toggleActive(EducationalLevel $level)
     {
         $level->update(['is_active' => !$level->is_active]);
+        AppCache::forgetEducationalLevels();
 
         $status = $level->is_active ? 'dibuka' : 'ditutup';
         return back()->with('status', "Pendaftaran jenjang {$level->name} berhasil {$status}.");

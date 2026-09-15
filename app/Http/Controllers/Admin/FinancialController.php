@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AdministrativeFee;
 use App\Models\EducationalLevel;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class FinancialController extends Controller
 {
     public function index()
     {
-        $levels = EducationalLevel::orderBy('sort_order')->get();
-        $fees = AdministrativeFee::with('level')->orderBy('educational_level_id')->orderBy('sort_order')->get();
+        $levels = AppCache::educationalLevels();
+        $fees   = AppCache::administrativeFees();
 
         return view('admin.financial.fees', compact('fees', 'levels'));
     }
@@ -27,6 +28,7 @@ class FinancialController extends Controller
         ]);
 
         AdministrativeFee::create($validated);
+        AppCache::forgetAdministrativeFees();
 
         return back()->with('status', 'Biaya administrasi berhasil ditambahkan.');
     }
@@ -41,6 +43,7 @@ class FinancialController extends Controller
         ]);
 
         $fee->update($validated);
+        AppCache::forgetAdministrativeFees();
 
         return back()->with('status', "Biaya {$fee->name} berhasil diperbarui.");
     }
@@ -48,6 +51,7 @@ class FinancialController extends Controller
     public function destroy(AdministrativeFee $fee)
     {
         $fee->delete();
+        AppCache::forgetAdministrativeFees();
         return back()->with('status', 'Biaya administrasi berhasil dihapus.');
     }
 
@@ -90,7 +94,7 @@ class FinancialController extends Controller
         }
 
         $payments = $query->latest()->get();
-        $levels = EducationalLevel::all();
+        $levels   = AppCache::educationalLevels();
 
         return view('admin.financial.payments', compact('payments', 'status', 'levels'));
     }

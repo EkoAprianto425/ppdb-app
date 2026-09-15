@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Registration;
 use App\Models\Sekolah;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class StudentManagementController extends Controller
@@ -32,8 +33,8 @@ class StudentManagementController extends Controller
         $students = $query->latest()->get();
         
         // Ambil data fees untuk menentukan status
-        $fees = \App\Models\AdministrativeFee::all()->groupBy('educational_level_id');
-        $levels = \App\Models\EducationalLevel::all();
+        $fees   = AppCache::administrativeFeesGrouped();
+        $levels = AppCache::educationalLevels();
 
         $students->each(function($student) use ($fees) {
             $student->ppdb_status = $this->calculateStatus($student, $fees);
@@ -65,7 +66,7 @@ class StudentManagementController extends Controller
         }
 
         $students = $query->latest()->get();
-        $fees = \App\Models\AdministrativeFee::all()->groupBy('educational_level_id');
+        $fees = AppCache::administrativeFeesGrouped();
 
         $students->each(function($student) use ($fees) {
             $student->ppdb_status = $this->calculateStatus($student, $fees);
@@ -188,13 +189,13 @@ class StudentManagementController extends Controller
         $this->authorizeAccess($registration);
 
         $namaProvinsi  = $registration->provinsi
-            ? Sekolah::where('kode_prop', $registration->provinsi)->value('propinsi')
+            ? AppCache::regionLookup('propinsi', 'kode_prop', $registration->provinsi)
             : null;
         $namaKabupaten = $registration->kabupaten
-            ? Sekolah::where('kode_kab_kota', $registration->kabupaten)->value('kabupaten_kota')
+            ? AppCache::regionLookup('kabupaten_kota', 'kode_kab_kota', $registration->kabupaten)
             : null;
         $namaKecamatan = $registration->kecamatan
-            ? Sekolah::where('kode_kec', $registration->kecamatan)->value('kecamatan')
+            ? AppCache::regionLookup('kecamatan', 'kode_kec', $registration->kecamatan)
             : null;
 
         return view('admin.students.show', compact('registration', 'namaProvinsi', 'namaKabupaten', 'namaKecamatan'));
@@ -325,7 +326,7 @@ class StudentManagementController extends Controller
         }
 
         $registrations = $query->latest()->get();
-        $levels = \App\Models\EducationalLevel::orderBy('sort_order')->get();
+        $levels = AppCache::educationalLevels();
 
         return view('admin.students.graduation', compact('registrations', 'levels'));
     }

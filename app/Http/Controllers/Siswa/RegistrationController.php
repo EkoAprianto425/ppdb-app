@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Siswa;
 use App\Http\Controllers\Controller;
 use App\Models\Registration;
 use App\Models\RegistrationWave;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -61,7 +62,7 @@ class RegistrationController extends Controller
         
         $validated['user_id'] = Auth::id();
         
-        $activeWave = RegistrationWave::where('is_active', true)->first();
+        $activeWave = AppCache::activeRegistrationWave();
         if ($activeWave) {
             $validated['registration_wave_id'] = $activeWave->id;
         }

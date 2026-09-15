@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolReason;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class SchoolReasonController extends Controller
@@ -24,6 +25,7 @@ class SchoolReasonController extends Controller
             'name' => $request->name,
             'is_active' => true,
         ]);
+        AppCache::forgetSchoolReasons();
 
         return redirect()->back()->with('success', 'Alasan memilih sekolah berhasil ditambahkan.');
     }
@@ -38,6 +40,7 @@ class SchoolReasonController extends Controller
             'name' => $request->name,
             'is_active' => $request->has('is_active'),
         ]);
+        AppCache::forgetSchoolReasons();
 
         return redirect()->back()->with('success', 'Alasan memilih sekolah berhasil diperbarui.');
     }
@@ -45,6 +48,7 @@ class SchoolReasonController extends Controller
     public function destroy(SchoolReason $school_reason)
     {
         $school_reason->delete();
+        AppCache::forgetSchoolReasons();
         return redirect()->back()->with('success', 'Alasan memilih sekolah berhasil dihapus.');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class AcademicYearController extends Controller
@@ -36,6 +37,7 @@ class AcademicYearController extends Controller
                 $year->update(['is_active' => false]);
                 $msg = 'Tahun ajaran berhasil dinonaktifkan.';
             }
+            AppCache::forgetAcademicYear();
             return back()->with('status', $msg);
         }
         

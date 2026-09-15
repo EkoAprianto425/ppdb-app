@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterStudentRequest;
 use App\Models\User;
+use App\Support\AppCache;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +16,9 @@ class RegisteredUserController extends Controller
 {
     public function create(): View
     {
-        $levels = \App\Models\EducationalLevel::where('is_active', true)->orderBy('sort_order')->get();
-        $sources = \App\Models\InformationSource::where('is_active', true)->orderBy('name')->get();
-        $reasons = \App\Models\SchoolReason::where('is_active', true)->orderBy('name')->get();
+        $levels  = AppCache::educationalLevelsActive();
+        $sources = AppCache::informationSourcesActive();
+        $reasons = AppCache::schoolReasonsActive();
         return view('auth.register', compact('levels', 'sources', 'reasons'));
     }
 

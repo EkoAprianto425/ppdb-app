@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AppCache;
 use Illuminate\Http\Request;
 
 class RegistrationWaveController extends Controller
@@ -45,6 +46,7 @@ class RegistrationWaveController extends Controller
                 ->where('id', '!=', $wave->id)
                 ->update(['is_active' => false]);
             $wave->update(['is_active' => true]);
+            AppCache::forgetRegistrationWave();
         }
         
         return back()->with('status', 'Gelombang pendaftaran berhasil diaktifkan.');
@@ -56,6 +58,7 @@ class RegistrationWaveController extends Controller
             return back()->with('error', 'Tidak dapat menghapus gelombang yang sedang aktif.');
         }
         $wave->delete();
+        AppCache::forgetRegistrationWave();
         return back()->with('status', 'Gelombang pendaftaran berhasil dihapus.');
     }
 }
