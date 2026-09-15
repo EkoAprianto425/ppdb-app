@@ -233,7 +233,7 @@
             <div>
                 <label class="block text-xs font-bold themed-text-muted uppercase tracking-widest mb-2">Pilih Jenjang Tujuan</label>
                 <select name="unit" required class="w-full themed-input rounded-xl px-4 py-3 text-sm transition-all appearance-none">
-                    @foreach(\App\Models\EducationalLevel::where('name', '!=', 'SMP')->get() as $level)
+                    @foreach(\App\Models\EducationalLevel::where('name', '!=', Auth::user()->educational_level->name)->get() as $level)
                         <option value="{{ $level->id }}" {{ $registration->user->educational_level_id === $level->id ? 'selected' : '' }}>Unit {{ $level->name }}</option>
                     @endforeach
                 </select>
