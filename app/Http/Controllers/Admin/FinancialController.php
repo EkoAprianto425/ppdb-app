@@ -281,8 +281,9 @@ class FinancialController extends Controller
 
         $payments = $query->latest()->get();
 
-        $labelStatus = $status === 'belum_lunas' ? 'Belum Lunas' : 'Berhasil';
-        $filename    = 'pembayaran_' . $status . '_' . now()->format('Ymd_His') . '.csv';
+        $labelStatus  = $status === 'belum_lunas' ? 'Belum Lunas' : 'Berhasil';
+        $isBelumLunas = $status === 'belum_lunas';
+        $filename     = 'pembayaran_' . $status . '_' . now()->format('Ymd_His') . '.xlsx';
 
         $methodLabels = [
             'va'     => 'VA BTN',
@@ -291,48 +292,179 @@ class FinancialController extends Controller
             'manual' => 'Manual',
         ];
 
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+        // ── Build spreadsheet ──────────────────────────────────────────────────
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet       = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Verifikasi Pembayaran');
+
+        $headerStyle = [
+            'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '1E3A5F']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                            'wrapText'   => true],
+            'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                             'color' => ['rgb' => 'FFFFFF']]],
         ];
 
-        $callback = function () use ($payments, $status, $methodLabels) {
-            $out = fopen('php://output', 'w');
-            // BOM for Excel UTF-8
-            fwrite($out, "\xEF\xBB\xBF");
+        $subHeaderStyle = [
+            'font'      => ['bold' => true, 'color' => ['rgb' => '1E3A5F'], 'size' => 10],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'E8F0FE']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                            'wrapText'   => true],
+            'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                             'color' => ['rgb' => 'B0C4DE']]],
+        ];
 
-            $header = ['No', 'Nama Siswa', 'Email', 'Unit/Jenjang', 'Tipe Biaya', 'Tagihan', 'Dibayarkan', 'Metode', 'Nomor VA', 'Tanggal Pembayaran', 'Status'];
-            if ($status === 'belum_lunas') {
-                array_splice($header, 7, 0, ['Sisa Tagihan']);
+        // ── Row 1: Judul laporan ───────────────────────────────────────────────
+        $lastCol = $isBelumLunas ? 'L' : 'K';
+        $sheet->mergeCells("A1:{$lastCol}1");
+        $sheet->setCellValue('A1', 'LAPORAN VERIFIKASI PEMBAYARAN - ' . strtoupper($labelStatus));
+        $sheet->getStyle('A1')->applyFromArray([
+            'font'      => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '0D2137']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // ── Row 2: Tanggal cetak ───────────────────────────────────────────────
+        $sheet->mergeCells("A2:{$lastCol}2");
+        $sheet->setCellValue('A2', 'Dicetak: ' . now()->format('d F Y, H:i') . ' WIB');
+        $sheet->getStyle('A2')->applyFromArray([
+            'font'      => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '555555']],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'F5F5F5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        // ── Row 3: blank spacer ────────────────────────────────────────────────
+        $sheet->getRowDimension(3)->setRowHeight(6);
+
+        // ── Row 4: kolom header ────────────────────────────────────────────────
+        $columns = ['No', 'Nama Siswa', 'Email', 'Unit/Jenjang', 'Tipe Biaya',
+                    'Tagihan (Rp)', 'Dibayarkan (Rp)', 'Metode', 'Nomor VA',
+                    'Tanggal Pembayaran', 'Status'];
+        if ($isBelumLunas) {
+            array_splice($columns, 7, 0, ['Sisa Tagihan (Rp)']);
+        }
+
+        foreach ($columns as $ci => $col) {
+            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($ci + 1) . '4';
+            $sheet->setCellValue($cell, $col);
+        }
+        $sheet->getStyle("A4:{$lastCol}4")->applyFromArray($headerStyle);
+        $sheet->getRowDimension(4)->setRowHeight(22);
+
+        // ── Data rows ──────────────────────────────────────────────────────────
+        $rowNum     = 5;
+        $totalTagihan    = 0;
+        $totalDibayar    = 0;
+        $totalSisa       = 0;
+
+        $zebraEven = ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                 'startColor' => ['rgb' => 'F0F4FB']]];
+        $borderData = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                                       'color' => ['rgb' => 'D0D8E8']]]];
+
+        foreach ($payments as $i => $p) {
+            $tagihan   = (int) $p->amount;
+            $dibayar   = (int) ($p->paid_amount ?? 0);
+            $sisa      = $tagihan - $dibayar;
+            $totalTagihan += $tagihan;
+            $totalDibayar += $dibayar;
+            $totalSisa    += $sisa;
+
+            $rowData = [
+                $i + 1,
+                $p->registration->user->full_name ?? $p->registration->user->name ?? '-',
+                $p->registration->user->email ?? '-',
+                $p->registration->user->educationalLevel->name ?? '-',
+                $p->fee_type,
+                $tagihan,
+                $dibayar,
+                $methodLabels[$p->payment_method] ?? ($p->payment_method ?? '-'),
+                $p->va_number ?? '-',
+                $p->verified_at ? $p->verified_at->format('d/m/Y H:i') : '-',
+                $labelStatus,
+            ];
+            if ($isBelumLunas) {
+                array_splice($rowData, 7, 0, [$sisa]);
             }
-            fputcsv($out, $header);
 
-            foreach ($payments as $i => $p) {
-                $row = [
-                    $i + 1,
-                    $p->registration->user->full_name ?? $p->registration->user->name ?? '-',
-                    $p->registration->user->email ?? '-',
-                    $p->registration->user->educationalLevel->name ?? '-',
-                    $p->fee_type,
-                    (int) $p->amount,
-                    (int) ($p->paid_amount ?? 0),
-                    $methodLabels[$p->payment_method] ?? ($p->payment_method ?? '-'),
-                    $p->va_number ?? '-',
-                    $p->verified_at ? $p->verified_at->format('d/m/Y H:i') : '-',
-                    $status === 'belum_lunas' ? 'Belum Lunas' : 'Berhasil',
-                ];
-                if ($status === 'belum_lunas') {
-                    $sisa = (int)$p->amount - (int)($p->paid_amount ?? 0);
-                    array_splice($row, 7, 0, [$sisa]);
-                }
-                fputcsv($out, $row);
+            foreach ($rowData as $ci => $val) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($ci + 1);
+                $sheet->setCellValue("{$colLetter}{$rowNum}", $val);
             }
 
-            fclose($out);
-        };
+            // Format angka sebagai number (bukan text)
+            $sheet->getStyle("F{$rowNum}")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle("G{$rowNum}")->getNumberFormat()->setFormatCode('#,##0');
+            if ($isBelumLunas) {
+                $sheet->getStyle("H{$rowNum}")->getNumberFormat()->setFormatCode('#,##0');
+            }
 
-        return response()->stream($callback, 200, $headers);
+            // Alignment
+            $sheet->getStyle("A{$rowNum}")->getAlignment()->setHorizontal('center');
+            $sheet->getStyle("{$lastCol}{$rowNum}")->getAlignment()->setHorizontal('center');
+
+            // Zebra stripe
+            if ($i % 2 === 1) {
+                $sheet->getStyle("A{$rowNum}:{$lastCol}{$rowNum}")->applyFromArray($zebraEven);
+            }
+            $sheet->getStyle("A{$rowNum}:{$lastCol}{$rowNum}")->applyFromArray($borderData);
+            $rowNum++;
+        }
+
+        // ── Summary row ────────────────────────────────────────────────────────
+        $sumRow = $rowNum + 1;
+        $sheet->mergeCells("A{$sumRow}:E{$sumRow}");
+        $sheet->setCellValue("A{$sumRow}", 'TOTAL');
+        $sheet->setCellValue("F{$sumRow}", $totalTagihan);
+        $sheet->setCellValue("G{$sumRow}", $totalDibayar);
+        if ($isBelumLunas) {
+            $sheet->setCellValue("H{$sumRow}", $totalSisa);
+        }
+        $sheet->getStyle("A{$sumRow}:{$lastCol}{$sumRow}")->applyFromArray([
+            'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '1E3A5F']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                             'color' => ['rgb' => '0D2137']]],
+        ]);
+        $sheet->getStyle("F{$sumRow}")->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle("G{$sumRow}")->getNumberFormat()->setFormatCode('#,##0');
+        if ($isBelumLunas) {
+            $sheet->getStyle("H{$sumRow}")->getNumberFormat()->setFormatCode('#,##0');
+        }
+
+        // ── Auto width kolom ───────────────────────────────────────────────────
+        $colWidths = [5, 30, 28, 18, 20, 16, 16, 12, 20, 20, 12];
+        if ($isBelumLunas) {
+            array_splice($colWidths, 7, 0, [16]);
+        }
+        foreach ($colWidths as $ci => $width) {
+            $sheet->getColumnDimensionByColumn($ci + 1)->setWidth($width);
+        }
+
+        // Freeze pane: beku baris header
+        $sheet->freezePane('A5');
+
+        // ── Output ────────────────────────────────────────────────────────────
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 }
 
