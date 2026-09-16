@@ -191,20 +191,27 @@ class FinancialController extends Controller
             // dd($result);
             if ($result['status']) {
                 $rspData = $result['data'];
-                if (isset($rspData['terbayar']) && $rspData['terbayar'] > 0) {
+                $terbayar = $rspData['terbayar'] ?? null;
+
+                // Fallback: jika terbayar null/0 tapi payment sudah ada amount, pakai amount tagihan
+                if (empty($terbayar) && !empty($payment->amount)) {
+                    $terbayar = $payment->amount;
+                }
+
+                if ($terbayar > 0) {
                     $payment->update([
-                        'status' => \App\Models\Payment::STATUS_SUCCESS,
-                        'amount' => $rspData['terbayar'],
+                        'status'      => \App\Models\Payment::STATUS_SUCCESS,
+                        'paid_amount' => $terbayar,
                         'verified_by' => auth()->id(),
                         'verified_at' => now(),
-                        'admin_note' => 'Auto-verified by BTN VA Inquiry'
+                        'admin_note'  => 'Auto-verified by BTN VA Inquiry'
                     ]);
                     if ($fee && $fee->sort_order == 1) {
                          $payment->registration->update(['payment_status' => 'success']);
                     }
-                    return back()->with('status', 'Status VA: Sudah Dibayar (Rp ' . number_format($rspData['terbayar'], 0, ',', '.') . '). Sistem telah mengupdate status otomatis.');
+                    return back()->with('status', 'Status VA: Sudah Dibayar (Rp ' . number_format($terbayar, 0, ',', '.') . '). Sistem telah mengupdate status otomatis.');
                 }
-                
+
                 return back()->with('status', 'Inquiry VA berhasil. Status: Belum Dibayar. (Respon API: ' . json_encode($rspData) . ')');
             } else {
                 return back()->with('error', 'Inquiry gagal: ' . ($result['messages'] ?? 'Unknown Error'));

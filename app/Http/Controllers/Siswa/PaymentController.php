@@ -136,18 +136,25 @@ class PaymentController extends Controller
             // dd($result);
             if ($result['status']) {
                 $rspData = $result['data'];
-                if (isset($rspData['terbayar']) && $rspData['terbayar'] > 0) {
+                $terbayar = $rspData['terbayar'] ?? null;
+
+                // Fallback: jika terbayar null/0 tapi payment sudah ada amount, pakai amount tagihan
+                if (empty($terbayar) && !empty($payment->amount)) {
+                    $terbayar = $payment->amount;
+                }
+
+                if ($terbayar > 0) {
                     $payment->update([
-                        'status' => Payment::STATUS_SUCCESS,
-                        'amount' => $rspData['terbayar'],
+                        'status'      => Payment::STATUS_SUCCESS,
+                        'paid_amount' => $terbayar,
                         'verified_at' => now()
                     ]);
                     if ($fee && $fee->sort_order == 1) {
-                         $payment->registration->update(['payment_status' => 'success']);
+                        $payment->registration->update(['payment_status' => 'success']);
                     }
-                    return back()->with('status', 'Pembayaran VA sebesar Rp ' . number_format($rspData['terbayar'], 0, ',', '.') . ' telah berhasil dilunasi!');
+                    return back()->with('status', 'Pembayaran VA sebesar Rp ' . number_format($terbayar, 0, ',', '.') . ' telah berhasil dilunasi!');
                 }
-                
+
                 return back()->with('status', 'Status VA masih belum dibayar.');
             } else {
                 return back()->with('error', 'Inquiry gagal: ' . ($result['messages'] ?? 'Unknown Error'));
