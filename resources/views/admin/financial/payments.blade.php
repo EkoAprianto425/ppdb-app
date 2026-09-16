@@ -65,6 +65,9 @@
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Sisa</th>
                         @endif
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Metode</th>
+                        @if(in_array($status, ['success', 'belum_lunas']))
+                        <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tanggal Pembayaran</th>
+                        @endif
                         <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-right" data-dt-order="disable">Aksi</th>
                     </tr>
                 </thead>
@@ -131,6 +134,19 @@
                                 @endif
                             </div>
                         </td>
+                        {{-- Tanggal Pembayaran --}}
+                        @if(in_array($status, ['success', 'belum_lunas']))
+                        <td class="px-8 py-5 text-center" data-order="{{ $payment->verified_at ? $payment->verified_at->timestamp : 0 }}">
+                            @if($payment->verified_at)
+                                <div class="flex flex-col items-center gap-0.5">
+                                    <span class="text-xs font-bold themed-text">{{ $payment->verified_at->format('d M Y') }}</span>
+                                    <span class="text-[10px] themed-text-muted">{{ $payment->verified_at->format('H:i') }} WIB</span>
+                                </div>
+                            @else
+                                <span class="text-[10px] themed-text-muted italic">-</span>
+                            @endif
+                        </td>
+                        @endif
                         {{-- Aksi --}}
                         <td class="px-8 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
