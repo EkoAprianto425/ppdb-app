@@ -76,83 +76,146 @@ class StudentManagementController extends Controller
             $students = $students->filter(fn($s) => $s->ppdb_status == $request->status);
         }
 
-        $fileName = 'Data_Pendaftar_PPDB_' . date('Y-m-d_H-i') . '.xls';
-
-        $headers = [
-            "Content-Type"        => "application/vnd.ms-excel",
-            "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
+        $fileName = 'Data_Pendaftar_PPDB_' . date('Y-m-d_H-i') . '.xlsx';
 
         $columns = [
-            'No', 'Tgl Daftar Akun', 'Nama Pembuat Akun', 'Nama Lengkap', 'Nama Panggilan', 'Email', 'No. WhatsApp', 
-            'Asal Sekolah', 'Alasan Memilih', 'Sumber Informasi', 'Jenjang Tujuan', 'Tahun Ajaran', 'Gelombang', 
-            'Status PPDB', 'Status Kelulusan', 'Deadline Daftar Ulang', 'Tempat Lahir', 'Tanggal Lahir', 
+            'No', 'Tgl Daftar Akun', 'Nama Pembuat Akun', 'Nama Lengkap', 'Nama Panggilan', 'Email', 'No. WhatsApp',
+            'Asal Sekolah', 'Alasan Memilih', 'Sumber Informasi', 'Jenjang Tujuan', 'Tahun Ajaran', 'Gelombang',
+            'Status PPDB', 'Status Kelulusan', 'Deadline Daftar Ulang', 'Tempat Lahir', 'Tanggal Lahir',
             'Jenis Kelamin', 'Agama', 'Alamat', 'Provinsi', 'Kabupaten', 'Kecamatan', 'Kebutuhan Khusus',
-            'Anak Ke', 'Dari Saudara', 'Nama Ayah', 'Pendidikan Ayah', 'Pekerjaan Ayah', 'Penghasilan Ayah', 
+            'Anak Ke', 'Dari Saudara', 'Nama Ayah', 'Pendidikan Ayah', 'Pekerjaan Ayah', 'Penghasilan Ayah',
             'Nama Ibu', 'Pendidikan Ibu', 'Pekerjaan Ibu', 'Penghasilan Ibu', 'Jadwal Ujian'
         ];
+        $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($columns));
 
-        $callback = function() use($students, $columns) {
-            echo "<html><head><meta charset='UTF-8'></head><body>";
-            echo "<table border='1'>";
-            
-            // Header
-            echo "<tr>";
-            foreach ($columns as $column) {
-                echo "<th style='background-color: #f2f2f2; font-weight: bold;'>$column</th>";
+        // ── Build spreadsheet ─────────────────────────────────────────────────
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet       = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Pendaftar');
+
+        // Row 1: Judul
+        $sheet->mergeCells("A1:{$lastCol}1");
+        $sheet->setCellValue('A1', 'LAPORAN DATA PENDAFTAR PPDB');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font'      => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '0D2137']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // Row 2: Tanggal cetak
+        $sheet->mergeCells("A2:{$lastCol}2");
+        $sheet->setCellValue('A2', 'Dicetak: ' . now()->format('d F Y, H:i') . ' WIB');
+        $sheet->getStyle('A2')->applyFromArray([
+            'font'      => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '555555']],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => 'F5F5F5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        // Row 3: spacer
+        $sheet->getRowDimension(3)->setRowHeight(6);
+
+        // Row 4: Header kolom
+        foreach ($columns as $ci => $col) {
+            $cell = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($ci + 1) . '4';
+            $sheet->setCellValue($cell, $col);
+        }
+        $sheet->getStyle("A4:{$lastCol}4")->applyFromArray([
+            'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 10],
+            'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '1E3A5F']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                            'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                            'wrapText'   => true],
+            'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                             'color' => ['rgb' => 'FFFFFF']]],
+        ]);
+        $sheet->getRowDimension(4)->setRowHeight(22);
+
+        // ── Data rows ─────────────────────────────────────────────────────────
+        $rowNum    = 5;
+        $zebraEven = ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                                 'startColor' => ['rgb' => 'F0F4FB']]];
+        $borderData = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                                       'color' => ['rgb' => 'D0D8E8']]]];
+
+        foreach ($students->values() as $i => $student) {
+            $reg = $student->registration;
+
+            $rowData = [
+                $i + 1,
+                $student->created_at->format('d/m/Y H:i'),
+                $student->name ?? '-',
+                $student->full_name ?? $student->name,
+                $reg?->nama_panggilan ?? '-',
+                $student->email,
+                "'" . ($student->whatsapp_number ?? ''),  // prefix ' agar tidak diformat angka
+                $student->asal_sekolah ?? '-',
+                $student->alasan_memilih ?? '-',
+                $student->sumber_informasi ?? '-',
+                $student->educationalLevel?->name ?? '-',
+                $reg?->academicYear?->name ?? '-',
+                $reg?->registrationWave?->name ?? '-',
+                $student->ppdb_status,
+                strtoupper($reg?->status ?? 'PROSES'),
+                $reg?->reregistration_deadline ? date('d/m/Y', strtotime($reg->reregistration_deadline)) : '-',
+                $reg?->tempat_lahir ?? '-',
+                $reg?->tanggal_lahir ?? '-',
+                $reg?->jenis_kelamin ?? '-',
+                $reg?->agama ?? '-',
+                $reg?->alamat ?? '-',
+                $reg?->provinsi ?? '-',
+                $reg?->kabupaten ?? '-',
+                $reg?->kecamatan ?? '-',
+                $reg?->kebutuhan_khusus ?? '-',
+                $reg?->anak_ke ?? '-',
+                $reg?->dari_saudara ?? '-',
+                $reg?->nama_ayah ?? '-',
+                $reg?->pendidikan_ayah ?? '-',
+                $reg?->pekerjaan_ayah ?? '-',
+                $reg?->penghasilan_ayah ? 'Rp ' . number_format($reg->penghasilan_ayah, 0, ',', '.') : '-',
+                $reg?->nama_ibu ?? '-',
+                $reg?->pendidikan_ibu ?? '-',
+                $reg?->pekerjaan_ibu ?? '-',
+                $reg?->penghasilan_ibu ? 'Rp ' . number_format($reg->penghasilan_ibu, 0, ',', '.') : '-',
+                $reg?->examSchedule ? $reg->examSchedule->date . ' ' . substr($reg->examSchedule->time_start, 0, 5) : '-',
+            ];
+
+            foreach ($rowData as $ci => $val) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($ci + 1);
+                $sheet->setCellValue("{$colLetter}{$rowNum}", $val);
             }
-            echo "</tr>";
 
-            // Data
-            foreach ($students as $key => $student) {
-                $reg = $student->registration;
-                echo "<tr>";
-                echo "<td>" . ($key + 1) . "</td>";
-                echo "<td>" . $student->created_at->format('d/m/Y H:i') . "</td>";
-                echo "<td>" . ($student->name ?? '-') . "</td>";
-                echo "<td>" . ($student->full_name ?? $student->name) . "</td>";
-                echo "<td>" . ($reg?->nama_panggilan ?? '-') . "</td>";
-                echo "<td>" . $student->email . "</td>";
-                echo "<td>&nbsp;" . $student->whatsapp_number . "</td>"; // Use &nbsp; to prevent number formatting
-                echo "<td>" . ($student->asal_sekolah ?? '-') . "</td>";
-                echo "<td>" . ($student->alasan_memilih ?? '-') . "</td>";
-                echo "<td>" . ($student->sumber_informasi ?? '-') . "</td>";
-                echo "<td>" . ($student->educationalLevel?->name ?? '-') . "</td>";
-                echo "<td>" . ($reg?->academicYear?->name ?? '-') . "</td>";
-                echo "<td>" . ($reg?->registrationWave?->name ?? '-') . "</td>";
-                echo "<td>" . $student->ppdb_status . "</td>";
-                echo "<td>" . strtoupper($reg?->status ?? 'PROSES') . "</td>";
-                echo "<td>" . ($reg?->reregistration_deadline ? date('d/m/Y', strtotime($reg->reregistration_deadline)) : '-') . "</td>";
-                echo "<td>" . ($reg?->tempat_lahir ?? '-') . "</td>";
-                echo "<td>" . ($reg?->tanggal_lahir ?? '-') . "</td>";
-                echo "<td>" . ($reg?->jenis_kelamin ?? '-') . "</td>";
-                echo "<td>" . ($reg?->agama ?? '-') . "</td>";
-                echo "<td>" . ($reg?->alamat ?? '-') . "</td>";
-                echo "<td>" . ($reg?->provinsi ?? '-') . "</td>";
-                echo "<td>" . ($reg?->kabupaten ?? '-') . "</td>";
-                echo "<td>" . ($reg?->kecamatan ?? '-') . "</td>";
-                echo "<td>" . ($reg?->kebutuhan_khusus ?? '-') . "</td>";
-                echo "<td>" . ($reg?->anak_ke ?? '-') . "</td>";
-                echo "<td>" . ($reg?->dari_saudara ?? '-') . "</td>";
-                echo "<td>" . ($reg?->nama_ayah ?? '-') . "</td>";
-                echo "<td>" . ($reg?->pendidikan_ayah ?? '-') . "</td>";
-                echo "<td>" . ($reg?->pekerjaan_ayah ?? '-') . "</td>";
-                echo "<td>" . ($reg?->penghasilan_ayah ? 'Rp ' . number_format($reg->penghasilan_ayah, 0, ',', '.') : '-') . "</td>";
-                echo "<td>" . ($reg?->nama_ibu ?? '-') . "</td>";
-                echo "<td>" . ($reg?->pendidikan_ibu ?? '-') . "</td>";
-                echo "<td>" . ($reg?->pekerjaan_ibu ?? '-') . "</td>";
-                echo "<td>" . ($reg?->penghasilan_ibu ? 'Rp ' . number_format($reg->penghasilan_ibu, 0, ',', '.') : '-') . "</td>";
-                echo "<td>" . ($reg?->examSchedule ? $reg->examSchedule->date . ' ' . substr($reg->examSchedule->time_start, 0, 5) : '-') . "</td>";
-                echo "</tr>";
+            $sheet->getStyle("A{$rowNum}")->getAlignment()->setHorizontal('center');
+
+            if ($i % 2 === 1) {
+                $sheet->getStyle("A{$rowNum}:{$lastCol}{$rowNum}")->applyFromArray($zebraEven);
             }
+            $sheet->getStyle("A{$rowNum}:{$lastCol}{$rowNum}")->applyFromArray($borderData);
+            $rowNum++;
+        }
 
-            echo "</table></body></html>";
-        };
+        // ── Lebar kolom ───────────────────────────────────────────────────────
+        $colWidths = [4, 16, 22, 25, 15, 28, 16, 20, 30, 20, 14, 14, 15, 12, 14, 18, 15, 14, 12, 12, 30, 16, 16, 16, 18, 8, 10, 22, 16, 18, 16, 22, 16, 18, 16, 20];
+        foreach ($colWidths as $ci => $width) {
+            $sheet->getColumnDimensionByColumn($ci + 1)->setWidth($width);
+        }
 
-        return response()->stream($callback, 200, $headers);
+        $sheet->freezePane('A5');
+
+        // ── Output ────────────────────────────────────────────────────────────
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+            'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+        ]);
     }
 
     private function calculateStatus($user, $feesGrouped)
