@@ -22,6 +22,10 @@ class Payment extends Model
         'verified_at',
     ];
 
+    protected $casts = [
+        'verified_at' => 'datetime',
+    ];
+
     const STATUS_PENDING = 'pending';
     const STATUS_SUCCESS = 'success';
     const STATUS_FAILED = 'failed';

@@ -143,11 +143,12 @@
                         </td>
                         {{-- Tanggal Pembayaran --}}
                         @if(in_array($status, ['success', 'belum_lunas']))
-                        <td class="px-8 py-5 text-center" data-order="{{ $payment->verified_at ? $payment->verified_at->timestamp : 0 }}">
-                            @if($payment->verified_at)
+                        @php $verifiedAt = $payment->verified_at ? \Carbon\Carbon::parse($payment->verified_at) : null; @endphp
+                        <td class="px-8 py-5 text-center" data-order="{{ $verifiedAt ? $verifiedAt->timestamp : 0 }}">
+                            @if($verifiedAt)
                                 <div class="flex flex-col items-center gap-0.5">
-                                    <span class="text-xs font-bold themed-text">{{ $payment->verified_at->format('d M Y') }}</span>
-                                    <span class="text-[10px] themed-text-muted">{{ $payment->verified_at->format('H:i') }} WIB</span>
+                                    <span class="text-xs font-bold themed-text">{{ $verifiedAt->format('d M Y') }}</span>
+                                    <span class="text-[10px] themed-text-muted">{{ $verifiedAt->format('H:i') }} WIB</span>
                                 </div>
                             @else
                                 <span class="text-[10px] themed-text-muted italic">-</span>
