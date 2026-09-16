@@ -144,10 +144,20 @@ class PaymentController extends Controller
                 }
 
                 if ($terbayar > 0) {
+                    // Parse waktu dari response BTN: createdate=DDMMYY, createtime=HHMMSS
+                    $verifiedAt = now();
+                    $cd = $rspData['createdate'] ?? null; // e.g. "150926"
+                    $ct = $rspData['createtime'] ?? null; // e.g. "081207"
+                    if ($cd && $ct) {
+                        try {
+                            $verifiedAt = \Carbon\Carbon::createFromFormat('dmyHis', $cd . $ct);
+                        } catch (\Throwable) {}
+                    }
+
                     $payment->update([
                         'status'      => Payment::STATUS_SUCCESS,
                         'paid_amount' => $terbayar,
-                        'verified_at' => now()
+                        'verified_at' => $verifiedAt
                     ]);
                     if ($fee && $fee->sort_order == 1) {
                         $payment->registration->update(['payment_status' => 'success']);

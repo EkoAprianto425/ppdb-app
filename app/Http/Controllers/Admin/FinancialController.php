@@ -199,11 +199,21 @@ class FinancialController extends Controller
                 }
 
                 if ($terbayar > 0) {
+                    // Parse waktu dari response BTN: createdate=DDMMYY, createtime=HHMMSS
+                    $verifiedAt = now();
+                    $cd = $rspData['createdate'] ?? null; // e.g. "150926"
+                    $ct = $rspData['createtime'] ?? null; // e.g. "081207"
+                    if ($cd && $ct) {
+                        try {
+                            $verifiedAt = \Carbon\Carbon::createFromFormat('dmyHis', $cd . $ct);
+                        } catch (\Throwable) {}
+                    }
+
                     $payment->update([
                         'status'      => \App\Models\Payment::STATUS_SUCCESS,
                         'paid_amount' => $terbayar,
                         'verified_by' => auth()->id(),
-                        'verified_at' => now(),
+                        'verified_at' => $verifiedAt,
                         'admin_note'  => 'Auto-verified by BTN VA Inquiry'
                     ]);
                     if ($fee && $fee->sort_order == 1) {
