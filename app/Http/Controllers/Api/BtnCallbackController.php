@@ -33,6 +33,8 @@ class BtnCallbackController extends Controller
 
         $vaNumber = $payload['va'] ?? null;
         $ref      = $payload['ref'] ?? null;
+        $tgl      = $payload['tgl'] ?? null; // format: YYYYMMDD dari BTN
+        $jam      = $payload['jam'] ?? null; // format: HHMMSS dari BTN
 
         if (!$vaNumber) {
             ApiBankLog::write(ApiBankLog::SOURCE_BTN, ApiBankLog::LEVEL_WARNING, 'VA_NUMBER_MISSING', [
@@ -46,9 +48,9 @@ class BtnCallbackController extends Controller
             ]);
         }
 
-        // Find payment by VA number and Ref
+        // Cari payment by va_number saja (ref BTN = ref transaksi bank, bukan va_ref)
+        // Sesuai contoh resmi BTN: query hanya by va, tidak filter ref
         $payment = Payment::where('va_number', $vaNumber)
-            ->where('va_ref', $ref)
             ->where('status', Payment::STATUS_PENDING)
             ->first();
 
@@ -84,13 +86,24 @@ class BtnCallbackController extends Controller
         }
 
         // Ambil nominal terbayar dari payload jika ada, fallback ke amount tagihan
-        $terbayar = $payload['terbayar'] ?? $payment->amount;
+        $terbayar = $payload['terbayar'] ?? $payload['amount'] ?? $payment->amount;
+
+        // Parse waktu bayar dari tgl+jam BTN (format: YYYYMMDD + HHMMSS)
+        $verifiedAt = now();
+        if ($tgl && $jam) {
+            try {
+                $verifiedAt = \Carbon\Carbon::createFromFormat('YmdHis', $tgl . $jam);
+            } catch (\Throwable $e) {
+                // fallback to now
+            }
+        }
 
         // Update Payment
         $payment->update([
             'status'      => Payment::STATUS_SUCCESS,
             'paid_amount' => $terbayar,
-            'verified_at' => now(),
+            'verified_at' => $verifiedAt,
+            'va_ref'      => $ref ?? $payment->va_ref, // simpan ref callback BTN
             'admin_note'  => 'Paid via BTN VA Callback'
         ]);
 
