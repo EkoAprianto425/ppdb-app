@@ -228,4 +228,94 @@ class FinancialController extends Controller
 
         return back()->with('status', "Nominal pembayaran berhasil diperbarui.");
     }
+
+    public function exportPayments(Request $request)
+    {
+        $status = $request->get('status', 'success');
+
+        if (!in_array($status, ['success', 'belum_lunas'])) {
+            return back()->with('error', 'Export hanya tersedia untuk tab Berhasil dan Belum Lunas.');
+        }
+
+        $query = \App\Models\Payment::with(['registration.user.educationalLevel'])
+            ->whereHas('registration');
+
+        if ($status === 'belum_lunas') {
+            $query->whereColumn('paid_amount', '<', 'amount')
+                  ->where('paid_amount', '>', 1)
+                  ->where('status', 'success');
+        } else {
+            $query->where('status', $status);
+        }
+
+        $user = auth()->user();
+        if (!$user->isSuperAdmin()) {
+            $levelIds = $user->getManagedLevelIds();
+            if (empty($levelIds)) {
+                $query->whereRaw('0 = 1');
+            } else {
+                $query->whereHas('registration.user', fn($q) => $q->whereIn('educational_level_id', $levelIds));
+            }
+        }
+
+        if ($request->filled('level_id')) {
+            $query->whereHas('registration.user', fn($q) => $q->where('educational_level_id', $request->level_id));
+        }
+
+        $payments = $query->latest()->get();
+
+        $labelStatus = $status === 'belum_lunas' ? 'Belum Lunas' : 'Berhasil';
+        $filename    = 'pembayaran_' . $status . '_' . now()->format('Ymd_His') . '.csv';
+
+        $methodLabels = [
+            'va'     => 'VA BTN',
+            'va_bca' => 'VA BCA',
+            'cash'   => 'Tunai',
+            'manual' => 'Manual',
+        ];
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'no-cache, no-store, must-revalidate',
+        ];
+
+        $callback = function () use ($payments, $status, $methodLabels) {
+            $out = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fwrite($out, "\xEF\xBB\xBF");
+
+            $header = ['No', 'Nama Siswa', 'Email', 'Unit/Jenjang', 'Tipe Biaya', 'Tagihan', 'Dibayarkan', 'Metode', 'Nomor VA', 'Tanggal Pembayaran', 'Status'];
+            if ($status === 'belum_lunas') {
+                array_splice($header, 7, 0, ['Sisa Tagihan']);
+            }
+            fputcsv($out, $header);
+
+            foreach ($payments as $i => $p) {
+                $row = [
+                    $i + 1,
+                    $p->registration->user->full_name ?? $p->registration->user->name ?? '-',
+                    $p->registration->user->email ?? '-',
+                    $p->registration->user->educationalLevel->name ?? '-',
+                    $p->fee_type,
+                    (int) $p->amount,
+                    (int) ($p->paid_amount ?? 0),
+                    $methodLabels[$p->payment_method] ?? ($p->payment_method ?? '-'),
+                    $p->va_number ?? '-',
+                    $p->verified_at ? $p->verified_at->format('d/m/Y H:i') : '-',
+                    $status === 'belum_lunas' ? 'Belum Lunas' : 'Berhasil',
+                ];
+                if ($status === 'belum_lunas') {
+                    $sisa = (int)$p->amount - (int)($p->paid_amount ?? 0);
+                    array_splice($row, 7, 0, [$sisa]);
+                }
+                fputcsv($out, $row);
+            }
+
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
+
