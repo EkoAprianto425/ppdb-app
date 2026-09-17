@@ -22,6 +22,7 @@
     // Ambil jadwal ujian yang tersedia untuk unit siswa
     $schedules = \App\Models\ExamSchedule::where('unit', $user->educationalLevel?->name)->get();
     $hasExam = $registration && $registration->exam_schedule_id;
+    $examPast = $hasExam && \Carbon\Carbon::parse($registration->examSchedule->date)->isPast();
 
     $statusColors = [
         'none' => 'bg-orange-700/50 text-white-400 border-orange-700',
@@ -281,6 +282,9 @@
         @elseif(!$hasExam)
             <p class="text-xs themed-text-muted mb-3">Pengumuman setelah ujian dilaksanakan.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Menunggu Ujian</span>
+        @elseif(!$examPast)
+            <p class="text-xs themed-text-muted mb-3">Ujian dijadwalkan {{ \Carbon\Carbon::parse($registration->examSchedule->date)->translatedFormat('d F Y') }}.</p>
+            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-blue-500/15 text-blue-400 border-blue-500/20">Belum Dilaksanakan</span>
         @else
             <p class="text-xs themed-text-muted mb-3">Ujian selesai. Tunggu pengumuman.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-amber-500/15 text-amber-400 border-amber-500/20">Dalam Validasi</span>
