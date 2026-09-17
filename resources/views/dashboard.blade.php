@@ -14,6 +14,10 @@
     // Cari Jenjang yang sesuai via relationship
     $level = $user->educationalLevel;
     $allFees = $level ? $level->fees()->orderBy('sort_order')->get() : collect();
+
+    // Alumni: biaya formulir (sort_order=1) = Rp 200.000 (sama seperti PaymentController::resolveFinalAmount)
+    $isAlumni = str_contains(strtolower($user->asal_sekolah ?? ''), 'al hasra');
+    $resolveAmount = fn($f) => ($isAlumni && $f->sort_order == 1) ? 200000 : $f->amount;
     
     // Ambil jadwal ujian yang tersedia untuk unit siswa
     $schedules = \App\Models\ExamSchedule::where('unit', $user->educationalLevel?->name)->get();
@@ -102,12 +106,13 @@
 
     $activeFee = null;
     foreach ($allFees as $f) {
+        $fAmount = $resolveAmount($f);
         $p = $registration ? $registration->payments()->where('fee_type', $f->name)->latest()->first() : null;
-        if (!$p || $p->status !== 'success' || ($p->paid_amount ?? 0) < $f->amount) { 
+        if (!$p || $p->status !== 'success' || ($p->paid_amount ?? 0) < $fAmount) { 
             $activeFee = (object)[
                 'id'             => $f->id,
                 'name'           => $f->name,
-                'amount'         => $f->amount,
+                'amount'         => $fAmount,
                 'sort_order'     => $f->sort_order,
                 'payment'        => $p,
                 'paid_amount'    => $p ? ($p->paid_amount ?? 0) : 0,
@@ -152,7 +157,9 @@
                     <p class="text-sm font-bold themed-text">Rp {{ number_format($activeFee->paid_amount, 0, ',', '.') }}</p>
                 </div>
                 <div class="shrink-0">
-                    @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
+                    @if($activeFee->paid_amount >= $activeFee->amount && $activeFee->amount > 0)
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/15 text-emerald-400 border-emerald-500/20">Lunas</span>
+                    @elseif($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">Belum Lunas</span>
                     @elseif($activeFee->status === 'pending')
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">Menunggu Verifikasi</span>

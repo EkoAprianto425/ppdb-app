@@ -413,7 +413,7 @@
                                 @php $canPayNext = false; @endphp
 
                             @else
-                                @if(isset($isBelumLunas) && $isBelumLunas)
+                                @if(isset($isBelumLunas) && $isBelumLunas && ($fee->paid_amount ?? 0) < $fee->amount)
                                     @php $canPayNext = false; @endphp
                                     <div class="flex justify-end">
                                         <div class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 border border-amber-500/30" title="Belum Lunas">
