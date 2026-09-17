@@ -122,6 +122,26 @@
         }
     }
     if ($activeFee && $activeFee->sort_order > 1 && !$isPassed) $activeFee = null;
+
+    // Fee terakhir untuk ditampilkan saat semua sudah lunas
+    $lastFee = null;
+    foreach ($allFees->reverse() as $f) {
+        $p = $registration ? $registration->payments()->where('fee_type', $f->name)->latest()->first() : null;
+        if ($p && $p->status === 'success') {
+            $fAmount = $resolveAmount($f);
+            $lastFee = (object)[
+                'id'          => $f->id,
+                'name'        => $f->name,
+                'amount'      => $fAmount,
+                'sort_order'  => $f->sort_order,
+                'payment'     => $p,
+                'paid_amount' => $p->paid_amount ?? 0,
+                'status'      => $p->status,
+            ];
+            break;
+        }
+    }
+    $displayFee = $activeFee ?? $lastFee;
 @endphp
 
 {{-- Info Cards --}}
@@ -137,16 +157,16 @@
         @if(!$hasRegistration)
             <p class="text-xs themed-text-muted mb-3">Silakan isi formulir pendaftaran terlebih dahulu.</p>
             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase border bg-orange-700/50 text-white-400 border-orange-700">Menunggu Formulir</span>
-        @elseif($activeFee)
+        @elseif($displayFee)
             {{-- Baris 1: Nama tagihan (kiri) & Nominal (kanan) --}}
             <div class="flex items-start justify-between gap-2 mb-2">
                 <div>
                     <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Tagihan</p>
-                    <p class="text-sm font-black themed-text leading-tight">{{ $activeFee->name }}</p>
+                    <p class="text-sm font-black themed-text leading-tight">{{ $displayFee->name }}</p>
                 </div>
                 <div class="text-right shrink-0">
                     <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Nominal</p>
-                    <p class="text-sm font-black text-purple-400">Rp {{ number_format($activeFee->amount, 0, ',', '.') }}</p>
+                    <p class="text-sm font-black text-purple-400">Rp {{ number_format($displayFee->amount, 0, ',', '.') }}</p>
                 </div>
             </div>
 
@@ -154,16 +174,16 @@
             <div class="flex items-center justify-between gap-2 mb-1">
                 <div>
                     <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Sudah Dibayar</p>
-                    <p class="text-sm font-bold themed-text">Rp {{ number_format($activeFee->paid_amount, 0, ',', '.') }}</p>
+                    <p class="text-sm font-bold themed-text">Rp {{ number_format($displayFee->paid_amount, 0, ',', '.') }}</p>
                 </div>
                 <div class="shrink-0">
-                    @if($activeFee->paid_amount >= $activeFee->amount && $activeFee->amount > 0)
+                    @if($displayFee->paid_amount >= $displayFee->amount && $displayFee->amount > 0)
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-emerald-500/15 text-emerald-400 border-emerald-500/20">Lunas</span>
-                    @elseif($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
+                    @elseif($displayFee->status === 'success' && $displayFee->paid_amount < $displayFee->amount)
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">Belum Lunas</span>
-                    @elseif($activeFee->status === 'pending')
+                    @elseif($displayFee->status === 'pending')
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-amber-500/15 text-amber-400 border-amber-500/20">Menunggu Verifikasi</span>
-                    @elseif($activeFee->status === 'failed')
+                    @elseif($displayFee->status === 'failed')
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-rose-500/15 text-rose-400 border-rose-500/20">Gagal / Ditolak</span>
                     @else
                         <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border bg-orange-700/50 text-white border-orange-700">Belum Bayar</span>
@@ -172,27 +192,27 @@
             </div>
 
             {{-- Baris 3: Sisa (tampilkan jika ada sisa) --}}
-            @if($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)
+            @if($displayFee->status === 'success' && $displayFee->paid_amount < $displayFee->amount)
                 <div class="mb-3">
                     <p class="text-[9px] themed-text-muted font-bold uppercase tracking-widest mb-0.5">Sisa</p>
-                    <p class="text-sm font-black text-rose-400">Rp {{ number_format($activeFee->amount - $activeFee->paid_amount, 0, ',', '.') }}</p>
+                    <p class="text-sm font-black text-rose-400">Rp {{ number_format($displayFee->amount - $displayFee->paid_amount, 0, ',', '.') }}</p>
                 </div>
             @else
                 <div class="mb-3"></div>
             @endif
 
-            {{-- Card VA --}}
-            @if($activeFee->payment && ($activeFee->status === 'pending' || ($activeFee->status === 'success' && $activeFee->paid_amount < $activeFee->amount)))
+            {{-- Card VA (hanya jika belum lunas) --}}
+            @if($displayFee->payment && ($displayFee->status === 'pending' || ($displayFee->status === 'success' && $displayFee->paid_amount < $displayFee->amount)))
                 <div class="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex flex-col gap-1">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-purple-400">Nomor VA {{ strtoupper($activeFee->payment->va_bank ?? 'BTN') }}</p>
-                    <p class="text-base font-mono font-bold themed-text tracking-wider">{{ $activeFee->payment->va_number }}</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-purple-400">Nomor VA {{ strtoupper($displayFee->payment->va_bank ?? 'BTN') }}</p>
+                    <p class="text-base font-mono font-bold themed-text tracking-wider">{{ $displayFee->payment->va_number }}</p>
                 </div>
             @endif
 
             <a href="{{ route('pendaftaran.financial') }}" class="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 shadow-purple-500/20 text-white text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all text-center block">Buka Menu Administrasi</a>
         @else
-            <p class="text-xs text-emerald-400 font-bold mb-2">Semua pembayaran lunas ✅</p>
-            <a href="{{ route('pendaftaran.financial') }}" class="text-[10px] text-primary font-bold uppercase hover:underline">Lihat Riwayat →</a>
+            <p class="text-xs themed-text-muted mb-3">Belum ada data pembayaran.</p>
+            <a href="{{ route('pendaftaran.financial') }}" class="text-[10px] text-primary font-bold uppercase hover:underline">Buka Menu Administrasi →</a>
         @endif
     </div>
 
