@@ -386,18 +386,17 @@ class PaymentController extends Controller
         $kodeInstansi  = '15822';                                            // 5 digit
         $parentUnit    = $registration->user->educationalLevel?->parent_unit ?? '';
         $kodeAplikasi  = match ($parentUnit) {
-            'SMP'   => '224',
-            'SMA'   => '524',
-            'SMK'   => '824',
-            default => '024',
-        };                                                                   // 3 digit
+            'SMP'   => '00002',
+            'SMK'   => '00005',
+            'SMA'   => '00008'
+        };                                                                   // 5 digit
         $tahun         = date('y');                                          // 2 digit
         $bulan         = date('m');                                          // 2 digit
         $tanggal       = date('d');                                          // 2 digit
         $regId         = str_pad($registration->id, 4, '0', STR_PAD_LEFT);  // 4 digit
         $sortOrder     = str_pad($fee->sort_order, 2, '0', STR_PAD_LEFT);   // 2 digit
 
-        // Contoh: 15822 + 024 + 26 + 08 + 08 + 0001 + 01 = 15822024260808000101
+        // Contoh: 15822 + 00002 + 26 + 08 + 08 + 0001 + 01 = 1582200002260808000101
         $noVaBca = $kodeInstansi . $kodeAplikasi . $tahun . $bulan . $tanggal . $regId . $sortOrder;
 
         // Terapkan diskon jika ada
