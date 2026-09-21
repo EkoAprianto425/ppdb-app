@@ -30,7 +30,7 @@ class StudentManagementController extends Controller
             $query->whereIn('educational_level_id', $levelIds);
         }
 
-        $students = $query->latest()->get();
+        $students = $query->orderByDesc('id')->get();
         
         // Ambil data fees untuk menentukan status
         $fees   = AppCache::administrativeFeesGrouped();
