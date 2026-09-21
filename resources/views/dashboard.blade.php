@@ -91,6 +91,20 @@
             <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center text-2xl shadow-lg">🎓</div>
         </div>
     </div>
+
+    {{-- CTA: Belum mengisi formulir pendaftaran --}}
+    @if(!$hasRegistration)
+    <div class="relative z-10 mt-4 flex items-center gap-3 p-3.5 rounded-xl bg-amber-400/15 border border-amber-400/30 backdrop-blur-sm">
+        <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-amber-400/20 flex items-center justify-center">
+            <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="flex-1 text-amber-100 text-sm font-medium">Anda belum mengisi formulir pendaftaran. Silakan lengkapi data Anda untuk melanjutkan proses PPDB.</p>
+        <a href="{{ route('pendaftaran.index') }}" class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-amber-950 text-xs font-bold shadow-lg transition-all duration-200 hover:shadow-amber-400/30">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            Isi Formulir Pendaftaran
+        </a>
+    </div>
+    @endif
 </div>
 
 
