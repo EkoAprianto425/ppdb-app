@@ -48,6 +48,7 @@
             <thead>
                 <tr class="border-b bg-black/10" :style="'border-color: var(--border-color)'">
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest">Siswa</th>
+                    <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Asal Sekolah</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Tujuan</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Jadwal Ujian</th>
                     <th class="px-8 py-4 text-[10px] font-bold themed-text-muted uppercase tracking-widest text-center">Status Saat Ini</th>
@@ -67,6 +68,11 @@
                                 <p class="text-[10px] themed-text-muted">Gel. {{ $reg->registrationWave->name ?? 'Belum Dipilih' }} | ID: #{{ str_pad($reg->id, 4, '0', STR_PAD_LEFT) }}</p>
                             </div>
                         </div>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                        <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
+                            {{ $reg->user->asal_sekolah ?? '-' }}
+                        </span>
                     </td>
                     <td class="px-8 py-5 text-center">
                         <span class="text-[10px] font-bold themed-text bg-card-bg px-3 py-1 rounded-lg border" :style="'border-color: var(--border-color)'">
