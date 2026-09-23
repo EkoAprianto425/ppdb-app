@@ -530,6 +530,7 @@
             if (!$.fn.DataTable.isDataTable(this)) {
                 $(this).DataTable({
                     pageLength: 25,
+                    order: [],
                     ordering: true,
                     language: {
                         search: '',

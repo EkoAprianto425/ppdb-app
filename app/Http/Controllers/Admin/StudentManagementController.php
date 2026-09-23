@@ -30,7 +30,7 @@ class StudentManagementController extends Controller
             $query->whereIn('educational_level_id', $levelIds);
         }
 
-        $students = $query->latest()->get();
+        $students = $query->orderByDesc('id')->get();
         
         // Ambil data fees untuk menentukan status
         $fees   = AppCache::administrativeFeesGrouped();
@@ -369,7 +369,8 @@ class StudentManagementController extends Controller
     {
         $user = auth()->user();
         $query = Registration::with('user', 'academicYear', 'registrationWave', 'user.educationalLevel')
-            ->where('payment_status', 'success');
+            ->where('payment_status', 'success')
+            ->whereNotNull('exam_schedule_id');
 
         // Filter Status Kelulusan (proses, lulus, tidak_lulus)
         if ($request->filled('status')) {
