@@ -418,9 +418,21 @@
         
         const baseUrl = "{{ url('') }}";
         
+        // Nilai yang tersimpan di DB (bisa nama atau kode)
         const oldProvinsi  = "{{ old('provinsi', $registration->provinsi ?? '') }}";
         const oldKabupaten = "{{ old('kabupaten', $registration->kabupaten ?? '') }}";
         const oldKecamatan = "{{ old('kecamatan', $registration->kecamatan ?? '') }}";
+
+        // Cocokkan berdasarkan kode ATAU nama
+        function matchProvinsi(item) {
+            return item.kode_prop === oldProvinsi || item.propinsi === oldProvinsi;
+        }
+        function matchKabupaten(item) {
+            return item.kode_kab_kota === oldKabupaten || item.kabupaten_kota === oldKabupaten;
+        }
+        function matchKecamatan(item) {
+            return item.kode_kec === oldKecamatan || item.kecamatan === oldKecamatan;
+        }
 
         let isFirstLoadProvinsi  = true;
         let isFirstLoadKabupaten = true;
@@ -430,9 +442,11 @@
             .then(res => res.json())
             .then(data => {
                 provinsiSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                let selectedKode = '';
                 data.forEach(item => {
-                    const selected = item.kode_prop === oldProvinsi ? 'selected' : '';
-                    provinsiSelect.innerHTML += `<option value="${item.kode_prop}" ${selected} class="text-slate-900">${item.propinsi}</option>`;
+                    const isSelected = matchProvinsi(item);
+                    if (isSelected) selectedKode = item.kode_prop;
+                    provinsiSelect.innerHTML += `<option value="${item.kode_prop}" ${isSelected ? 'selected' : ''} class="text-slate-900">${item.propinsi}</option>`;
                 });
                 if (oldProvinsi) {
                     provinsiSelect.dispatchEvent(new Event('change'));
@@ -442,7 +456,7 @@
 
         // Event: Provinsi Changed
         provinsiSelect.addEventListener('change', function () {
-            const val = this.value;
+            const val = this.value; // selalu kode_prop setelah user pilih
             kabupatenSelect.innerHTML = '<option value="">-- Memuat... --</option>';
             kabupatenSelect.disabled = true;
             kecamatanSelect.innerHTML = '<option value="">Pilih Kabupaten Dulu</option>';
@@ -454,11 +468,11 @@
                     .then(data => {
                         kabupatenSelect.innerHTML = '<option value="">-- Pilih Kabupaten --</option>';
                         data.forEach(item => {
-                            const selected = (isFirstLoadProvinsi && item.kode_kab_kota === oldKabupaten && val === oldProvinsi) ? 'selected' : '';
-                            kabupatenSelect.innerHTML += `<option value="${item.kode_kab_kota}" ${selected} class="text-slate-900">${item.kabupaten_kota}</option>`;
+                            const isSelected = isFirstLoadProvinsi && matchKabupaten(item);
+                            kabupatenSelect.innerHTML += `<option value="${item.kode_kab_kota}" ${isSelected ? 'selected' : ''} class="text-slate-900">${item.kabupaten_kota}</option>`;
                         });
                         kabupatenSelect.disabled = false;
-                        if (isFirstLoadProvinsi && oldKabupaten && val === oldProvinsi) {
+                        if (isFirstLoadProvinsi && oldKabupaten) {
                             kabupatenSelect.dispatchEvent(new Event('change'));
                         }
                         isFirstLoadProvinsi = false;
@@ -481,8 +495,8 @@
                     .then(data => {
                         kecamatanSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
                         data.forEach(item => {
-                            const selected = (isFirstLoadKabupaten && item.kode_kec === oldKecamatan && val === oldKabupaten) ? 'selected' : '';
-                            kecamatanSelect.innerHTML += `<option value="${item.kode_kec}" ${selected} class="text-slate-900">${item.kecamatan}</option>`;
+                            const isSelected = isFirstLoadKabupaten && matchKecamatan(item);
+                            kecamatanSelect.innerHTML += `<option value="${item.kode_kec}" ${isSelected ? 'selected' : ''} class="text-slate-900">${item.kecamatan}</option>`;
                         });
                         kecamatanSelect.disabled = false;
                         isFirstLoadKabupaten = false;
