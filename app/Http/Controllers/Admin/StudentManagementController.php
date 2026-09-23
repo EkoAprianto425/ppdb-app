@@ -267,7 +267,9 @@ class StudentManagementController extends Controller
     public function edit(Registration $registration)
     {
         $this->authorizeAccess($registration);
-        return view('admin.students.edit', compact('registration'));
+        $sources = AppCache::informationSourcesActive();
+        $reasons = AppCache::schoolReasonsActive();
+        return view('admin.students.edit', compact('registration', 'sources', 'reasons'));
     }
 
     public function update(Request $request, Registration $registration)
@@ -469,7 +471,9 @@ class StudentManagementController extends Controller
         if ($user->registration) {
             return redirect()->route('admin.students.edit', $user->registration);
         }
-        return view('admin.students.edit-guest', compact('user'));
+        $sources = AppCache::informationSourcesActive();
+        $reasons = AppCache::schoolReasonsActive();
+        return view('admin.students.edit-guest', compact('user', 'sources', 'reasons'));
     }
 
     public function updateGuest(Request $request, User $user)
