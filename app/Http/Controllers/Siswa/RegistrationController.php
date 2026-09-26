@@ -19,7 +19,11 @@ class RegistrationController extends Controller
             return redirect()->route('pendaftaran.create');
         }
 
-        return view('pendaftaran.show', compact('registration'));
+        $namaProvinsi  = AppCache::regionLookup('propinsi',      'kode_prop',      trim($registration->provinsi));
+        $namaKabupaten = AppCache::regionLookup('kabupaten_kota', 'kode_kab_kota', trim($registration->kabupaten));
+        $namaKecamatan = AppCache::regionLookup('kecamatan',      'kode_kec',      trim($registration->kecamatan));
+
+        return view('pendaftaran.show', compact('registration', 'namaProvinsi', 'namaKabupaten', 'namaKecamatan'));
     }
 
     public function create()

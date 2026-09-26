@@ -105,15 +105,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div class="flex flex-col">
                         <span class="text-[9px] themed-text-muted uppercase tracking-widest">Provinsi</span>
-                        <span class="text-xs themed-text font-medium">{{ $registration->provinsi }}</span>
+                        <span class="text-xs themed-text font-medium">{{ $namaProvinsi ?? $registration->provinsi }}</span>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-[9px] themed-text-muted uppercase tracking-widest">Kabupaten</span>
-                        <span class="text-xs themed-text font-medium">{{ $registration->kabupaten }}</span>
+                        <span class="text-[9px] themed-text-muted uppercase tracking-widest">Kabupaten / Kota</span>
+                        <span class="text-xs themed-text font-medium">{{ $namaKabupaten ?? $registration->kabupaten }}</span>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-[9px] themed-text-muted uppercase tracking-widest">Kecamatan</span>
-                        <span class="text-xs themed-text font-medium">{{ $registration->kecamatan }}</span>
+                        <span class="text-xs themed-text font-medium">{{ $namaKecamatan ?? $registration->kecamatan }}</span>
                     </div>
                 </div>
             </div>
