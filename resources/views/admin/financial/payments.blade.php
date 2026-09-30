@@ -166,15 +166,7 @@
                                         Edit
                                     </button>
                                 @else
-                                    {{-- VA BTN: Cek Status --}}
-                                    @if($payment->payment_method === 'va')
-                                        <form action="{{ route('admin.financial.check-va', $payment) }}" method="POST" class="inline-block">
-                                            @csrf
-                                            <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-all">
-                                                Cek Status VA
-                                            </button>
-                                        </form>
-                                    @endif
+
 
                                     {{-- Tombol Input Cash: muncul untuk semua payment pending yang punya VA --}}
                                     @if($payment->status === 'pending' && $payment->va_number)

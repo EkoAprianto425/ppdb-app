@@ -193,10 +193,6 @@ class FinancialController extends Controller
                 $rspData = $result['data'];
                 $terbayar = $rspData['terbayar'] ?? null;
 
-                // Fallback: jika terbayar null/0 tapi payment sudah ada amount, pakai amount tagihan
-                if (empty($terbayar) && !empty($payment->amount)) {
-                    $terbayar = $payment->amount;
-                }
 
                 if ($terbayar > 0) {
                     // Parse waktu dari response BTN: createdate=DDMMYY, createtime=HHMMSS

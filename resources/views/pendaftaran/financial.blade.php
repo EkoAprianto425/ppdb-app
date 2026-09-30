@@ -376,16 +376,7 @@
                                     $isBcaVa = $vaBank === 'bca';
                                 @endphp
                                 <div class="flex flex-col items-end gap-2">
-                                    {{-- Cek Status (hanya untuk VA BTN) --}}
-                                    @if($isBtnVa)
-                                        <form action="{{ route('pendaftaran.payment.check-va') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="payment_id" value="{{ $pendingPayment->id }}">
-                                            <button type="submit" class="px-3 py-1.5 rounded-lg btn-soft-secondary text-[9px] font-bold uppercase tracking-widest">
-                                                Cek Status
-                                            </button>
-                                        </form>
-                                    @endif
+
 
                                     {{-- Tombol Switch --}}
                                     @if($isBtnVa)
