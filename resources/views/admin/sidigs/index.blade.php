@@ -80,7 +80,7 @@
                             </button>
                             {{-- Tombol repost (hanya jika gagal) --}}
                             @if($record->status !== 'success')
-                            <form method="POST" action="{{ route('sidigs.repost', $record) }}" onsubmit="return confirm('Kirim ulang data siswa ini ke SIDIGS?')">
+                            <form method="POST" action="{{ route('admin.sidigs.repost', $record) }}" onsubmit="return confirm('Kirim ulang data siswa ini ke SIDIGS?')">
                                 @csrf
                                 <button type="submit" class="p-2 rounded-lg btn-action-edit" title="Kirim Ulang ke SIDIGS">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

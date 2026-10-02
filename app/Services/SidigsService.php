@@ -62,8 +62,8 @@ class SidigsService
             'religion'   => $registration->agama ?? null,
             'address'    => $registration->alamat ?? null,
             'phone'      => $registration->user->whatsapp_number ?? null,
-            'grade'      => $grade,
-            'class_name' => $className,
+            // 'grade'      => $grade,
+            // 'class_name' => $className,
             'wali'       => [
                 'name'  => $registration->nama_ayah ?? $registration->nama_ibu ?? 'Wali',
                 'phone' => $registration->user->whatsapp_number ?? null,
@@ -82,29 +82,43 @@ class SidigsService
         $payload = $method . $path . $rawBody . $timestamp;
         $signature = hash_hmac('sha256', $payload, $school['secret_key']);
 
+        $debugHeaders = [
+            'Content-Type'  => 'application/json',
+            'X-CLIENT-KEY'  => $school['client_key'],
+            'X-TIMESTAMP'   => $timestamp,
+            'X-SIGNATURE'   => $signature,
+            'Accept'        => 'application/json',
+        ];
+
+        // dd([
+        //     'url'            => self::API_BASE . '/students',
+        //     'method'         => $method,
+        //     'headers'        => $debugHeaders,
+        //     'body'           => $body,
+        //     'rawBody'        => $rawBody,
+        //     'payload_string' => $payload,
+        // ]);
+
         try {
-            $response = Http::withHeaders([
-                'Content-Type'  => 'application/json',
-                'X-CLIENT-KEY'  => $school['client_key'],
-                'X-TIMESTAMP'   => $timestamp,
-                'X-SIGNATURE'   => $signature,
-                'Accept'        => 'application/json',
-            ])->withBody($rawBody, 'application/json')
+            $response = Http::withHeaders($debugHeaders)
+              ->withBody($rawBody, 'application/json')
               ->post(self::API_BASE . '/students');
 
             $responseData = $response->json();
             $responseCode = $responseData['responseCode'] ?? null;
             $isSuccess = $responseCode === '000200';
 
-            SidigsRecord::create([
-                'registration_id'  => $registration->id,
-                'status'           => $isSuccess ? 'success' : 'failed',
-                'response_payload' => $responseData ?? ['body' => $response->body()],
-                'student_username' => $responseData['data']['student_account']['username'] ?? null,
-                'student_password' => $responseData['data']['student_account']['password'] ?? null,
-                'wali_username'    => $responseData['data']['wali_account']['username'] ?? null,
-                'wali_password'    => $responseData['data']['wali_account']['password'] ?? null,
-            ]);
+            SidigsRecord::updateOrCreate(
+                ['registration_id' => $registration->id],
+                [
+                    'status'           => $isSuccess ? 'success' : 'failed',
+                    'response_payload' => $responseData ?? ['body' => $response->body()],
+                    'student_username' => $responseData['data']['student_account']['username'] ?? null,
+                    'student_password' => $responseData['data']['student_account']['password'] ?? null,
+                    'wali_username'    => $responseData['data']['wali_account']['username'] ?? null,
+                    'wali_password'    => $responseData['data']['wali_account']['password'] ?? null,
+                ]
+            );
 
             if ($isSuccess) {
                 Log::info('SIDIGS: Siswa berhasil didaftarkan', [
@@ -125,11 +139,10 @@ class SidigsService
             return $isSuccess;
         } catch (\Exception $e) {
             Log::error('SIDIGS Post Error: ' . $e->getMessage());
-            SidigsRecord::create([
-                'registration_id' => $registration->id,
-                'status' => 'failed',
-                'response_payload' => ['error' => $e->getMessage()],
-            ]);
+            SidigsRecord::updateOrCreate(
+                ['registration_id' => $registration->id],
+                ['status' => 'failed', 'response_payload' => ['error' => $e->getMessage()]]
+            );
             return false;
         }
     }

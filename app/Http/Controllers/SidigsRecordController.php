@@ -22,7 +22,7 @@ class SidigsRecordController extends Controller
         }
 
         $registration = $record->registration()->with('user.educationalLevel')->first();
-        $record->delete();
+        // $record->delete();
 
         $success = SidigsService::postStudent($registration);
 
