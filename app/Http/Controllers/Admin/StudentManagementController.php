@@ -318,7 +318,7 @@ class StudentManagementController extends Controller
             'whatsapp_number'           => $validated['whatsapp_number'],
             'alasan_memilih'            => $validated['alasan_memilih'],
             'sumber_informasi'          => $validated['sumber_informasi'],
-            'sumber_informasi_tambahan' => $validated['sumber_informasi_tambahan'],
+            'sumber_informasi_tambahan' => $validated['sumber_informasi_tambahan'] ?? null,
         ]);
 
         // Update Registration (Biodata)
