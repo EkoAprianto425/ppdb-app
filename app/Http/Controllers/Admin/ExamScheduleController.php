@@ -84,4 +84,26 @@ class ExamScheduleController extends Controller
         $schedule->delete();
         return back()->with('status', 'Jadwal ujian berhasil dihapus.');
     }
+
+    public function move(Request $request, \App\Models\Registration $registration)
+    {
+        $request->validate([
+            'exam_schedule_id' => 'required|exists:exam_schedules,id'
+        ]);
+
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && $registration->user->educational_level_id !== $user->educational_level_id) {
+            // Adjust permission check if needed. Let's just use the getManagedLevelIds
+            $levelIds = $user->getManagedLevelIds();
+            if (!in_array($registration->user->educational_level_id, $levelIds)) {
+                abort(403);
+            }
+        }
+
+        $registration->update([
+            'exam_schedule_id' => $request->exam_schedule_id
+        ]);
+
+        return back()->with('status', 'Jadwal ujian siswa berhasil dipindahkan.');
+    }
 }

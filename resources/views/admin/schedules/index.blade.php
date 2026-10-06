@@ -164,6 +164,7 @@
                             <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Siswa & Kontak</th>
                             <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Unit Tujuan</th>
                             <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted">Detail Sesi</th>
+                            <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] themed-text-muted text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
@@ -201,6 +202,11 @@
                                     </div>
                                 </div>
                             </td>
+                            <td class="px-8 py-6 text-right">
+                                <button onclick="openMoveModal('{{ $participant->id }}', '{{ $participant->user->full_name ?? $participant->user->name }}', '{{ $participant->exam_schedule_id }}')" class="px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-colors">
+                                    Pindah Jadwal
+                                </button>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -220,4 +226,52 @@
         @endif
     </div>
 </div>
+
+{{-- Modal Pindah Jadwal --}}
+<div id="moveModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeMoveModal()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+        <div class="card-glass rounded-3xl p-8 border border-white/5 shadow-2xl relative">
+            <button onclick="closeMoveModal()" class="absolute top-4 right-4 text-white/40 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h3 class="text-xl font-black themed-text mb-1">Pindah Jadwal Ujian</h3>
+            <p class="text-xs themed-text-muted mb-6">Pilih jadwal ujian baru untuk <span id="studentNameDisplay" class="font-bold text-primary"></span></p>
+
+            <form id="moveForm" method="POST" action="">
+                @csrf
+                <div class="mb-6">
+                    <label class="block text-[10px] font-black themed-text-muted uppercase tracking-[0.2em] mb-2 px-1">Jadwal Baru</label>
+                    <select name="exam_schedule_id" id="examScheduleSelect" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
+                        <option value="" disabled selected>Pilih Jadwal</option>
+                        @foreach($schedules as $schedule)
+                            <option value="{{ $schedule->id }}" class="text-slate-900">{{ $schedule->name }} ({{ date('d M Y', strtotime($schedule->date)) }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-[0.2em] text-xs shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.5)] hover:shadow-primary/40 hover:-translate-y-1 transition-all active:scale-95">
+                    Simpan Perubahan
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openMoveModal(registrationId, studentName, currentScheduleId) {
+    document.getElementById('moveModal').classList.remove('hidden');
+    document.getElementById('studentNameDisplay').textContent = studentName;
+    document.getElementById('moveForm').action = `/admin/schedules/move/${registrationId}`;
+    
+    // Select the current schedule
+    const select = document.getElementById('examScheduleSelect');
+    if (currentScheduleId) {
+        select.value = currentScheduleId;
+    }
+}
+
+function closeMoveModal() {
+    document.getElementById('moveModal').classList.add('hidden');
+}
+</script>
 @endsection
