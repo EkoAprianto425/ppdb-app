@@ -245,7 +245,7 @@
                     <select name="exam_schedule_id" id="examScheduleSelect" class="w-full bg-black/20 border-2 border-white/5 rounded-2xl px-5 py-4 text-sm themed-text focus:border-primary/50 focus:ring-0 transition-all appearance-none" required>
                         <option value="" disabled selected>Pilih Jadwal</option>
                         @foreach($schedules as $schedule)
-                            <option value="{{ $schedule->id }}" class="text-slate-900">{{ $schedule->name }} ({{ date('d M Y', strtotime($schedule->date)) }})</option>
+                            <option value="{{ $schedule->id }}" class="text-slate-900">{{ $schedule->educationalLevel->name ?? 'Global' }} - {{ $schedule->name }} ({{ date('d M Y', strtotime($schedule->date)) }}, {{ date('H:i', strtotime($schedule->time_start)) }})</option>
                         @endforeach
                     </select>
                 </div>
