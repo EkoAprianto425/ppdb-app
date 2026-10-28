@@ -135,6 +135,21 @@ class StudentManagementController extends Controller
         ]);
         $sheet->getRowDimension(4)->setRowHeight(22);
 
+        // ── Pre-fetch region names (hindari N+1 query) ───────────────────────
+        $propCodes = $students->map(fn($s) => $s->registration?->provinsi)->filter()->unique()->values()->all();
+        $kabCodes  = $students->map(fn($s) => $s->registration?->kabupaten)->filter()->unique()->values()->all();
+        $kecCodes  = $students->map(fn($s) => $s->registration?->kecamatan)->filter()->unique()->values()->all();
+
+        $provinsiMap = !empty($propCodes)
+            ? Sekolah::whereIn('kode_prop', $propCodes)->whereNotNull('propinsi')->pluck('propinsi', 'kode_prop')->all()
+            : [];
+        $kabupatenMap = !empty($kabCodes)
+            ? Sekolah::whereIn('kode_kab_kota', $kabCodes)->whereNotNull('kabupaten_kota')->pluck('kabupaten_kota', 'kode_kab_kota')->all()
+            : [];
+        $kecamatanMap = !empty($kecCodes)
+            ? Sekolah::whereIn('kode_kec', $kecCodes)->whereNotNull('kecamatan')->pluck('kecamatan', 'kode_kec')->all()
+            : [];
+
         // ── Data rows ─────────────────────────────────────────────────────────
         $rowNum    = 5;
         $zebraEven = ['fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -144,6 +159,16 @@ class StudentManagementController extends Controller
 
         foreach ($students->values() as $i => $student) {
             $reg = $student->registration;
+
+            $provinsi = $reg?->provinsi
+                ? ($provinsiMap[$reg->provinsi] ?? AppCache::regionLookup('propinsi', 'kode_prop', $reg->provinsi) ?? $reg->provinsi)
+                : '-';
+            $kabupaten = $reg?->kabupaten
+                ? ($kabupatenMap[$reg->kabupaten] ?? AppCache::regionLookup('kabupaten_kota', 'kode_kab_kota', $reg->kabupaten) ?? $reg->kabupaten)
+                : '-';
+            $kecamatan = $reg?->kecamatan
+                ? ($kecamatanMap[$reg->kecamatan] ?? AppCache::regionLookup('kecamatan', 'kode_kec', $reg->kecamatan) ?? $reg->kecamatan)
+                : '-';
 
             $rowData = [
                 $i + 1,
@@ -167,9 +192,9 @@ class StudentManagementController extends Controller
                 $reg?->jenis_kelamin ?? '-',
                 $reg?->agama ?? '-',
                 $reg?->alamat ?? '-',
-                $reg?->provinsi ?? '-',
-                $reg?->kabupaten ?? '-',
-                $reg?->kecamatan ?? '-',
+                $provinsi,
+                $kabupaten,
+                $kecamatan,
                 $reg?->kebutuhan_khusus ?? '-',
                 $reg?->anak_ke ?? '-',
                 $reg?->dari_saudara ?? '-',
@@ -199,7 +224,7 @@ class StudentManagementController extends Controller
         }
 
         // ── Lebar kolom ───────────────────────────────────────────────────────
-        $colWidths = [4, 16, 22, 25, 15, 28, 16, 20, 30, 20, 14, 14, 15, 12, 14, 18, 15, 14, 12, 12, 30, 16, 16, 16, 18, 8, 10, 22, 16, 18, 16, 22, 16, 18, 16, 20];
+        $colWidths = [4, 16, 22, 25, 15, 28, 16, 20, 30, 20, 14, 14, 15, 12, 14, 18, 15, 14, 12, 12, 30, 22, 22, 22, 18, 8, 10, 22, 16, 18, 16, 22, 16, 18, 16, 20];
         foreach ($colWidths as $ci => $width) {
             $sheet->getColumnDimensionByColumn($ci + 1)->setWidth($width);
         }
